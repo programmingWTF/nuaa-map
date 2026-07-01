@@ -1,16 +1,20 @@
 {
   "_template": "建筑信息采集模板 — ④组按此格式填写每个建筑的数据",
   "_note": "每个建筑一个文件，命名为 building-<id>.json，放置于 data/raw/ 目录",
+  "_note_coords": "坐标以①组手绘地图扫描图为基准，使用像素坐标(pixelX, pixelY)。由⑥组统一标注，④组无需填写。",
   "id": "building-001",
   "name": "建筑名称",
   "category": "教学楼 | 宿舍 | 食堂 | 图书馆 | 行政楼 | 体育设施 | 其它",
-  "coordinates": {
-    "lat": 31.1234,
-    "lng": 119.5678
+  "position": {
+    "pixelX": 0,
+    "pixelY": 0,
+    "_comment": "像素坐标，图片左上角为原点(0,0)。⑥组根据①组手绘地图标注。"
   },
-  "boundary": {
-    "type": "Polygon",
-    "coordinates": []
+  "clickArea": {
+    "_comment": "可点击区域，用于前端热区判定。⑥组标注。",
+    "type": "rect | polygon",
+    "rect": { "x": 0, "y": 0, "width": 0, "height": 0 },
+    "polygon": [{ "x": 0, "y": 0 }]
   },
   "floors": 5,
   "description": "建筑功能简介（50-200字）",

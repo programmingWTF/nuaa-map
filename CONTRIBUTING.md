@@ -18,18 +18,18 @@ main  ← 主分支（所有代码最终合并到这里）
   └─ convert/xxx      ← 数据转换分支（⑥组）
 ```
 
-> 直接从 `main` 创建分支，完成后 PR 合并回 `main`。项目规模不大，两层分支足够。
+> 直接从 `main` 创建分支，完成后 PR 合并回 `main`。
 
 ### 分支命名规范
 
 - `feature/<功能简述>` — 例：`feature/building-popup`
 - `fix/<问题简述>` — 例：`fix/map-zoom-bug`
-- `map/<内容>` — 例：`map/campus-base-layer`
-- `interact/<内容>` — 例：`interact/building-click-handler`
+- `map/<内容>` — 例：`map/hand-drawn-v2`
+- `interact/<内容>` — 例：`interact/building-hotspot`
 - `platform/<内容>` — 例：`platform/ci-setup`
 - `data/<内容>` — 例：`data/dormitory-info`
 - `ai/<内容>` — 例：`ai/rag-pipeline`
-- `convert/<内容>` — 例：`convert/geojson-export`
+- `convert/<内容>` — 例：`convert/coordinate-annotation`
 
 ### 提交信息规范
 
@@ -56,9 +56,9 @@ main  ← 主分支（所有代码最终合并到这里）
 
 **示例**：
 ```
-feat(interact): 点击建筑弹出详情面板
-data(map): 更新东区宿舍楼坐标信息
-asset(map): 添加天目湖校区底图 v2
+feat(interact): 点击建筑热区弹出详情面板
+data(map): 更新东区宿舍楼像素坐标信息
+asset(map): 更新手绘地图扫描图 v2
 feat(ai): 接入 RAG 检索增强问答管道
 ```
 
@@ -91,34 +91,49 @@ feat(ai): 接入 RAG 检索增强问答管道
 ## 跨组协作约定
 
 ### ①地图美工 → ②交互 & ⑥数据转换
-- 地图底图以 **SVG / 高清 PNG** 格式交付，放置于 `assets/map/` 目录
-- 建筑标注坐标以 **GeoJSON** 格式提供，每个建筑包含 `id`、`name`、`coordinates` 字段
-- 底图更新需在群内通知
+- ①组交付**手绘地图的高清扫描图**（建议 ≥ 4K 分辨率，PNG/JPEG 格式），放置于 `assets/map/` 目录
+- 扫描图应保持平正，避免倾斜和透视变形
+- ⑥组基于该扫描图标注建筑像素坐标
+- 手绘地图更新时，需在群内通知②组和⑥组
 
 ### ④调研数据 → ⑥数据转换 → ②交互
-- 建筑信息以统一的 **JSON 模板** 填写（模板见 `docs/templates/building-info.json`）
-- ⑥组将原始数据转换为前端可用的 GeoJSON 格式
-- ②组通过 API 或静态文件读取 GeoJSON 数据
+- ④组按模板填写建筑文字信息（`docs/templates/building-info.json`）
+- ⑥组在手绘地图扫描图上确定每个建筑的**像素坐标**（pixelX, pixelY），补充到数据中
+- ⑥组同时标注建筑的**可点击区域**（矩形或多边形）
+- 最终产出放在 `data/positions/`，②组前端直接读取
 
 ### ⑤智能体 → ②交互 & ③平台
 - 智能体提供 **REST API** 或 **WebSocket** 接口
 - 接口协议需提前对齐（③组牵头确定 API 规范）
-- 知识库内容来源于④组的建筑/设施信息
+- 知识库内容来源于 `data/positions/` 中的建筑/设施信息（含 FAQ）
+
+## 坐标标注参考
+
+由于是手绘地图，坐标系统很简单：
+
+```
+图片左上角 → (0, 0)
+x 轴 → 向右递增
+y 轴 → 向下递增
+单位 → 像素（px）
+```
+
+⑥组可用浏览器的开发者工具或自制 HTML 页面来点击取坐标。推荐在 `scripts/` 下放一个简单的坐标拾取工具。
 
 ## 目录结构（规划）
 
 ```
 nuaa-map/
-├── assets/            # 静态资源（地图底图、图标、图片）
-│   └── map/           # ①组交付的地图素材
-├── data/              # 数据文件（JSON、GeoJSON）
-│   ├── raw/           # ④组原始调研数据
-│   └── geo/           # ⑥组转换后的地理数据
+├── assets/            # 静态资源
+│   └── map/           # ①组交付：手绘地图扫描图、图标
+├── data/              # 数据文件
+│   ├── raw/           # ④组原始调研数据（纯文字，无坐标）
+│   └── positions/     # ⑥组产出：带像素坐标的完整建筑数据
 ├── docs/              # 项目文档
 │   └── templates/     # 数据模板
 ├── frontend/          # 前端代码
 ├── backend/           # 后端代码（含智能体 API）
 ├── ai-agent/          # ⑤组智能体训练代码
-├── scripts/           # 工具脚本
+├── scripts/           # 工具脚本（坐标拾取器等）
 └── .github/           # GitHub Actions CI/CD
 ```
