@@ -1,0 +1,28 @@
+{
+  "_template": "建筑信息采集模板 — ④组按此格式填写每个建筑的数据",
+  "_note": "每个建筑一个文件，命名为 building-<id>.json，放置于 data/raw/ 目录",
+  "id": "building-001",
+  "name": "建筑名称",
+  "category": "教学楼 | 宿舍 | 食堂 | 图书馆 | 行政楼 | 体育设施 | 其它",
+  "coordinates": {
+    "lat": 31.1234,
+    "lng": 119.5678
+  },
+  "boundary": {
+    "type": "Polygon",
+    "coordinates": []
+  },
+  "floors": 5,
+  "description": "建筑功能简介（50-200字）",
+  "openTime": "08:00-22:00",
+  "facilities": ["电梯", "饮水机", "无障碍通道"],
+  "departments": ["在此办公的院系/部门"],
+  "images": ["building-001-01.jpg"],
+  "tags": ["上课", "自习"],
+  "faq": [
+    {
+      "question": "这里可以自习吗？",
+      "answer": "可以，开放时间为每天 08:00-22:00。"
+    }
+  ]
+}
