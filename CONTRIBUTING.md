@@ -8,28 +8,15 @@
 
 ```
 main  ← 主分支（所有代码最终合并到这里）
-  ├─ feature/xxx      ← 新功能分支
-  ├─ fix/xxx          ← Bug 修复分支
   ├─ map/xxx          ← 地图图纸/美工分支（①组）
   ├─ interact/xxx     ← 交互功能分支（②组）
   ├─ platform/xxx     ← 平台搭建分支（③组）
-  ├─ data/xxx         ← 数据收集分支（④组）
+  ├─ data/xxx         ← 数据采集分支（④组）
   ├─ ai/xxx           ← 智能体训练分支（⑤组）
   └─ convert/xxx      ← 数据转换分支（⑥组）
 ```
 
-> 直接从 `main` 创建分支，完成后 PR 合并回 `main`。项目规模不大，两层分支足够。
-
-### 分支命名规范
-
-- `feature/<功能简述>` — 例：`feature/building-popup`
-- `fix/<问题简述>` — 例：`fix/map-zoom-bug`
-- `map/<内容>` — 例：`map/campus-base-layer`
-- `interact/<内容>` — 例：`interact/building-click-handler`
-- `platform/<内容>` — 例：`platform/ci-setup`
-- `data/<内容>` — 例：`data/dormitory-info`
-- `ai/<内容>` — 例：`ai/rag-pipeline`
-- `convert/<内容>` — 例：`convert/geojson-export`
+> 直接从 `main` 创建分支，完成后 PR 合并回 `main`。
 
 ### 提交信息规范
 
@@ -37,28 +24,18 @@ main  ← 主分支（所有代码最终合并到这里）
 
 ```
 <type>(<scope>): <description>
-
-[optional body]
 ```
 
-**type 类型**：
-- `feat` — 新功能
-- `fix` — Bug 修复
-- `docs` — 文档更新
-- `style` — 代码格式（不影响逻辑）
-- `refactor` — 重构
-- `test` — 测试相关
-- `chore` — 构建/工具变动
-- `data` — 数据更新（④组常用）
-- `asset` — 静态资源更新（①组常用）
+**type**：`feat` / `fix` / `docs` / `style` / `refactor` / `test` / `chore` / `data` / `asset`
 
-**scope 范围**：`map`、`interact`、`platform`、`data`、`ai`、`convert`、`docs`
+**scope**：`map` / `interact` / `platform` / `data` / `ai` / `convert` / `docs`
 
 **示例**：
 ```
-feat(interact): 点击建筑弹出详情面板
-data(map): 更新东区宿舍楼坐标信息
-asset(map): 添加天目湖校区底图 v2
+feat(interact): 点击建筑热区弹出详情面板
+data(ai): 添加宿舍区问答数据
+data(map): 更新东区宿舍楼建筑信息
+asset(map): 更新手绘地图扫描图 v2
 feat(ai): 接入 RAG 检索增强问答管道
 ```
 
@@ -80,45 +57,47 @@ feat(ai): 接入 RAG 检索增强问答管道
 - 涉及数据改动需说明数据来源
 - 至少一人 Approve 后方可合并
 
-### 代码 Review 要点
-
-- 逻辑是否正确
-- 代码风格是否一致
-- 是否有明显的性能问题
-- 数据格式是否与约定一致
-- 是否有安全风险（如密钥泄露）
-
 ## 跨组协作约定
 
 ### ①地图美工 → ②交互 & ⑥数据转换
-- 地图底图以 **SVG / 高清 PNG** 格式交付，放置于 `assets/map/` 目录
-- 建筑标注坐标以 **GeoJSON** 格式提供，每个建筑包含 `id`、`name`、`coordinates` 字段
-- 底图更新需在群内通知
+- ①组交付**手绘地图的高清扫描图**（≥ 4K，PNG/JPEG），放 `assets/map/`
+- 扫描图保持平正，避免倾斜变形
+- ⑥组基于该图标注建筑像素坐标
+- 地图更新时群内通知②组和⑥组
 
-### ④调研数据 → ⑥数据转换 → ②交互
-- 建筑信息以统一的 **JSON 模板** 填写（模板见 `docs/templates/building-info.json`）
-- ⑥组将原始数据转换为前端可用的 GeoJSON 格式
-- ②组通过 API 或静态文件读取 GeoJSON 数据
+### ④调研数据 → 两个方向
+
+**→ ⑤智能体（主要通道，直接对接）**
+- ④组**核心产出**：校园问答知识库，按 `docs/templates/qa-knowledge.json` 模板填写
+- 放 `data/qa/`，⑤组直接读取用于 RAG 和 Prompt 工程
+- 这是④组最重要的工作，覆盖新生所有常见问题
+
+**→ ⑥数据转换 → ②交互（次要通道）**
+- ④组**次要产出**：建筑基本信息，按 `docs/templates/building-info.json` 模板填写（只填文字）
+- 放 `data/raw/`，⑥组补充像素坐标后输出到 `data/positions/`
+- ②组前端读取用于地图详情展示
 
 ### ⑤智能体 → ②交互 & ③平台
-- 智能体提供 **REST API** 或 **WebSocket** 接口
-- 接口协议需提前对齐（③组牵头确定 API 规范）
-- 知识库内容来源于④组的建筑/设施信息
+- 智能体提供 REST API 或 WebSocket 接口
+- 知识库核心来源：`data/qa/`（④组 QA 数据）
+- 辅助信息来源：`data/positions/`（建筑信息）
+- 接口协议由③组牵头确定
 
 ## 目录结构（规划）
 
 ```
 nuaa-map/
-├── assets/            # 静态资源（地图底图、图标、图片）
-│   └── map/           # ①组交付的地图素材
-├── data/              # 数据文件（JSON、GeoJSON）
-│   ├── raw/           # ④组原始调研数据
-│   └── geo/           # ⑥组转换后的地理数据
-├── docs/              # 项目文档
-│   └── templates/     # 数据模板
-├── frontend/          # 前端代码
-├── backend/           # 后端代码（含智能体 API）
-├── ai-agent/          # ⑤组智能体训练代码
+├── assets/            # 静态资源
+│   └── map/           # ①组：手绘地图扫描图、图标
+├── data/
+│   ├── qa/            # ④组核心产出：问答知识库 → ⑤组直接使用
+│   ├── raw/           # ④组次要产出：建筑信息（无坐标）
+│   └── positions/     # ⑥组产出：建筑信息 + 像素坐标
+├── docs/
+│   └── templates/     # 数据模板（qa-knowledge.json / building-info.json）
+├── frontend/          # ②③组：前端代码
+├── backend/           # ③组：后端 API
+├── ai-agent/          # ⑤组：RAG + Prompt 工程
 ├── scripts/           # 工具脚本
-└── .github/           # GitHub Actions CI/CD
+└── .github/           # CI/CD
 ```

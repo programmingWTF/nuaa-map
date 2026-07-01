@@ -9,6 +9,7 @@ NUAAMap 是南京航空航天大学天目湖校区的智能校园地图网站，
 - **仓库**：https://github.com/programmingWTF/nuaa-map.git
 - **团队规模**：14 人，分 6 个小组（详见 README.md）
 - **目标用户**：南航新生、访客
+- **地图类型**：**手绘地图**（①组手绘 → 扫描为高清图片 → 前端以此为底图叠加交互热区）
 
 ## ⚠️ AI 工具行为准则（必读）
 
@@ -26,16 +27,14 @@ git checkout -b <前缀>/<功能描述>
 
 ### 分支前缀选择
 
-根据修改内容自动选择：
-
 | 修改内容 | 分支前缀 | 示例 |
 |----------|----------|------|
 | 地图底图、图标、CSS 样式、UI 设计 | `map/` | `map/add-library-icon` |
 | 前端交互、地图点击、弹窗、聊天界面 | `interact/` | `interact/building-detail-panel` |
 | 项目配置、构建脚本、部署、CI/CD | `platform/` | `platform/add-vite-config` |
-| 数据文件（JSON、建筑信息） | `data/` | `data/add-canteen-info` |
+| QA 知识库、建筑数据 | `data/` | `data/add-dormitory-qa` |
 | AI 智能体、RAG、聊天 API | `ai/` | `ai/setup-rag-pipeline` |
-| 数据转换脚本、GeoJSON 处理 | `convert/` | `convert/json-to-geojson` |
+| 数据转换脚本、坐标标注 | `convert/` | `convert/mark-building-coords` |
 | 项目文档 | `docs/` | `docs/update-readme` |
 
 ### 提交信息格式
@@ -80,34 +79,45 @@ git push origin <分支名>
 
 ## 技术架构
 
-本项目为 Web 应用，分为三个核心模块：
+本项目为 Web 应用，分为三条主线：
 
-1. **前端地图交互** — 基于 Leaflet.js 或 MapLibre GL JS 的校园地图展示，支持点击建筑查看详情
-2. **后端数据服务** — REST API，提供建筑信息查询、GeoJSON 数据接口
-3. **AI 智能问答** — 基于 RAG（检索增强生成）的聊天机器人，知识库来源于校园建筑/设施信息
+1. **地图交互线**：手绘地图扫描图 → ⑥标注像素坐标 → ②前端热区叠加
+2. **AI 问答线**（核心）：④组采集 QA 知识库 → ⑤组直接用于 RAG / Prompt → 前端聊天界面
+3. **后端服务线**：③搭建 API 服务器，承接前端请求，转发智能体调用
 
 ### 数据流
 
 ```
-④组调研数据 (JSON)
-    → ⑥组转换 (GeoJSON)
-        → 前端地图渲染 (Leaflet/MapLibre)
-        → 后端 API 服务
-            → AI 智能体知识库 (RAG)
-                → 前端聊天界面
+┌─ 地图交互线 ─────────────────────────────────────┐
+│  ①手绘地图扫描图                                   │
+│      → ⑥组标注像素坐标                             │
+│          → ②组前端：底图 + 热区叠加                  │
+│  ④组建筑基本信息（次要）→ ⑥合并坐标 → 前端详情面板    │
+└──────────────────────────────────────────────────┘
+
+┌─ AI 问答线（核心）────────────────────────────────┐
+│  ④组 QA 知识库（主要）→ data/qa/                    │
+│      → ⑤组 RAG 检索 + Prompt 工程                   │
+│          → 后端 /api/chat                           │
+│              → ②组前端聊天界面                       │
+└──────────────────────────────────────────────────┘
 ```
+
+> **关键**：④组的主要产出是 `data/qa/`（问答知识库），直接供给⑤组使用，不需要⑥组转换。建筑信息是次要任务。
 
 ## 目录结构
 
 ```
 nuaa-map/
-├── assets/map/        # ①组交付：地图底图、图标
-├── data/raw/          # ④组交付：建筑信息 JSON（模板见 docs/templates/building-info.json）
-├── data/geo/          # ⑥组产出：GeoJSON 地理数据
+├── assets/map/        # ①组交付：手绘地图扫描图、图标
+├── data/
+│   ├── qa/            # ④组核心产出：问答知识库（模板 docs/templates/qa-knowledge.json）
+│   ├── raw/           # ④组次要产出：建筑信息 JSON（模板 docs/templates/building-info.json）
+│   └── positions/     # ⑥组产出：带像素坐标的完整建筑数据
 ├── frontend/          # ②③组：前端代码
 ├── backend/           # ③组：后端 API
 ├── ai-agent/          # ⑤组：智能体训练与 RAG 管道
-├── scripts/           # 工具脚本
+├── scripts/           # 工具脚本（坐标标注辅助工具等）
 ├── docs/              # 项目文档
 └── .github/           # CI/CD 配置
 ```
@@ -116,23 +126,29 @@ nuaa-map/
 
 ## 关键约定
 
+### 地图与坐标
+
+- ①组交付**手绘地图的高清扫描图**（建议 ≥ 4K 分辨率），放置于 `assets/map/`
+- 坐标系统基于扫描图的**像素坐标**：以图片左上角为原点 (0, 0)，x 轴向右，y 轴向下
+- ⑥组负责在手绘扫描图上标注每个建筑的像素位置和可点击区域
+
 ### 数据格式
 
-- 所有建筑信息必须遵循 `docs/templates/building-info.json` 定义的模板
-- 地理数据统一使用 **GeoJSON** 格式，坐标系为 **WGS84 (EPSG:4326)**
+- **QA 知识库**（④组主要产出）：遵循 `docs/templates/qa-knowledge.json`，按主题分类，每个问题配准确答案
+- **建筑信息**（④组次要产出）：遵循 `docs/templates/building-info.json`，④组只填文字，坐标由⑥组补充
 - 每个建筑必须有唯一 `id`，格式：`building-<数字编号>`
 
 ### 前端交互
 
-- 地图交互采用"点击建筑 → 弹出详情面板"模式
-- 详情面板需展示：名称、图片、功能描述、开放时间、设施列表、FAQ
-- AI 聊天入口独立于地图，以浮动按钮或侧边栏形式呈现
+- 地图：手绘图片 + 热区叠加模式（不依赖 GIS/瓦片地图），支持缩放拖拽
+- 点击建筑热区 → 弹出详情面板
+- AI 聊天入口独立于地图，浮动按钮或侧边栏形式
 
 ### 智能体
 
-- 智能体通过 REST API 与前端通信
-- 知识库以④组的建筑信息 JSON + FAQ 为基础构建
-- 支持流式输出（Server-Sent Events 或 WebSocket），提升对话体验
+- 知识库以④组的 `data/qa/` 为核心检索内容
+- 支持流式输出（Server-Sent Events 或 WebSocket）
+- API 接口需与③组协商确定协议
 
 ### Git 分支
 
@@ -142,39 +158,45 @@ nuaa-map/
 
 ## 常见开发任务
 
-### 添加新建筑数据（④组 → ⑥组）
+### 添加问答数据（④组核心任务）
 
-1. 按 `docs/templates/building-info.json` 模板填写数据
+1. 确定主题（宿舍、食堂、选课、社团……）
+2. 按 `docs/templates/qa-knowledge.json` 模板填写问题和答案
+3. 放入 `data/qa/qa-<主题>.json`
+4. ⑤组直接读取此目录构建 RAG 知识库
+5. 提交时使用 `data(ai): 添加xxx问答数据`
+
+### 添加建筑信息（④组次要任务）
+
+1. 按 `docs/templates/building-info.json` 模板填写文字信息
 2. 放入 `data/raw/building-<id>.json`
-3. ⑥组运行转换脚本生成 `data/geo/building-<id>.geojson`
+3. ⑥组补充坐标后输出到 `data/positions/`
 4. 提交时使用 `data(map): 添加xxx建筑信息`
 
-### 更新地图底图（①组）
+### 更新手绘地图（①组）
 
-1. 将新底图放入 `assets/map/` 目录
-2. 命名格式：`base-map-v<版本号>.<扩展名>`
-3. 更新 `assets/map/manifest.json`（记录当前使用的底图版本）
-4. 提交时使用 `asset(map): 更新底图 vX`
+1. 将新手绘地图扫描图放入 `assets/map/` 目录
+2. 命名格式：`hand-drawn-map-v<版本号>.<扩展名>`
+3. 更新 `assets/map/manifest.json`
+4. ⚠️ 如果布局变化，通知⑥组重新标注坐标
 
 ### 前端开发（②③组）
 
-- 参考 `CONTRIBUTING.md` 中的分支和提交规范
-- 前端组件使用 Leaflet.js 或 MapLibre GL JS 作为地图引擎
-- 聊天组件需支持流式输出显示
+- 地图底图使用 `<img>` + 热区或 Canvas，不使用 GIS 库
+- 聊天组件需支持流式输出
 
 ### 智能体开发（⑤组）
 
-- 知识库文件位于 `data/raw/` 目录
+- 核心知识源：`data/qa/`（④组问答数据）
+- 辅助知识源：`data/positions/`（建筑详细信息）
 - RAG 管道代码放在 `ai-agent/` 目录
-- API 接口需与③组协商确定协议
 
 ## 跨组依赖关系
 
 ```
-①地图素材 → ②前端渲染地图
-④建筑数据 → ⑥GeoJSON转换 → ②前端展示详情 → ⑤智能体知识库
-③后端/部署 → 所有模块的线上运行
-⑤智能体API → ②前端聊天界面
+①手绘地图 → ②前端底图渲染
+①手绘地图 → ⑥标注像素坐标 → ②前端热区
+④建筑信息（次要）→ ⑥合并坐标 → ②前端详情
+④QA知识库（核心）→ ⑤RAG知识库 → 后端API → ②前端聊天
+③后端/部署 → 所有模块线上运行
 ```
-
-各组交付物和接口约定详见 `CONTRIBUTING.md` 中的"跨组协作约定"部分。
