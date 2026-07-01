@@ -2,6 +2,11 @@
 
 本文档指导团队成员如何使用 AI Agent（如 Claude Code、GitHub Copilot 等）提升开发效率。
 
+> ⚠️ **重要前提**：本仓库的 `CLAUDE.md` 文件是给 AI 工具看的"项目规则书"，里面规定了 AI 在改代码时必须先创建分支、遵循提交格式等。**Claude Code 会自动读取 CLAUDE.md 并遵守**。如果你用的是其他 AI 工具（ChatGPT、Cursor、Copilot 等），请在 Prompt 开头加上：
+> ```
+> 请先阅读仓库根目录的 CLAUDE.md、CONTRIBUTING.md 和 AGENTS.md，严格遵守其中的规范。
+> ```
+
 ## 适用场景
 
 每个小组都可以在以下场景利用 AI Agent：
@@ -89,14 +94,28 @@
 
 1. 打开终端，进入项目目录
 2. 运行 `claude` 启动 Claude Code
-3. 描述你的任务，例如：
+3. Claude Code 会**自动读取 CLAUDE.md**，遵守其中的分支、提交等规范
+4. 描述你的任务，例如：
 
 ```
 "读取 data/raw/building-001.json，创建一个 React 组件 BuildingDetail 来展示这个建筑的所有信息字段"
 ```
 
-4. Claude Code 会读取相关文件、编写代码
-5. 你 Review 改动，确认无误后提交
+5. Claude Code 会自动创建分支 → 写代码 → 提交 → 推送
+6. 你 Review 改动，确认无误后去 GitHub 创建 PR
+
+### 用其他 AI 工具时
+
+如果你用 ChatGPT、Cursor、Copilot 等工具来写代码，AI 不会自动读取 CLAUDE.md。请在 Prompt 开头加上：
+
+```
+你是 NUAAMap 项目的开发者。请遵守以下规范：
+- 不要直接在 main 分支上改代码，每次改动前创建独立分支
+- 分支名用前缀：map/ interact/ platform/ data/ ai/ convert/ docs/
+- 提交信息用 Conventional Commits：<type>(<scope>): <描述>
+- 数据格式参考 docs/templates/building-info.json
+- 完整规范见仓库根目录的 CONTRIBUTING.md
+```
 
 ## 常用 Prompt 模板
 

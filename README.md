@@ -19,6 +19,16 @@
 | ⑤ 智能体训练 | 胡德文、李睿、姜禹锡 | AI 问答模型/RAG 系统搭建与训练 |
 | ⑥ 数据转换 | 杜明泽 | 地图数据格式转换与处理 |
 
+## 文档导航
+
+| 文档 | 内容 |
+|------|------|
+| [GitHub 协作入门指南](docs/github-guide.md) | 🆕 零基础学 Git/GitHub，从安装到 PR |
+| [团队协作规范](CONTRIBUTING.md) | 分支策略、提交规范、跨组接口 |
+| [团队职责](docs/team.md) | 各组详细职责与对接关系 |
+| [AI 工具使用指南](AGENTS.md) | 各组如何用 AI Agent 提效 |
+| [数据采集模板](docs/templates/building-info.json) | ④组建筑信息填写模板 |
+
 ## 技术栈（建议）
 
 - **前端**：React / Vue + Leaflet.js / MapLibre GL JS

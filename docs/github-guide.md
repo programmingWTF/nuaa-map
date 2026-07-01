@@ -34,7 +34,7 @@ git config --global user.email "你的GitHub邮箱"
 
 ## 第三步：克隆仓库到本地
 
-1. 确保你已被邀请为仓库协作者（仓库 Settings → Collaborators → 添加每个人的 GitHub 账号）
+1. 确保你已被邀请为仓库协作者 — **首次使用联系李桂聿添加你的 GitHub 账号**
 2. 打开 Git Bash，进入你想放项目的目录，比如桌面：
    ```bash
    cd ~/Desktop
@@ -195,10 +195,10 @@ git push origin 你的分支名
 ## 常见问题排查
 
 ### Q: 提交时提示 "Please tell me who you are"
-运行第四步的身份配置命令。
+运行第二步的身份配置命令。
 
 ### Q: push 时提示 "Permission denied"
-说明你的 GitHub 账号没有被添加为仓库协作者，联系仓库管理员添加。
+说明你的 GitHub 账号没有被添加为仓库协作者，联系李桂聿添加。
 
 ### Q: push 时提示 "failed to push, the remote contains work..."
 说明别人在你之前 push 了新代码。先拉取再 push：

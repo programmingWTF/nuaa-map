@@ -93,7 +93,7 @@ feat(ai): 接入 RAG 检索增强问答管道
 ### ①地图美工 → ②交互 & ⑥数据转换
 - 地图底图以 **SVG / 高清 PNG** 格式交付，放置于 `assets/map/` 目录
 - 建筑标注坐标以 **GeoJSON** 格式提供，每个建筑包含 `id`、`name`、`coordinates` 字段
-- 底图更新需在 `#map-assets` 频道通知
+- 底图更新需在群内通知
 
 ### ④调研数据 → ⑥数据转换 → ②交互
 - 建筑信息以统一的 **JSON 模板** 填写（模板见 `docs/templates/building-info.json`）
