@@ -1,21 +1,24 @@
 # 团队协作规范
 
+> 🆕 还不会用 Git/GitHub？先看 [GitHub 协作入门指南](docs/github-guide.md)，从零开始手把手教学。
+
 ## Git 工作流
 
 ### 分支策略
 
 ```
-main          ← 生产就绪代码，仅通过 PR 合并
-  └─ develop  ← 开发主分支，日常集成
-       ├─ feature/xxx      ← 新功能分支
-       ├─ fix/xxx          ← Bug 修复分支
-       ├─ map/xxx          ← 地图图纸/美工分支（①组）
-       ├─ interact/xxx     ← 交互功能分支（②组）
-       ├─ platform/xxx     ← 平台搭建分支（③组）
-       ├─ data/xxx         ← 数据收集分支（④组）
-       ├─ ai/xxx           ← 智能体训练分支（⑤组）
-       └─ convert/xxx      ← 数据转换分支（⑥组）
+main  ← 主分支（所有代码最终合并到这里）
+  ├─ feature/xxx      ← 新功能分支
+  ├─ fix/xxx          ← Bug 修复分支
+  ├─ map/xxx          ← 地图图纸/美工分支（①组）
+  ├─ interact/xxx     ← 交互功能分支（②组）
+  ├─ platform/xxx     ← 平台搭建分支（③组）
+  ├─ data/xxx         ← 数据收集分支（④组）
+  ├─ ai/xxx           ← 智能体训练分支（⑤组）
+  └─ convert/xxx      ← 数据转换分支（⑥组）
 ```
+
+> 直接从 `main` 创建分支，完成后 PR 合并回 `main`。项目规模不大，两层分支足够。
 
 ### 分支命名规范
 
@@ -63,11 +66,11 @@ feat(ai): 接入 RAG 检索增强问答管道
 
 ### 日常开发
 
-1. 从 `develop` 拉取最新代码
+1. 从 `main` 拉取最新代码
 2. 创建你的功能分支
 3. 在分支上开发并提交
 4. 推送到远程并创建 Pull Request
-5. 至少一人 Review 后合并到 `develop`
+5. 至少一人 Review 后合并到 `main`
 
 ### Pull Request 要求
 
@@ -90,7 +93,7 @@ feat(ai): 接入 RAG 检索增强问答管道
 ### ①地图美工 → ②交互 & ⑥数据转换
 - 地图底图以 **SVG / 高清 PNG** 格式交付，放置于 `assets/map/` 目录
 - 建筑标注坐标以 **GeoJSON** 格式提供，每个建筑包含 `id`、`name`、`coordinates` 字段
-- 底图更新需在 `#map-assets` 频道通知
+- 底图更新需在群内通知
 
 ### ④调研数据 → ⑥数据转换 → ②交互
 - 建筑信息以统一的 **JSON 模板** 填写（模板见 `docs/templates/building-info.json`）

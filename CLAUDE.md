@@ -10,6 +10,74 @@ NUAAMap 是南京航空航天大学天目湖校区的智能校园地图网站，
 - **团队规模**：14 人，分 6 个小组（详见 README.md）
 - **目标用户**：南航新生、访客
 
+## ⚠️ AI 工具行为准则（必读）
+
+当团队成员使用 Claude Code 或其他 AI 工具来修改本仓库代码时，**必须**遵守以下规则。这些规则同样适用于你（AI）——每次被调用时自动执行。
+
+### 修改代码前：必须先创建分支
+
+**绝对禁止直接在 `main` 分支上提交代码。** 每次修改前：
+
+```bash
+git checkout main
+git pull origin main
+git checkout -b <前缀>/<功能描述>
+```
+
+### 分支前缀选择
+
+根据修改内容自动选择：
+
+| 修改内容 | 分支前缀 | 示例 |
+|----------|----------|------|
+| 地图底图、图标、CSS 样式、UI 设计 | `map/` | `map/add-library-icon` |
+| 前端交互、地图点击、弹窗、聊天界面 | `interact/` | `interact/building-detail-panel` |
+| 项目配置、构建脚本、部署、CI/CD | `platform/` | `platform/add-vite-config` |
+| 数据文件（JSON、建筑信息） | `data/` | `data/add-canteen-info` |
+| AI 智能体、RAG、聊天 API | `ai/` | `ai/setup-rag-pipeline` |
+| 数据转换脚本、GeoJSON 处理 | `convert/` | `convert/json-to-geojson` |
+| 项目文档 | `docs/` | `docs/update-readme` |
+
+### 提交信息格式
+
+必须使用 Conventional Commits：
+
+```
+<type>(<scope>): <中文描述>
+```
+
+- **type**：`feat` / `fix` / `docs` / `style` / `refactor` / `test` / `chore` / `data` / `asset`
+- **scope**：`map` / `interact` / `platform` / `data` / `ai` / `convert` / `docs`
+
+### 完整工作流
+
+每次帮用户修改代码时，按以下步骤执行：
+
+```bash
+# 1. 切到 main 并拉取最新
+git checkout main && git pull origin main
+
+# 2. 创建功能分支
+git checkout -b <前缀>/<功能描述>
+
+# 3. 修改代码...
+
+# 4. 提交
+git add -A
+git commit -m "<type>(<scope>): <描述>"
+
+# 5. 推送
+git push origin <分支名>
+```
+
+推送后提醒用户：**"代码已推送到分支 `<分支名>`，请去 GitHub 创建 Pull Request 合并到 main。"**
+
+### 遇到冲突时
+
+如果 push 被拒绝（远程有新提交），先 `git pull origin main --rebase` 解决冲突后再 push。
+
+---
+
 ## 技术架构
 
 本项目为 Web 应用，分为三个核心模块：
@@ -68,8 +136,7 @@ nuaa-map/
 
 ### Git 分支
 
-- `main` — 生产就绪代码
-- `develop` — 开发集成
+- `main` — 主分支，所有代码最终合并到这里
 - 各组按前缀建分支：`map/` `interact/` `platform/` `data/` `ai/` `convert/`
 - 提交信息遵循 Conventional Commits 格式（详见 CONTRIBUTING.md）
 
