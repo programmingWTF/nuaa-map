@@ -1,7 +1,7 @@
 {
-  "_template": "建筑信息采集模板 — ④组次要产出，用于地图展示",
+  "_template": "建筑信息采集模板 — ④组产出之一，用于地图展示",
   "_note": "每个建筑一个文件，命名为 building-<id>.json，放置于 data/raw/ 目录",
-  "_note_priority": "④组优先完成 data/qa/ 下的问答知识库，建筑信息可以后补。",
+  "_note_priority": "与问答知识库同等重要，两者并行采集。",
   "_note_coords": "坐标由⑥组标注，④组只填写文字信息。",
   "id": "building-001",
   "name": "建筑名称",
