@@ -26,6 +26,16 @@
 - **AI/智能体**：LangChain + RAG（检索增强生成）
 - **数据**：GeoJSON 格式存储地理信息
 
+## 文档导航
+
+| 文档 | 内容 |
+|------|------|
+| [GitHub 协作入门指南](docs/github-guide.md) | 🆕 零基础学 Git/GitHub，从安装到 PR |
+| [团队协作规范](CONTRIBUTING.md) | 分支策略、提交规范、跨组接口 |
+| [团队职责](docs/team.md) | 各组详细职责与对接关系 |
+| [AI 工具使用指南](AGENTS.md) | 各组如何用 AI Agent 提效 |
+| [数据采集模板](docs/templates/building-info.json) | ④组建筑信息填写模板 |
+
 ## 快速开始
 
 ```bash

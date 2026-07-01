@@ -68,8 +68,7 @@ nuaa-map/
 
 ### Git 分支
 
-- `main` — 生产就绪代码
-- `develop` — 开发集成
+- `main` — 主分支，所有代码最终合并到这里
 - 各组按前缀建分支：`map/` `interact/` `platform/` `data/` `ai/` `convert/`
 - 提交信息遵循 Conventional Commits 格式（详见 CONTRIBUTING.md）
 
