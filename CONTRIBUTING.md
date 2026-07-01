@@ -67,20 +67,18 @@ feat(ai): 接入 RAG 检索增强问答管道
 
 ### ④调研数据 → 两个方向
 
-**→ ⑤智能体（主要通道，直接对接）**
-- ④组**核心产出**：校园问答知识库，按 `docs/templates/qa-knowledge.json` 模板填写
+**→ ⑤智能体**
+- 校园问答知识库，按 `docs/templates/qa-knowledge.json` 模板填写
 - 放 `data/qa/`，⑤组直接读取用于 RAG 和 Prompt 工程
-- 这是④组最重要的工作，覆盖新生所有常见问题
 
-**→ ⑥数据转换 → ②交互（次要通道）**
-- ④组**次要产出**：建筑基本信息，按 `docs/templates/building-info.json` 模板填写（只填文字）
+**→ ⑥数据转换 → ②交互**
+- 建筑基本信息，按 `docs/templates/building-info.json` 模板填写（只填文字）
 - 放 `data/raw/`，⑥组补充像素坐标后输出到 `data/positions/`
 - ②组前端读取用于地图详情展示
 
 ### ⑤智能体 → ②交互 & ③平台
 - 智能体提供 REST API 或 WebSocket 接口
-- 知识库核心来源：`data/qa/`（④组 QA 数据）
-- 辅助信息来源：`data/positions/`（建筑信息）
+- 知识库来源：`data/qa/`（④组 QA 数据）+ `data/positions/`（建筑信息）
 - 接口协议由③组牵头确定
 
 ## 目录结构（规划）
@@ -90,8 +88,8 @@ nuaa-map/
 ├── assets/            # 静态资源
 │   └── map/           # ①组：手绘地图扫描图、图标
 ├── data/
-│   ├── qa/            # ④组核心产出：问答知识库 → ⑤组直接使用
-│   ├── raw/           # ④组次要产出：建筑信息（无坐标）
+│   ├── qa/            # ④组：问答知识库 → ⑤组直接使用
+│   ├── raw/           # ④组：建筑信息（无坐标）
 │   └── positions/     # ⑥组产出：建筑信息 + 像素坐标
 ├── docs/
 │   └── templates/     # 数据模板（qa-knowledge.json / building-info.json）
