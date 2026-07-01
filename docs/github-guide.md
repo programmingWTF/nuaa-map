@@ -182,8 +182,7 @@ git diff
 
 # 5. 暂存 + 提交
 git add .
-git commit -m "feat(组): 描述"
-
+git commit -m "<type>(<scope>): <描述>"
 # 6. 推送
 git push origin 你的分支名
 
