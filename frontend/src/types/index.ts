@@ -10,7 +10,7 @@ export interface Hotspot {
 export interface Building {
   id: string;
   name: string;
-  category: 'teaching' | 'dormitory' | 'canteen' | 'library' | 'sports' | 'service' | 'other';
+  category: 'teaching' | 'dormitory' | 'canteen' | 'library' | 'sports' | 'service' | 'gate' | 'landscape' | 'facility' | 'other';
   hotspot: Hotspot;
   description: string;
   openTime?: string;

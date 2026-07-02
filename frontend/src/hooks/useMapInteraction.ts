@@ -1,13 +1,31 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type { MapTransform } from '../types';
 
-const MIN_SCALE = 0.5;
 const MAX_SCALE = 4;
 const ZOOM_SPEED = 0.001;
 
 interface UseMapInteractionOptions {
   containerRef: React.RefObject<HTMLDivElement | null>;
   imageSize: { width: number; height: number } | null;
+}
+
+/** 钳制变换，确保图片始终覆盖容器（拖拽不超出边界，不留白边） */
+function clampTransform(
+  t: MapTransform,
+  cw: number, ch: number,
+  iw: number, ih: number,
+): MapTransform {
+  const maxX = 0;
+  const minX = cw - iw * t.scale;
+  const maxY = 0;
+  const minY = ch - ih * t.scale;
+
+  return {
+    scale: t.scale,
+    // 图片比容器窄时居中，否则钳制在边界内
+    x: minX > maxX ? (cw - iw * t.scale) / 2 : Math.min(maxX, Math.max(minX, t.x)),
+    y: minY > maxY ? (ch - ih * t.scale) / 2 : Math.min(maxY, Math.max(minY, t.y)),
+  };
 }
 
 export function useMapInteraction({ containerRef, imageSize }: UseMapInteractionOptions) {
@@ -26,29 +44,38 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
     midX: 0, midY: 0,
   });
 
-  /* ── 滚轮缩放（以鼠标位置为中心） ── */
+  /* 动态最小缩放 = 容器宽度 / 图片宽度（保证左右边界对齐窗口） */
+  const getMinScale = useCallback(() => {
+    const cw = containerRef.current?.clientWidth;
+    if (!cw || cw === 0 || !imageSize) return 0.5;
+    return cw / imageSize.width;
+  }, [containerRef, imageSize]);
+
+  /* ── 滚轮缩放（以鼠标位置为中心，钳制边界） ── */
   const handleWheel = useCallback((e: WheelEvent) => {
     e.preventDefault();
     const container = containerRef.current;
-    if (!container) return;
+    if (!container || !imageSize) return;
 
     const rect = container.getBoundingClientRect();
     const cx = e.clientX - rect.left;
     const cy = e.clientY - rect.top;
+    const cw = rect.width;
+    const ch = rect.height;
 
     setTransform(prev => {
+      const minScale = getMinScale();
       const delta = -e.deltaY * ZOOM_SPEED;
-      const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, prev.scale + delta * prev.scale));
+      const newScale = Math.min(MAX_SCALE, Math.max(minScale, prev.scale + delta * prev.scale));
       const ratio = newScale / prev.scale;
-      return {
-        scale: newScale,
-        x: cx - ratio * (cx - prev.x),
-        y: cy - ratio * (cy - prev.y),
-      };
+      return clampTransform(
+        { scale: newScale, x: cx - ratio * (cx - prev.x), y: cy - ratio * (cy - prev.y) },
+        cw, ch, imageSize.width, imageSize.height,
+      );
     });
-  }, [containerRef]);
+  }, [containerRef, imageSize, getMinScale]);
 
-  /* ── 鼠标拖拽 ── */
+  /* ── 鼠标拖拽（钳制边界） ── */
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0) return;
     e.preventDefault();
@@ -62,19 +89,28 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!dragRef.current.active) return;
-    setTransform(prev => ({
-      ...prev,
-      x: dragRef.current.startTx + (e.clientX - dragRef.current.startX),
-      y: dragRef.current.startTy + (e.clientY - dragRef.current.startY),
-    }));
-  }, []);
+    const container = containerRef.current;
+    if (!container || !imageSize) return;
+    const rect = container.getBoundingClientRect();
+
+    setTransform(prev =>
+      clampTransform(
+        {
+          ...prev,
+          x: dragRef.current.startTx + (e.clientX - dragRef.current.startX),
+          y: dragRef.current.startTy + (e.clientY - dragRef.current.startY),
+        },
+        rect.width, rect.height, imageSize.width, imageSize.height,
+      ),
+    );
+  }, [containerRef, imageSize]);
 
   const handleMouseUp = useCallback(() => {
     dragRef.current.active = false;
     setIsDragging(false);
   }, []);
 
-  /* ── 触摸（移动端拖拽 + 双指缩放） ── */
+  /* ── 触摸（移动端拖拽 + 双指缩放，钳制边界） ── */
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (e.touches.length === 1) {
       const t = e.touches[0];
@@ -99,33 +135,49 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
   }, [transform]);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    const container = containerRef.current;
+    if (!container || !imageSize) return;
+    const rect = container.getBoundingClientRect();
+    const cw = rect.width;
+    const ch = rect.height;
+    const iw = imageSize.width;
+    const ih = imageSize.height;
+
     if (e.touches.length === 1 && dragRef.current.active) {
       const t = e.touches[0];
-      setTransform(prev => ({
-        ...prev,
-        x: dragRef.current.startTx + (t.clientX - dragRef.current.startX),
-        y: dragRef.current.startTy + (t.clientY - dragRef.current.startY),
-      }));
+      setTransform(prev =>
+        clampTransform(
+          {
+            ...prev,
+            x: dragRef.current.startTx + (t.clientX - dragRef.current.startX),
+            y: dragRef.current.startTy + (t.clientY - dragRef.current.startY),
+          },
+          cw, ch, iw, ih,
+        ),
+      );
     } else if (e.touches.length === 2 && pinchRef.current.lastDist > 0) {
       const [t1, t2] = [e.touches[0], e.touches[1]];
       const dist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
       const ratio = dist / pinchRef.current.lastDist;
-      const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, pinchRef.current.startScale * ratio));
+      const minScale = getMinScale();
+      const newScale = Math.min(MAX_SCALE, Math.max(minScale, pinchRef.current.startScale * ratio));
 
-      const container = containerRef.current;
-      if (!container) return;
-      const rect = container.getBoundingClientRect();
       const midX = pinchRef.current.midX - rect.left;
       const midY = pinchRef.current.midY - rect.top;
       const scaleRatio = newScale / pinchRef.current.startScale;
 
-      setTransform({
-        scale: newScale,
-        x: midX - scaleRatio * (midX - pinchRef.current.startX),
-        y: midY - scaleRatio * (midY - pinchRef.current.startY),
-      });
+      setTransform(
+        clampTransform(
+          {
+            scale: newScale,
+            x: midX - scaleRatio * (midX - pinchRef.current.startX),
+            y: midY - scaleRatio * (midY - pinchRef.current.startY),
+          },
+          cw, ch, iw, ih,
+        ),
+      );
     }
-  }, [containerRef]);
+  }, [containerRef, imageSize, getMinScale]);
 
   const handleTouchEnd = useCallback(() => {
     dragRef.current.active = false;
@@ -133,28 +185,23 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
     pinchRef.current.lastDist = 0;
   }, []);
 
-  /* ── 适应屏幕 ── */
+  /* ── 适应屏幕：宽度适配，左右边界对齐窗口 ── */
   const resetTransform = useCallback(() => {
     const container = containerRef.current;
     if (!container || !imageSize) return;
 
     const cw = container.clientWidth;
     const ch = container.clientHeight;
-    const fitScale = Math.min(cw / imageSize.width, ch / imageSize.height, 1);
+    if (cw === 0 || ch === 0) return;
+
+    const fitScale = cw / imageSize.width;
 
     setTransform({
       scale: fitScale,
-      x: (cw - imageSize.width * fitScale) / 2,
+      x: 0,
       y: (ch - imageSize.height * fitScale) / 2,
     });
   }, [containerRef, imageSize]);
-
-  // 图片加载完成后自动适应
-  useEffect(() => {
-    if (imageSize) {
-      requestAnimationFrame(() => resetTransform());
-    }
-  }, [imageSize, resetTransform]);
 
   // 全局 mouseup（鼠标拖出容器外也能结束拖拽）
   useEffect(() => {

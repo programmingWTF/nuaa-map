@@ -9,7 +9,7 @@ NUAAMap 是南京航空航天大学天目湖校区的智能校园地图网站，
 - **仓库**：https://github.com/programmingWTF/nuaa-map.git
 - **团队规模**：14 人，分 6 个小组（详见 README.md）
 - **目标用户**：南航新生、访客
-- **地图类型**：**手绘地图**（①组手绘 → 扫描为高清图片 → 前端以此为底图叠加交互热区）
+- **地图类型**：**手绘地图**（①组手绘 → 扫描为高清图片 → 前端以此为底图叠加交互热区）；当前开发阶段使用官方地图卫星底图 `frontend/public/tianmuhu-map.jpg`（1536×1536，提取自 map.nuaa.edu.cn）
 
 ## ⚠️ AI 工具行为准则（必读）
 
@@ -93,6 +93,11 @@ git push origin <分支名>
 │      → ⑥组标注像素坐标                            │
 │          → ②组前端：底图 + 热区叠加                 │
 │  ④组建筑信息 → ⑥合并坐标 → ②前端详情面板           │
+│                                                  │
+│  [当前开发阶段]                                    │
+│  官方地图瓦片 → 拼接 → tianmuhu-map.jpg            │
+│      → 提取建筑坐标 → mock-buildings.json (28个)   │
+│          → 前端热区叠加                             │
 └─────────────────────────────────────────────────┘
 
 ┌─ AI 问答线 ─────────────────────────────────────┐
@@ -110,19 +115,24 @@ git push origin <分支名>
 ```
 nuaa-map/
 ├── frontend/          # ✅ ②③组：前端（React + TypeScript + Vite）
+│   ├── public/
+│   │   └── tianmuhu-map.jpg  # ✅ 天目湖校区卫星底图（1536×1536）
 │   └── src/
-│       ├── components/    # MapView / BuildingPopover / ChatWidget / Minimap / TopBar
+│       ├── components/    # MapView / HotspotLayer / BuildingPopover / ChatWidget / Minimap / TopBar
 │       ├── hooks/         # useMapInteraction（缩放/拖拽/捏合）
 │       ├── types/         # Building, MapTransform, ChatMessage 等类型
-│       └── data/          # Mock 建筑数据（⑥组产出替换目标）
-├── assets/map/        # 📋 ①组：手绘地图扫描图、图标
+│       └── data/          # 建筑数据（28个真实天目湖建筑 + 真实坐标）
+├── assets/map/
+│   └── tiles-tianmuhu/    # ✅ 天目湖官方地图瓦片（36块，用于拼接）
 ├── data/
-│   ├── qa/            # 📋 ④组：问答知识库 → ⑤组直接使用
-│   ├── raw/           # 📋 ④组：建筑信息 JSON（无坐标）
-│   └── positions/     # 📋 ⑥组：建筑信息 + 像素坐标 → ②前端
+│   ├── extracted-map/     # ✅ 官方地图提取参考数据与文档
+│   ├── qa/                # 📋 ④组：问答知识库 → ⑤组直接使用
+│   ├── raw/               # 📋 ④组：建筑信息 JSON（无坐标）
+│   └── positions/         # 📋 ⑥组：建筑信息 + 像素坐标 → ②前端
 ├── backend/           # 📋 ③组：后端 API
 ├── ai-agent/          # 📋 ⑤组：RAG 管道
-├── scripts/           # 📋 工具脚本
+├── scripts/
+│   └── stitch-tianmuhu-tiles.py  # ✅ 瓦片拼接脚本
 ├── docs/              # 项目文档 + 数据模板
 └── .github/           # 📋 CI/CD 配置
 ```
@@ -133,9 +143,14 @@ nuaa-map/
 
 ### 地图与坐标
 
-- ①组交付**手绘地图的高清扫描图**（建议 ≥ 4K 分辨率），放置于 `assets/map/`
-- 坐标系统基于扫描图的**像素坐标**：以图片左上角为原点 (0, 0)，x 轴向右，y 轴向下
-- ⑥组负责在手绘扫描图上标注每个建筑的像素位置和可点击区域
+- 当前底图：`frontend/public/tianmuhu-map.jpg`（1536×1536 像素），由 36 块 Zoom 3 瓦片拼接而成
+- 瓦片来源：`https://map.nuaa.edu.cn/mapdata/zoom3/{col}_{row}.jpg`（col 44-49, row 13-18, 每块 256×256）
+- 拼接脚本：`scripts/stitch-tianmuhu-tiles.py`
+- 坐标系统基于地图图片的**像素坐标**：以图片左上角为原点 (0, 0)，x 轴向右，y 轴向下
+- 建筑坐标提取方法：从官方地图 DOM 全局坐标减去瓦片网格原点偏移量（ORIGIN_X=8877, ORIGIN_Y=1757）
+- 原始参考数据在 `data/extracted-map/`（含 29 个建筑全局坐标 + 瓦片样本）
+- ①组手绘地图交付后：替换 `MAP_SRC` 常量，⑥组重新标注坐标
+- ⑥组负责在每个建筑上标注像素位置和可点击区域
 
 ### 数据格式
 
@@ -146,9 +161,11 @@ nuaa-map/
 ### 前端交互
 
 - 地图：手绘图片 + CSS Transform 热区叠加模式（不依赖 GIS/瓦片地图），支持平滑缩放拖拽
+- **边界约束**：拖拽和缩放均钳制在图片边界内，不会露出白色/黑色背景；最小缩放 = 容器宽/图片宽
+- **宽度适配**：初始加载时地图左右边界对齐浏览器窗口（`scale = cw / iw, x = 0`），上下居中
 - 点击建筑热区 → 气泡弹窗（BuildingPopover），定位在标记上方，内嵌建筑专属 AI 问答
 - AI 聊天入口：右下角浮动按钮（ChatWidget），呼吸光晕动画，展开为对话面板
-- 缩略图导航：左下角 Minimap，支持点击跳转和拖拽实时平移
+- 缩略图导航：左下角 Minimap，支持点击跳转和拖拽实时平移；按地图真实比例渲染，X/Y 轴独立 scale
 - 设计系统：「航迹云」主题——深度玻璃态毛玻璃（blur 24-36px）+ 彩虹渐变光泽 + 浮动光斑背景 + 光扫hover动效
 - 移动端：气泡降级为底部 Sheet，聊天面板全屏化
 
@@ -195,7 +212,8 @@ nuaa-map/
 - 聊天组件需支持流式输出（预留 SSE 接入口）
 - 启动开发服务器：`cd frontend && npm run dev`
 - 现有组件：`MapView`（地图）、`HotspotLayer`（热区）、`BuildingPopover`（气泡）、`ChatWidget`（聊天）、`Minimap`（缩略图）、`TopBar`（导航栏）
-- Mock 建筑数据：`frontend/src/data/mock-buildings.json`，格式与⑥组最终产出一致
+- 建筑数据：`frontend/src/data/mock-buildings.json`，当前包含天目湖校区 28 个真实建筑（坐标提取自官方地图网站），格式与⑥组最终产出一致
+- 建筑分类：teaching | dormitory | canteen | library | sports | service | gate | landscape | facility | other
 - 设计令牌集中管理在 `frontend/src/index.css` 的 `:root {}` 中
 
 ### 智能体开发（⑤组）
