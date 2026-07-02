@@ -6,7 +6,7 @@
 
 - **React 19** + **TypeScript** — 组件化 UI，类型安全
 - **Vite 8** — 构建工具，极速 HMR
-- **CSS Custom Properties** — 设计令牌体系（航迹云主题：玻璃态 + 天空渐变）
+- **CSS Custom Properties** — 设计令牌体系（航迹云主题：深度玻璃态 + 彩虹光泽 + 浮动光斑背景 + 光扫动效）
 
 ## 快速开始
 
