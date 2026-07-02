@@ -5,6 +5,7 @@ import './Minimap.css';
 interface MinimapProps {
   imageSrc: string;
   imageWidth: number;
+  imageHeight: number;
   transform: MapTransform;
   containerWidth: number;
   containerHeight: number;
@@ -12,16 +13,18 @@ interface MinimapProps {
 }
 
 const MINIMAP_W = 180;
-const ASPECT = 9 / 16;
 const DRAG_THRESHOLD = 3; // 超过此像素才视为拖拽
 
 export function Minimap({
-  imageSrc, imageWidth, transform,
+  imageSrc, imageWidth, imageHeight, transform,
   containerWidth, containerHeight, onNavigate,
 }: MinimapProps) {
   const canvasRef = useRef<HTMLDivElement>(null);
-  const minimapH = Math.round(MINIMAP_W * ASPECT);
-  const scale = imageWidth > 0 ? MINIMAP_W / imageWidth : 1;
+  // 缩略图高度按图片真实比例计算（地图 1536×1536 → 1:1 → minimap 180×180）
+  const minimapH = imageHeight > 0 ? Math.round(MINIMAP_W * imageHeight / imageWidth) : 120;
+  // X/Y 分别使用独立 scale，避免方形地图在非方形缩略图上的坐标偏移
+  const scaleX = imageWidth > 0 ? MINIMAP_W / imageWidth : 1;
+  const scaleY = imageHeight > 0 ? minimapH / imageHeight : 1;
 
   // 拖拽状态
   const dragRef = useRef({
@@ -37,8 +40,8 @@ export function Minimap({
   const visW = containerWidth / transform.scale;
   const visH = containerHeight / transform.scale;
 
-  const ix = visX * scale, iy = visY * scale;
-  const iw = visW * scale, ih = visH * scale;
+  const ix = visX * scaleX, iy = visY * scaleY;
+  const iw = visW * scaleX, ih = visH * scaleY;
   const cx = Math.max(0, ix), cy = Math.max(0, iy);
   const cw = Math.min(MINIMAP_W - cx, iw + (ix < 0 ? ix : 0));
   const ch = Math.min(minimapH - cy, ih + (iy < 0 ? iy : 0));
@@ -73,14 +76,14 @@ export function Minimap({
     if (!dragRef.current.moved) return;
 
     // 缩略图像素 → 地图像素 → transform 偏移
-    const mapDx = dx / scale;
-    const mapDy = dy / scale;
+    const mapDx = dx / scaleX;
+    const mapDy = dy / scaleY;
     onNavigate({
       ...transform,
       x: dragRef.current.startTx - mapDx * transform.scale,
       y: dragRef.current.startTy - mapDy * transform.scale,
     });
-  }, [scale, transform, onNavigate]);
+  }, [scaleX, scaleY, transform, onNavigate]);
 
   /* ── 鼠标松开 ── */
   const handleMouseUp = useCallback((e: React.MouseEvent) => {
@@ -90,8 +93,8 @@ export function Minimap({
     if (!dragRef.current.moved) {
       const rect = canvasRef.current?.getBoundingClientRect();
       if (!rect) { dragRef.current.active = false; return; }
-      const mapX = (e.clientX - rect.left) / scale;
-      const mapY = (e.clientY - rect.top) / scale;
+      const mapX = (e.clientX - rect.left) / scaleX;
+      const mapY = (e.clientY - rect.top) / scaleY;
       onNavigate({
         ...transform,
         x: containerWidth / 2 - mapX * transform.scale,
@@ -101,7 +104,7 @@ export function Minimap({
 
     dragRef.current.active = false;
     dragRef.current.moved = false;
-  }, [scale, transform, containerWidth, containerHeight, onNavigate]);
+  }, [scaleX, scaleY, transform, containerWidth, containerHeight, onNavigate]);
 
   /* ── 全局 mouseup（拖出缩略图外也结束） ── */
   useEffect(() => {
@@ -129,14 +132,14 @@ export function Minimap({
       dragRef.current.moved = true;
     }
     if (!dragRef.current.moved) return;
-    const mapDx = dx / scale;
-    const mapDy = dy / scale;
+    const mapDx = dx / scaleX;
+    const mapDy = dy / scaleY;
     onNavigate({
       ...transform,
       x: dragRef.current.startTx - mapDx * transform.scale,
       y: dragRef.current.startTy - mapDy * transform.scale,
     });
-  }, [scale, transform, onNavigate]);
+  }, [scaleX, scaleY, transform, onNavigate]);
 
   const handleTouchEnd = useCallback(() => {
     dragRef.current.active = false;

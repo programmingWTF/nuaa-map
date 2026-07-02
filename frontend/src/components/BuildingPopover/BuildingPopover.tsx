@@ -12,7 +12,8 @@ interface BuildingPopoverProps {
 
 const CATEGORY_LABELS: Record<Building['category'], string> = {
   teaching: '教学楼', dormitory: '宿舍', canteen: '食堂',
-  library: '图书馆', sports: '体育设施', service: '生活服务', other: '其他',
+  library: '图书馆', sports: '体育设施', service: '生活服务',
+  gate: '校门', landscape: '景观', facility: '设施', other: '其他',
 };
 
 const POPOVER_W = 300;

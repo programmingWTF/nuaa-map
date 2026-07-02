@@ -5,8 +5,7 @@ import { BuildingPopover } from '../BuildingPopover/BuildingPopover';
 import type { Building, BuildingClickData, MapImageMeta, MapTransform } from '../../types';
 import './MapView.css';
 
-const PLACEHOLDER_SRC = '/placeholder-map.svg';
-const MAP_SRC = PLACEHOLDER_SRC;
+const MAP_SRC = '/tianmuhu-map.jpg';
 
 export interface MapViewState {
   transform: MapTransform;
@@ -63,6 +62,12 @@ export function MapView({ buildings, selectedBuilding, onBuildingClick, onMapSta
     if (img) setImageMeta({ width: img.naturalWidth, height: img.naturalHeight, loaded: true });
   }, []);
 
+  /* 图片 + 容器就绪后宽度适配（左右对齐窗口） */
+  useEffect(() => {
+    if (!imageMeta.loaded || containerSize.w === 0 || containerSize.h === 0) return;
+    resetTransform();
+  }, [imageMeta.loaded, containerSize.w, containerSize.h, resetTransform]);
+
   useEffect(() => {
     const onResize = () => { if (imageMeta.loaded) resetTransform(); };
     window.addEventListener('resize', onResize);
@@ -111,7 +116,7 @@ export function MapView({ buildings, selectedBuilding, onBuildingClick, onMapSta
         }}
       >
         <img ref={imageRef} className="map-image" src={MAP_SRC}
-          alt="南航天目湖校区手绘地图" onLoad={handleImageLoad} draggable={false} />
+          alt="南航天目湖校区地图" onLoad={handleImageLoad} draggable={false} />
 
         {imageMeta.loaded && (
           <HotspotLayer

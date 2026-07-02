@@ -43,6 +43,7 @@ function App() {
       <Minimap
         imageSrc={mapState.imageSrc || '/placeholder-map.svg'}
         imageWidth={mapState.imageWidth}
+        imageHeight={mapState.imageHeight}
         transform={mapState.transform}
         containerWidth={mapState.containerWidth}
         containerHeight={mapState.containerHeight}
