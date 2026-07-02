@@ -1,0 +1,61 @@
+[
+  {
+    "id": "building-001",
+    "name": "图书馆",
+    "category": "library",
+    "hotspot": { "x": 960, "y": 420, "width": 180, "height": 130 },
+    "description": "天目湖校区图书馆，藏书丰富，设有自习区、电子阅览室和研讨间。",
+    "openTime": "周一至周日 8:00-22:00",
+    "floors": 5,
+    "facilities": ["自习室", "电子阅览室", "研讨间", "咖啡角"]
+  },
+  {
+    "id": "building-002",
+    "name": "学生食堂",
+    "category": "canteen",
+    "hotspot": { "x": 640, "y": 320, "width": 140, "height": 100 },
+    "description": "主食堂共三层，提供各地风味菜品，支持校园卡和移动支付。",
+    "openTime": "早餐 6:30-9:00 | 午餐 11:00-13:00 | 晚餐 17:00-19:30",
+    "floors": 3,
+    "facilities": ["快餐窗口", "清真窗口", "小炒区", "水吧"]
+  },
+  {
+    "id": "building-003",
+    "name": "教学楼 A",
+    "category": "teaching",
+    "hotspot": { "x": 200, "y": 180, "width": 160, "height": 200 },
+    "description": "主要教学场所，配备多媒体教室、阶梯教室和智慧教室。",
+    "openTime": "周一至周五 7:00-21:30",
+    "floors": 6,
+    "facilities": ["多媒体教室", "阶梯教室", "智慧教室", "自动售货机"]
+  },
+  {
+    "id": "building-004",
+    "name": "学生宿舍 1 号楼",
+    "category": "dormitory",
+    "hotspot": { "x": 1400, "y": 200, "width": 120, "height": 180 },
+    "description": "四人间宿舍，上床下桌，独立卫浴，配备空调和热水器。",
+    "floors": 7,
+    "facilities": ["独立卫浴", "空调", "热水器", "洗衣房", "公共厨房"]
+  },
+  {
+    "id": "building-005",
+    "name": "综合体育馆",
+    "category": "sports",
+    "hotspot": { "x": 1400, "y": 520, "width": 200, "height": 160 },
+    "description": "含室内篮球场、羽毛球场、乒乓球室及健身房。",
+    "openTime": "周一至周日 9:00-21:00",
+    "floors": 2,
+    "facilities": ["篮球场", "羽毛球场", "乒乓球室", "健身房", "更衣室"]
+  },
+  {
+    "id": "building-006",
+    "name": "校医院",
+    "category": "service",
+    "hotspot": { "x": 80, "y": 500, "width": 100, "height": 80 },
+    "description": "提供基本医疗服务，支持校园医保报销。",
+    "openTime": "周一至周五 8:00-17:00（急诊 24 小时）",
+    "floors": 3,
+    "facilities": ["门诊", "药房", "急诊室"]
+  }
+]
