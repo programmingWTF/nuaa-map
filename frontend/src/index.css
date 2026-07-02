@@ -1,136 +1,126 @@
 /* ═══════════════════════════════════════════
    NUAAMap — 全局样式 · 设计系统
    主题：航迹云 (Contrail)
-   风格：玻璃态 + 天空渐变 + 航空蓝
+   风格：深度玻璃态 · 彩虹光泽 · 光扫动效 · 浮动光斑
    ═══════════════════════════════════════════ */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Serif+SC:wght@500;700;900&display=swap');
 
 /* ── 设计令牌 ── */
 :root {
-  /* 色彩系统 — 天空渐层 */
   --color-sky-50:  #F0F4FA;
   --color-sky-100: #E0E8F4;
-  --color-sky-200: #C4D4E8;
-
   --color-blue-500: #2563EB;
   --color-blue-600: #1D4ED8;
-  --color-blue-700: #1E3A8A;
-
   --color-cyan-400: #22D3EE;
   --color-cyan-500: #06B6D4;
-
   --color-amber-400: #FBBF24;
-  --color-amber-500: #F59E0B;
   --color-orange-500: #F97316;
-
+  --color-purple-500: #8B5CF6;
   --color-slate-800: #1E293B;
   --color-slate-600: #475569;
   --color-slate-500: #64748B;
   --color-slate-400: #94A3B8;
   --color-slate-200: #E2E8F0;
-  --color-slate-100: #F1F5F9;
 
-  /* 语义色 */
   --color-paper:  var(--color-sky-50);
   --color-navy:   var(--color-slate-800);
   --color-chart:  var(--color-blue-500);
   --color-beacon: var(--color-orange-500);
-  --color-card:   rgba(255, 255, 255, 0.72);
   --color-cloud:  var(--color-slate-500);
-
-  --color-chart-hover:  var(--color-blue-600);
+  --color-chart-hover: var(--color-blue-600);
   --color-beacon-hover: #EA580C;
-  --color-chart-light:  rgba(37, 99, 235, 0.08);
 
   /* 渐变 */
-  --gradient-sky:    linear-gradient(135deg, #2563EB 0%, #06B6D4 100%);
-  --gradient-sunset: linear-gradient(135deg, #F97316 0%, #FBBF24 100%);
-  --gradient-card:   linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%);
+  --gradient-sky:       linear-gradient(135deg, #2563EB 0%, #06B6D4 100%);
+  --gradient-sunset:    linear-gradient(135deg, #F97316 0%, #FBBF24 100%);
+  --gradient-card:      linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.68) 100%);
+  --gradient-rainbow:   linear-gradient(135deg, #6366F1, #06B6D4, #10B981, #F59E0B, #F97316);
 
-  /* 玻璃态 */
-  --glass-bg:     rgba(255, 255, 255, 0.65);
-  --glass-border: rgba(255, 255, 255, 0.5);
-  --glass-blur:   16px;
-  --glass-shadow: 0 8px 32px rgba(30, 58, 138, 0.08), 0 2px 8px rgba(0,0,0,0.04);
+  /* 玻璃态 — 深度版 */
+  --glass-bg:           rgba(255,255,255,0.5);
+  --glass-bg-heavy:     rgba(255,255,255,0.7);
+  --glass-border:       rgba(255,255,255,0.5);
+  --glass-border-strong: rgba(255,255,255,0.7);
+  --glass-highlight:    inset 0 1px 0 rgba(255,255,255,0.7);
+  --glass-shadow:       0 8px 32px rgba(30,58,138,0.07), 0 2px 8px rgba(0,0,0,0.03), var(--glass-highlight);
+  --glass-shadow-lg:    0 20px 60px rgba(30,58,138,0.1), 0 4px 16px rgba(0,0,0,0.04), var(--glass-highlight);
+  --glass-shadow-colored: 0 12px 40px rgba(37,99,235,0.1), 0 0 0 1px rgba(37,99,235,0.05), var(--glass-highlight);
 
-  /* 字体 */
   --font-display: 'Noto Serif SC', 'Source Han Serif SC', serif;
   --font-body:    'Inter', system-ui, -apple-system, sans-serif;
 
-  /* 字号 */
-  --text-xs: 0.75rem; --text-sm: 0.875rem; --text-base: 1rem;
-  --text-lg: 1.125rem; --text-xl: 1.25rem; --text-2xl: 1.5rem; --text-3xl: 2rem;
+  --text-xs:0.75rem; --text-sm:0.875rem; --text-base:1rem;
+  --text-lg:1.125rem; --text-xl:1.25rem; --text-2xl:1.5rem; --text-3xl:2rem;
 
-  /* 圆角 */
-  --radius-sm: 8px; --radius-md: 14px; --radius-lg: 22px; --radius-full: 9999px;
+  --radius-sm:8px; --radius-md:14px; --radius-lg:22px; --radius-full:9999px;
 
-  /* 阴影 */
-  --shadow-sm:   0 1px 3px rgba(0,0,0,0.04);
-  --shadow-card: 0 4px 20px rgba(30, 58, 138, 0.07), 0 1px 4px rgba(0,0,0,0.04);
-  --shadow-panel: 0 16px 48px rgba(30, 58, 138, 0.12), 0 4px 12px rgba(0,0,0,0.04);
-  --shadow-float: 0 8px 32px rgba(30, 58, 138, 0.10), 0 2px 6px rgba(0,0,0,0.04);
-  --shadow-glow:  0 0 20px rgba(37, 99, 235, 0.25);
+  --shadow-sm:   0 1px 3px rgba(0,0,0,0.03);
+  --shadow-card: 0 4px 20px rgba(30,58,138,0.06), 0 1px 4px rgba(0,0,0,0.03);
+  --shadow-panel: 0 20px 60px rgba(30,58,138,0.12), 0 4px 16px rgba(0,0,0,0.04);
+  --shadow-float: 0 12px 40px rgba(30,58,138,0.1), 0 2px 8px rgba(0,0,0,0.04);
+  --shadow-glow:       0 0 24px rgba(37,99,235,0.25);
+  --shadow-glow-orange: 0 0 24px rgba(249,115,22,0.3);
 
-  /* 动效 */
-  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out:    cubic-bezier(0.16,1,0.3,1);
+  --ease-spring: cubic-bezier(0.34,1.56,0.64,1);
   --transition-fast:   150ms var(--ease-out);
   --transition-normal: 300ms var(--ease-out);
   --transition-spring: 400ms var(--ease-spring);
-
-  /* 布局 */
   --topbar-height: 60px;
 }
 
 /* ── 全局重置 ── */
 *,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
-
-html {
-  font-size: 16px;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+html { font-size:16px; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
 
 body {
-  font-family: var(--font-body);
-  color: var(--color-navy);
-  background: linear-gradient(180deg, #EEF2FB 0%, #F5F7FC 40%, #FAFBFF 100%);
-  background-attachment: fixed;
-  line-height: 1.6;
-  overflow: hidden;
-  height: 100dvh;
-  width: 100vw;
+  font-family: var(--font-body); color: var(--color-navy);
+  background: #EDF1F7;
+  line-height:1.6; overflow:hidden; height:100dvh; width:100vw;
 }
 
-/* 背景装饰 — 微妙的几何纹理 */
+/* 背景 — 浮动光斑 + 网格 */
 body::before {
-  content: '';
-  position: fixed; inset: 0;
+  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 600px 500px at 15% 20%, rgba(37,99,235,0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 500px 600px at 80% 75%, rgba(6,182,212,0.05) 0%, transparent 70%),
+    radial-gradient(ellipse 400px 400px at 50% 50%, rgba(139,92,246,0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 300px 350px at 90% 15%, rgba(249,115,22,0.04) 0%, transparent 70%);
+  animation: bg-float 20s ease-in-out infinite;
+}
+@keyframes bg-float {
+  0%,100% { transform: translate(0,0) scale(1); }
+  25%     { transform: translate(25px,-15px) scale(1.06); }
+  50%     { transform: translate(-12px,20px) scale(0.94); }
+  75%     { transform: translate(-20px,-8px) scale(1.04); }
+}
+body::after {
+  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
   background-image:
-    radial-gradient(circle at 20% 80%, rgba(37, 99, 235, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 50% 50%, rgba(249, 115, 22, 0.02) 0%, transparent 50%);
-  pointer-events: none; z-index: 0;
+    linear-gradient(rgba(37,99,235,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37,99,235,0.015) 1px, transparent 1px);
+  background-size: 64px 64px;
 }
 
 #root { height:100%; width:100%; position:relative; z-index:1; }
 
-button {
-  font-family: var(--font-body); cursor: pointer;
-  border: none; background: none; color: inherit; font-size: inherit;
-}
+button { font-family:var(--font-body); cursor:pointer; border:none; background:none; color:inherit; font-size:inherit; }
+button:focus-visible,a:focus-visible,input:focus-visible { outline:2px solid var(--color-chart); outline-offset:2px; }
+:focus:not(:focus-visible) { outline:none; }
 
-button:focus-visible, a:focus-visible, input:focus-visible {
-  outline: 2px solid var(--color-chart); outline-offset: 2px;
-}
-:focus:not(:focus-visible) { outline: none; }
-
-@media (prefers-reduced-motion: reduce) {
-  *,*::before,*::after { animation-duration:0.01ms !important; transition-duration:0.01ms !important; }
+@media (prefers-reduced-motion:reduce) {
+  *,*::before,*::after { animation-duration:0.01ms!important; transition-duration:0.01ms!important; }
 }
 
 ::-webkit-scrollbar { width:6px; }
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb { background:var(--color-slate-400); border-radius:var(--radius-full); }
 ::-webkit-scrollbar-thumb:hover { background:var(--color-chart); }
+
+/* ── 光扫动效 ── */
+@keyframes shimmer {
+  0%   { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(200%) skewX(-15deg); }
+}
