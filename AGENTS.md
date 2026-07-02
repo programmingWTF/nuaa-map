@@ -30,10 +30,14 @@
 
 ### ② 交互功能组
 
-```
-"创建 CampusMap 组件：手绘扫描图为底图(img)，读取 data/positions/ 的 JSON 生成可点击热区，支持 CSS transform 缩放拖拽"
+> 前端已搭建完成，包含 MapView（地图缩放/拖拽）、HotspotLayer（建筑热区）、BuildingPopover（气泡弹窗）、ChatWidget（AI 聊天）、Minimap（缩略图导航）等组件。
 
-"创建 ChatWidget 组件，浮动在地图右下角，支持流式文本显示，对接后端 /api/chat"
+```
+"在 BuildingPopover 组件中增加建筑图片轮播功能"
+
+"优化 HotspotLayer 的热区标记样式，当前航路点风格在 frontend/src/components/MapView/HotspotLayer.tsx"
+
+"对接后端 /api/chat 接口，替换 ChatWidget 和 BuildingPopover 中的 Mock 回复，代码中有 TODO 标记"
 ```
 
 ### ③ 平台搭建组
@@ -55,9 +59,14 @@
 
 ### ⑤ 智能体训练组
 
+> 前端已预留两个 `/api/chat` 接入口：ChatWidget（通用问答）和 BuildingPopover（建筑专属问答）。接口协议需与③组协商。
+
 ```
 "基于 LangChain 搭建 RAG 管道，以 data/qa/ 和 data/positions/ 为知识库，
 提供 /api/chat 端点，支持流式输出。"
+
+"设计 /api/chat 接口协议：请求格式 { question, context? }，响应 SSE 流 { delta, done }，
+与③组对齐后在前端 ChatWidget 和 BuildingPopover 中接入"
 ```
 
 ### ⑥ 数据转换组
@@ -95,6 +104,15 @@
 - 分支前缀：map/ interact/ platform/ data/ ai/ convert/ docs/
 - 提交格式：<type>(<scope>): <描述>
 - 数据模板见 docs/templates/
+
+前端已用 React + TypeScript + Vite 搭建，运行方式：
+  cd frontend && npm install && npm run dev
+
+前端组件都在 frontend/src/components/ 下：
+  MapView（地图缩放/拖拽）、HotspotLayer（建筑热区）、BuildingPopover（气泡弹窗）、
+  ChatWidget（AI聊天）、Minimap（缩略图导航）、TopBar（导航栏）
+
+Mock 数据在 frontend/src/data/mock-buildings.json，类型定义在 frontend/src/types/index.ts
 ```
 
 ## 常用 Prompt 模板

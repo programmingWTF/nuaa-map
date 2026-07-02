@@ -16,10 +16,12 @@
 - 建筑详情弹窗/Panel 组件
 - AI 聊天界面的前端交互
 - 前端状态管理
+- **当前进度**：✅ 前端框架已搭建（React + TypeScript + Vite），含 MapView / BuildingPopover / ChatWidget / Minimap 组件
+- **运行方式**：`cd frontend && npm install && npm run dev`
 - 需要对接：③组的 API、⑥组的像素坐标数据（`data/positions/`）
 
 ### ③ 平台搭建 — 罗羽彤、李桂聿、郑应楠
-- 前端项目脚手架搭建
+- ~~前端项目脚手架搭建~~ ✅ 已完成
 - 后端 API 服务器搭建
 - 数据库设计与维护
 - CI/CD 流程配置
