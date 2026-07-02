@@ -109,20 +109,25 @@ git push origin <分支名>
 
 ```
 nuaa-map/
-├── assets/map/        # ①组交付：手绘地图扫描图、图标
+├── frontend/          # ✅ ②③组：前端（React + TypeScript + Vite）
+│   └── src/
+│       ├── components/    # MapView / BuildingPopover / ChatWidget / Minimap / TopBar
+│       ├── hooks/         # useMapInteraction（缩放/拖拽/捏合）
+│       ├── types/         # Building, MapTransform, ChatMessage 等类型
+│       └── data/          # Mock 建筑数据（⑥组产出替换目标）
+├── assets/map/        # 📋 ①组：手绘地图扫描图、图标
 ├── data/
-│   ├── qa/            # ④组产出：问答知识库（模板 docs/templates/qa-knowledge.json）
-│   ├── raw/           # ④组产出：建筑信息 JSON（模板 docs/templates/building-info.json）
-│   └── positions/     # ⑥组产出：带像素坐标的完整建筑数据
-├── frontend/          # ②③组：前端代码
-├── backend/           # ③组：后端 API
-├── ai-agent/          # ⑤组：智能体训练与 RAG 管道
-├── scripts/           # 工具脚本（坐标标注辅助工具等）
-├── docs/              # 项目文档
-└── .github/           # CI/CD 配置
+│   ├── qa/            # 📋 ④组：问答知识库 → ⑤组直接使用
+│   ├── raw/           # 📋 ④组：建筑信息 JSON（无坐标）
+│   └── positions/     # 📋 ⑥组：建筑信息 + 像素坐标 → ②前端
+├── backend/           # 📋 ③组：后端 API
+├── ai-agent/          # 📋 ⑤组：RAG 管道
+├── scripts/           # 📋 工具脚本
+├── docs/              # 项目文档 + 数据模板
+└── .github/           # 📋 CI/CD 配置
 ```
 
-> 以上为规划结构，项目初始化后需各组确认并调整。
+> ✅ = 已搭建 | 📋 = 规划中。启动前端：`cd frontend && npm install && npm run dev`
 
 ## 关键约定
 
@@ -140,9 +145,12 @@ nuaa-map/
 
 ### 前端交互
 
-- 地图：手绘图片 + 热区叠加模式（不依赖 GIS/瓦片地图），支持缩放拖拽
-- 点击建筑热区 → 弹出详情面板
-- AI 聊天入口独立于地图，浮动按钮或侧边栏形式
+- 地图：手绘图片 + CSS Transform 热区叠加模式（不依赖 GIS/瓦片地图），支持平滑缩放拖拽
+- 点击建筑热区 → 气泡弹窗（BuildingPopover），定位在标记上方，内嵌建筑专属 AI 问答
+- AI 聊天入口：右下角浮动按钮（ChatWidget），呼吸光晕动画，展开为对话面板
+- 缩略图导航：左下角 Minimap，支持点击跳转和拖拽实时平移
+- 设计系统：「航迹云」主题——玻璃态毛玻璃 + 天空渐变背景 + 航空蓝配色
+- 移动端：气泡降级为底部 Sheet，聊天面板全屏化
 
 ### 智能体
 
@@ -182,8 +190,13 @@ nuaa-map/
 
 ### 前端开发（②③组）
 
-- 地图底图使用 `<img>` + 热区或 Canvas，不使用 GIS 库
-- 聊天组件需支持流式输出
+- 地图底图使用 `<img>` + CSS Transform 热区叠加，不使用 GIS 库
+- 地图尺寸自适应（运行时从 `img.naturalWidth/Height` 读取），不硬编码
+- 聊天组件需支持流式输出（预留 SSE 接入口）
+- 启动开发服务器：`cd frontend && npm run dev`
+- 现有组件：`MapView`（地图）、`HotspotLayer`（热区）、`BuildingPopover`（气泡）、`ChatWidget`（聊天）、`Minimap`（缩略图）、`TopBar`（导航栏）
+- Mock 建筑数据：`frontend/src/data/mock-buildings.json`，格式与⑥组最终产出一致
+- 设计令牌集中管理在 `frontend/src/index.css` 的 `:root {}` 中
 
 ### 智能体开发（⑤组）
 
