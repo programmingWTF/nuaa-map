@@ -81,21 +81,37 @@ feat(ai): 接入 RAG 检索增强问答管道
 - 知识库来源：`data/qa/`（④组 QA 数据）+ `data/positions/`（建筑信息）
 - 接口协议由③组牵头确定
 
-## 目录结构（规划）
+## 本地开发
+
+```bash
+cd frontend
+npm install
+npm run dev        # 启动开发服务器（热更新）
+npm run build      # 生产构建
+```
+
+## 目录结构
 
 ```
 nuaa-map/
-├── assets/            # 静态资源
+├── frontend/          # ✅ ②③组：前端代码（React + TypeScript + Vite）
+│   └── src/
+│       ├── components/    # UI 组件（MapView / BuildingPopover / ChatWidget / Minimap）
+│       ├── hooks/         # 自定义 Hook（useMapInteraction）
+│       ├── types/         # TypeScript 类型定义
+│       └── data/          # Mock 建筑数据
+├── assets/            # 📋 规划：静态资源
 │   └── map/           # ①组：手绘地图扫描图、图标
 ├── data/
 │   ├── qa/            # ④组：问答知识库 → ⑤组直接使用
 │   ├── raw/           # ④组：建筑信息（无坐标）
 │   └── positions/     # ⑥组产出：建筑信息 + 像素坐标
 ├── docs/
-│   └── templates/     # 数据模板（qa-knowledge.json / building-info.json）
-├── frontend/          # ②③组：前端代码
-├── backend/           # ③组：后端 API
-├── ai-agent/          # ⑤组：RAG + Prompt 工程
-├── scripts/           # 工具脚本
-└── .github/           # CI/CD
+│   └── templates/     # 数据模板
+├── backend/           # ③组：后端 API（待开发）
+├── ai-agent/          # ⑤组：RAG + Prompt 工程（待开发）
+├── scripts/           # 工具脚本（待开发）
+└── .github/           # CI/CD（待配置）
 ```
+
+> ✅ = 已搭建完成 | 📋 = 规划中，待对应组交付
