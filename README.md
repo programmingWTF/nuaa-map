@@ -19,20 +19,40 @@
 | ⑤ 智能体训练 | 胡德文、李睿、姜禹锡 | AI 问答模型/RAG 系统搭建与训练 |
 | ⑥ 数据转换 | 杜明泽 | 手绘地图像素坐标标注与数据合并 |
 
+## 前置要求
+
+在开始之前，请确保你的开发环境满足以下条件：
+
+- **[Node.js](https://nodejs.org/)** ≥ 18.x（推荐使用最新的 LTS 版本）
+- **[Git](https://git-scm.com/)** ≥ 2.x
+- 一个现代的代码编辑器（推荐 [VS Code](https://code.visualstudio.com/)）
+
+> 💡 安装 Node.js 时会自动附带 npm 包管理器。可以通过以下命令确认安装成功：
+> ```bash
+> node --version   # 应输出 v18.x.x 或更高
+> npm --version    # 应输出 9.x.x 或更高
+> ```
+
 ## 快速开始
 
 ```bash
-# 克隆仓库
+# 1. 克隆仓库
 git clone https://github.com/programmingWTF/nuaa-map.git
 cd nuaa-map
 
-# 安装依赖并启动前端开发服务器
+# 2. 进入前端目录
 cd frontend
+
+# 3. 安装项目依赖（首次运行必须执行）
 npm install
+
+# 4. 启动开发服务器
 npm run dev
 ```
 
 浏览器打开 http://localhost:5173 即可看到地图页面。
+
+> ⚠️ **常见问题**：如果直接执行 `npm run dev` 提示 `'vite' 不是内部或外部命令`，说明还没有安装依赖——请先运行 `npm install`（即上述第 3 步），再执行第 4 步。`node_modules/` 目录不会纳入 Git 版本控制，因此每次在新环境中 clone 仓库后都需要重新安装。
 
 > 目前前端已搭建完成，包含天目湖校区真实卫星地图底图（Zoom 3 瓦片拼接）+ 28 个真实建筑坐标 + 地图交互（缩放/拖拽边界约束、宽度适配）+ AI 聊天界面 + 缩略图导航。后端和 AI 智能体模块尚未开发。
 
