@@ -28,11 +28,19 @@ export function BuildingPopover({
   const [chatMsgs, setChatMsgs] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
+  const popoverRef = useRef<HTMLDivElement>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [chatMsgs]);
+  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, [chatMsgs]);
   useEffect(() => { inputRef.current?.focus(); }, []);
+  useEffect(() => {
+    const el = popoverRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => { e.stopPropagation(); };
+    el.addEventListener('wheel', onWheel);
+    return () => el.removeEventListener('wheel', onWheel);
+  }, []);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey);
@@ -74,6 +82,7 @@ export function BuildingPopover({
     <>
       <div className="popover-backdrop" onClick={onClose} />
       <div
+        ref={popoverRef}
         className={`popover popover--${arrowDir === 'bottom' ? 'above' : 'below'}`}
         style={{ left: popLeft, top: popTop, width: POPOVER_W, maxHeight: POPOVER_MAX_H }}
         role="dialog" aria-label={`${building.name} 详情`}
