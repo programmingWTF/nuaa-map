@@ -80,6 +80,7 @@ export function BuildingPopover({
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
+  const nearbyRef = useRef<HTMLDivElement>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -94,6 +95,20 @@ export function BuildingPopover({
     if (!el) return;
     const onWheel = (e: WheelEvent) => { e.stopPropagation(); };
     el.addEventListener('wheel', onWheel);
+    return () => el.removeEventListener('wheel', onWheel);
+  }, []);
+
+  /* 周边区域：垂直滚轮 → 水平滚动 */
+  useEffect(() => {
+    const el = nearbyRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        e.preventDefault();
+        el.scrollLeft += e.deltaY;
+      }
+    };
+    el.addEventListener('wheel', onWheel, { passive: false });
     return () => el.removeEventListener('wheel', onWheel);
   }, []);
   useEffect(() => {
@@ -208,7 +223,7 @@ export function BuildingPopover({
             {nearby.length > 0 && (
               <div className="popover-nearby">
                 <div className="popover-nearby-label">🚶 周边设施</div>
-                <div className="popover-nearby-list">
+                <div className="popover-nearby-list" ref={nearbyRef}>
                   {nearby.map(({ building: nb, distance }) => (
                     <button
                       key={nb.id}
