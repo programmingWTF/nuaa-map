@@ -24,14 +24,30 @@ function App() {
   }, []);
 
   const handleMinimapNavigate = useCallback((t: MapTransform) => {
-    // Minimap 导航通过更新 mapState 来实现，但这需要 MapView 响应。
-    // 当前方案：通过 window.dispatchEvent 向 MapView 发送自定义事件
     window.dispatchEvent(new CustomEvent('map-navigate', { detail: t }));
   }, []);
 
+  /* 搜索选中 → 地图飞入 + 弹出详情 */
+  const handleSearchSelect = useCallback((building: Building) => {
+    const { transform, containerWidth, containerHeight, imageWidth, imageHeight } = mapState;
+    if (!imageWidth || !imageHeight || !containerWidth || !containerHeight) return;
+
+    const hotspotCX = building.hotspot.x + building.hotspot.width / 2;
+    const hotspotCY = building.hotspot.y + building.hotspot.height / 2;
+    const scale = Math.max(transform.scale, 1.5);
+    const tx = containerWidth / 2 - hotspotCX * scale;
+    const ty = containerHeight / 2 - hotspotCY * scale;
+
+    window.dispatchEvent(new CustomEvent('map-navigate', { detail: { scale, x: tx, y: ty } }));
+    setSelectedBuilding(building);
+  }, [mapState]);
+
   return (
     <div className="app">
-      <TopBar />
+      <TopBar
+        buildings={buildings}
+        onSearchSelect={handleSearchSelect}
+      />
       <main className="app-main">
         <MapView
           buildings={buildings}
@@ -49,7 +65,10 @@ function App() {
         containerHeight={mapState.containerHeight}
         onNavigate={handleMinimapNavigate}
       />
-      <ChatWidget />
+      <ChatWidget
+        selectedBuilding={selectedBuilding}
+        onViewBuilding={(bld) => handleSearchSelect(bld)}
+      />
     </div>
   );
 }

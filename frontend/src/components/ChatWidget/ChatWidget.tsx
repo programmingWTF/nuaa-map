@@ -1,8 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import type { ChatMessage } from '../../types';
+import type { Building, ChatMessage } from '../../types';
 import './ChatWidget.css';
 
-export function ChatWidget() {
+interface ChatWidgetProps {
+  selectedBuilding?: Building | null;
+  onViewBuilding?: (building: Building) => void;
+}
+
+export function ChatWidget({ selectedBuilding, onViewBuilding }: ChatWidgetProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([{
     id: 'welcome', role: 'assistant',
@@ -78,6 +83,20 @@ export function ChatWidget() {
               </svg>
             </button>
           </div>
+
+          {selectedBuilding && (
+            <div className="chat-context">
+              <span className="chat-context-dot" />
+              <span className="chat-context-text">
+                当前在看 <strong>{selectedBuilding.name}</strong>
+              </span>
+              {onViewBuilding && (
+                <button className="chat-context-action" onClick={() => onViewBuilding(selectedBuilding)}>
+                  查看详情
+                </button>
+              )}
+            </div>
+          )}
 
           <div className="chat-messages">
             {messages.map(msg => (

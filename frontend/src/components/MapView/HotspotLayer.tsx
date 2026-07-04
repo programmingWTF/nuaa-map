@@ -33,7 +33,7 @@ export function HotspotLayer({
         return (
           <button
             key={b.id}
-            className={`hotspot ${isSelected ? 'hotspot--selected' : ''}`}
+            className={`hotspot hotspot--cat-${b.category} ${isSelected ? 'hotspot--selected' : ''}`}
             style={{ left: x, top: y, width, height }}
             onClick={handleClick}
             aria-label={`查看 ${b.name} 详情`}
