@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import type { Building, ChatMessage } from '../../types';
 import './BuildingPopover.css';
 
@@ -28,6 +28,7 @@ export function BuildingPopover({
   const [chatMsgs, setChatMsgs] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
+  const [popHeight, setPopHeight] = useState<number | null>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -70,13 +71,23 @@ export function BuildingPopover({
   const hotspotTop = screenY;
   const hotspotBot = screenY + screenHeight;
 
-  let popTop = hotspotTop - POPOVER_MAX_H - GAP - ARROW_H;
+  // 用实际渲染高度算上方间距，避免因 POPOVER_MAX_H 偏大致使弹窗离热区过远
+  const effectiveH = popHeight ?? POPOVER_MAX_H;
+  let popTop = hotspotTop - effectiveH - GAP - ARROW_H;
   let arrowDir: 'bottom' | 'top' = 'bottom';
   if (popTop < 0) { popTop = hotspotBot + GAP + ARROW_H; arrowDir = 'top'; }
 
   let popLeft = hotspotCX - POPOVER_W / 2;
   popLeft = Math.max(8, Math.min(popLeft, containerWidth - POPOVER_W - 8));
   const arrowOff = hotspotCX - (popLeft + POPOVER_W / 2);
+
+  // 在浏览器绘制前测量弹窗实际高度，消除位置跳动
+  useLayoutEffect(() => {
+    const el = popoverRef.current;
+    if (!el) return;
+    const h = el.getBoundingClientRect().height;
+    if (h > 0 && h !== popHeight) setPopHeight(h);
+  });
 
   return (
     <>
