@@ -2,7 +2,8 @@
 
 本文档指导团队成员如何使用 AI Agent（如 Claude Code、GitHub Copilot 等）提升开发效率。
 
-> ⚠️ **重要前提**：本仓库的 `CLAUDE.md` 是给 AI 看的"项目规则书"。**Claude Code 自动读取并遵守**。用其他 AI 工具时请在 Prompt 开头加：
+> [!IMPORTANT]
+> **重要前提**：本仓库的 `CLAUDE.md` 是给 AI 看的"项目规则书"。**Claude Code 自动读取并遵守**。用其他 AI 工具时请在 Prompt 开头加：
 > ```
 > 请先阅读仓库根目录的 CLAUDE.md、CONTRIBUTING.md，严格遵守其中的规范。
 > ```
