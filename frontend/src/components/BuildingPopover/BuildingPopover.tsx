@@ -7,7 +7,9 @@ interface BuildingPopoverProps {
   screenX: number; screenY: number;
   screenWidth: number; screenHeight: number;
   containerWidth: number;
+  buildings: Building[];
   onClose: () => void;
+  onNavigateToBuilding: (building: Building) => void;
 }
 
 const CATEGORY_LABELS: Record<Building['category'], string> = {
@@ -16,14 +18,63 @@ const CATEGORY_LABELS: Record<Building['category'], string> = {
   gate: '校门', landscape: '景观', facility: '设施', other: '其他',
 };
 
+/* 分类色块 */
+const CATEGORY_COLORS: Record<Building['category'], string> = {
+  teaching: '#475569', dormitory: '#E8905A', canteen: '#F97316',
+  library: '#6366F1', sports: '#10B981', service: '#0EA5E9',
+  gate: '#78716C', landscape: '#14B8A6', facility: '#94A3B8', other: '#8B5CF6',
+};
+
 const POPOVER_W = 300;
-const POPOVER_MAX_H = 380;
+const POPOVER_MAX_H = 400;
 const ARROW_H = 8;
 const GAP = 10;
 
+/* 判断建筑当前开放状态 */
+function getOpenStatus(openTime?: string): { open: boolean; label: string } | null {
+  if (!openTime) return null;
+  if (openTime === '全天开放' || openTime === '24小时') return { open: true, label: '开放中' };
+  if (openTime.includes('急诊 24小时')) return { open: true, label: '急诊开放' };
+  const hour = new Date().getHours();
+  // 简单的时间段判断
+  if (openTime.includes('早餐') && hour >= 6 && hour < 9) return { open: true, label: '营业中' };
+  if (openTime.includes('午餐') && hour >= 11 && hour < 13) return { open: true, label: '营业中' };
+  if (openTime.includes('晚餐') && hour >= 17 && hour < 20) return { open: true, label: '营业中' };
+  if (hour >= 7 && hour <= 21) {
+    if (openTime.includes('周一')) return { open: true, label: '开放中' };
+  }
+  // 默认判断：日间时间认为开放
+  if (hour >= 7 && hour <= 21 && !openTime.includes('闭馆')) return { open: true, label: '开放中' };
+  return { open: false, label: '已关闭' };
+}
+
+/* 计算周边最近建筑 */
+function getNearby(current: Building, all: Building[], max = 4) {
+  const cx = current.hotspot.x + current.hotspot.width / 2;
+  const cy = current.hotspot.y + current.hotspot.height / 2;
+  return all
+    .filter(b => b.id !== current.id)
+    .map(b => {
+      const bx = b.hotspot.x + b.hotspot.width / 2;
+      const by = b.hotspot.y + b.hotspot.height / 2;
+      const dist = Math.round(Math.sqrt((cx - bx) ** 2 + (cy - by) ** 2));
+      return { building: b, distance: dist };
+    })
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, max);
+}
+
+/* 像素距离 → 估算步行时间 */
+function walkTime(px: number): string {
+  const minutes = Math.max(1, Math.round(px / 80)); // 80px ≈ 1分钟步行
+  if (minutes <= 1) return '1分钟';
+  if (minutes >= 20) return '>20分钟';
+  return `${minutes}分钟`;
+}
+
 export function BuildingPopover({
   building, screenX, screenY, screenWidth, screenHeight,
-  containerWidth, onClose,
+  containerWidth, buildings, onClose, onNavigateToBuilding,
 }: BuildingPopoverProps) {
   const [chatMsgs, setChatMsgs] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
@@ -31,6 +82,10 @@ export function BuildingPopover({
   const popoverRef = useRef<HTMLDivElement>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const openStatus = getOpenStatus(building.openTime);
+  const nearby = getNearby(building, buildings);
+  const catColor = CATEGORY_COLORS[building.category];
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, [chatMsgs]);
   useEffect(() => { inputRef.current?.focus(); }, []);
@@ -70,14 +125,12 @@ export function BuildingPopover({
   const hotspotTop = screenY;
   const hotspotBot = screenY + screenHeight;
 
-  // 下方弹出：top 直接计算即可；上方弹出：用 translateY(-100%) 让弹窗底边对齐热区上方
   let anchorTop: number;
   let arrowDir: 'bottom' | 'top';
   let anchorAbove = false;
 
   const belowTop = hotspotBot + GAP + ARROW_H;
   if (hotspotTop - POPOVER_MAX_H - GAP - ARROW_H >= 0) {
-    // 上方空间够：锚点顶边放在热区上方 GAP+ARROW_H 处，translateY(-100%) 后底边正好对齐
     anchorTop = hotspotTop - GAP - ARROW_H;
     arrowDir = 'bottom';
     anchorAbove = true;
@@ -106,9 +159,19 @@ export function BuildingPopover({
           <div className={`popover-arrow popover-arrow--${arrowDir}`}
             style={{ left: `calc(50% + ${arrowOff}px)` }} />
 
+          {/* 照片区：有图用图，无图用分类色块 */}
+          <div className="popover-hero" style={{ background: building.imageUrl ? `url(${building.imageUrl}) center/cover` : catColor }}>
+            {openStatus && (
+              <span className={`popover-status ${openStatus.open ? 'popover-status--open' : ''}`}>
+                <span className="popover-status-dot" />
+                {openStatus.label}
+              </span>
+            )}
+          </div>
+
           <div className="popover-header">
             <div>
-              <span className="popover-category">{CATEGORY_LABELS[building.category]}</span>
+              <span className="popover-category" style={{ color: catColor }}>{CATEGORY_LABELS[building.category]}</span>
               <h3 className="popover-name">{building.name}</h3>
             </div>
             <button className="popover-close" onClick={onClose} aria-label="关闭">
@@ -121,22 +184,50 @@ export function BuildingPopover({
 
           <div className="popover-body">
             <p className="popover-desc">{building.description}</p>
-            {building.openTime && (
-              <div className="popover-meta-row">
-                <span className="popover-meta-label">开放时间</span><span>{building.openTime}</span>
-              </div>
-            )}
-            {building.floors && (
-              <div className="popover-meta-row">
-                <span className="popover-meta-label">楼层</span><span>{building.floors} 层</span>
-              </div>
-            )}
+            <div className="popover-meta">
+              {building.openTime && (
+                <div className="popover-meta-row">
+                  <span className="popover-meta-label">开放时间</span>
+                  <span>{building.openTime}</span>
+                </div>
+              )}
+              {building.floors !== undefined && (
+                <div className="popover-meta-row">
+                  <span className="popover-meta-label">楼层</span>
+                  <span>{building.floors > 0 ? `${building.floors} 层` : '—'}</span>
+                </div>
+              )}
+            </div>
             {building.facilities && building.facilities.length > 0 && (
               <div className="popover-tags">
                 {building.facilities.map(f => <span key={f} className="popover-tag">{f}</span>)}
               </div>
             )}
 
+            {/* 周边设施 */}
+            {nearby.length > 0 && (
+              <div className="popover-nearby">
+                <div className="popover-nearby-label">🚶 周边设施</div>
+                <div className="popover-nearby-list">
+                  {nearby.map(({ building: nb, distance }) => (
+                    <button
+                      key={nb.id}
+                      className="popover-nearby-card"
+                      onClick={() => onNavigateToBuilding(nb)}
+                      title={`步行约 ${walkTime(distance)}`}
+                    >
+                      <span className="popover-nearby-card-icon" style={{ background: CATEGORY_COLORS[nb.category] }} />
+                      <span className="popover-nearby-card-info">
+                        <span className="popover-nearby-card-name">{nb.name}</span>
+                        <span className="popover-nearby-card-time">步行 {walkTime(distance)}</span>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 内嵌问答 */}
             <div className="popover-chat">
               <div className="popover-chat-label">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"

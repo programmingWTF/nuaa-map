@@ -8,7 +8,6 @@
   box-shadow: var(--glass-highlight), 0 4px 24px rgba(30,58,138,0.05);
   position: relative; z-index: 100;
 }
-/* 底部彩虹渐变线 */
 .topbar::after {
   content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
   background: var(--gradient-rainbow); opacity: 0.5;
@@ -28,10 +27,13 @@
   box-shadow: 0 4px 16px rgba(37,99,235,0.3), 0 0 0 4px rgba(37,99,235,0.08);
 }
 .topbar-title { font-family:var(--font-display); font-weight:700; font-size:var(--text-lg); color:var(--color-slate-800); }
-.topbar-search { position:relative; max-width:300px; width:100%; }
-.topbar-search-icon { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--color-slate-400); pointer-events:none; }
+
+/* 搜索栏 + 下拉面板容器 */
+.topbar-search { position:relative; max-width:340px; width:100%; }
+.topbar-search--open { z-index:200; }
+.topbar-search-icon { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--color-slate-400); pointer-events:none; z-index:1; }
 .topbar-search-input {
-  width:100%; height:40px; padding:0 16px 0 40px;
+  width:100%; height:40px; padding:0 80px 0 40px;
   border:1px solid rgba(255,255,255,0.5); border-radius:var(--radius-full);
   background:rgba(255,255,255,0.5); backdrop-filter:blur(10px);
   -webkit-backdrop-filter:blur(10px);
@@ -45,4 +47,71 @@
   background:rgba(255,255,255,0.8);
 }
 
-@media (max-width:640px) { .topbar { padding:0 12px; } .topbar-title { display:none; } .topbar-search { max-width:180px; } }
+/* 清除按钮 */
+.topbar-search-clear {
+  position:absolute; right:56px; top:50%; transform:translateY(-50%);
+  width:22px; height:22px; display:flex; align-items:center; justify-content:center;
+  border-radius:50%; background:rgba(37,99,235,0.08); color:var(--color-slate-500);
+  border:none; cursor:pointer; z-index:1;
+}
+.topbar-search-clear:hover { background:rgba(37,99,235,0.15); color:var(--color-blue-500); }
+
+/* Ctrl+K 快捷键提示 */
+.topbar-search-kbd {
+  position:absolute; right:12px; top:50%; transform:translateY(-50%);
+  font-size:10px; font-family:inherit; color:var(--color-slate-400);
+  background:rgba(37,99,235,0.04); border:1px solid rgba(37,99,235,0.1);
+  border-radius:4px; padding:2px 6px; pointer-events:none;
+}
+.topbar-search--open .topbar-search-kbd { display:none; }
+
+/* 搜索结果下拉 */
+.topbar-search-panel {
+  position:absolute; top:calc(100% + 8px); left:0; right:0;
+  background:rgba(255,255,255,0.88);
+  backdrop-filter:blur(28px) saturate(200%);
+  -webkit-backdrop-filter:blur(28px) saturate(200%);
+  border:1px solid rgba(255,255,255,0.6);
+  border-radius:var(--radius-md);
+  box-shadow:var(--glass-shadow-lg), 0 4px 32px rgba(0,0,0,0.06);
+  overflow:hidden; max-height:360px; overflow-y:auto;
+}
+
+.topbar-search-item {
+  display:flex; align-items:center; gap:10px;
+  width:100%; padding:10px 14px; border:none; background:none;
+  cursor:pointer; text-align:left;
+  transition:background var(--transition-fast);
+}
+.topbar-search-item:hover,
+.topbar-search-item--active { background:rgba(37,99,235,0.05); }
+
+.topbar-search-item-icon {
+  width:10px; height:10px; border-radius:50%; flex-shrink:0;
+  background:var(--color-blue-500);
+}
+.topbar-search-item-icon[data-cat="dormitory"] { background:#E8905A; }
+.topbar-search-item-icon[data-cat="canteen"] { background:#F97316; }
+.topbar-search-item-icon[data-cat="library"] { background:#6366F1; }
+.topbar-search-item-icon[data-cat="sports"] { background:#10B981; }
+.topbar-search-item-icon[data-cat="service"] { background:#0EA5E9; }
+.topbar-search-item-icon[data-cat="gate"] { background:#78716C; }
+.topbar-search-item-icon[data-cat="landscape"] { background:#14B8A6; }
+.topbar-search-item-icon[data-cat="facility"] { background:#94A3B8; }
+.topbar-search-item-icon[data-cat="other"] { background:#8B5CF6; }
+
+.topbar-search-item-info { display:flex; flex-direction:column; min-width:0; }
+.topbar-search-item-name { font-size:var(--text-sm); font-weight:600; color:var(--color-slate-800); }
+.topbar-search-item-cat { font-size:11px; color:var(--color-slate-400); }
+
+.topbar-search-empty {
+  padding:24px; text-align:center;
+  font-size:var(--text-sm); color:var(--color-slate-400);
+}
+
+@media (max-width:640px) {
+  .topbar { padding:0 12px; }
+  .topbar-title { display:none; }
+  .topbar-search { max-width:200px; }
+  .topbar-search-kbd { display:none; }
+}

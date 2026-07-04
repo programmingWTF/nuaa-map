@@ -139,7 +139,15 @@ export function MapView({ buildings, selectedBuilding, onBuildingClick, onMapSta
           screenWidth={selectedPopoverState.screenW}
           screenHeight={selectedPopoverState.screenH}
           containerWidth={containerSize.w}
+          buildings={buildings}
           onClose={() => onBuildingClick(null)}
+          onNavigateToBuilding={(bld) => {
+            const sx = transform.x + bld.hotspot.x * transform.scale;
+            const sy = transform.y + bld.hotspot.y * transform.scale;
+            const sw = bld.hotspot.width * transform.scale;
+            const sh = bld.hotspot.height * transform.scale;
+            onBuildingClick({ building: bld, screenX: sx, screenY: sy, screenWidth: sw, screenHeight: sh });
+          }}
         />
       )}
 
