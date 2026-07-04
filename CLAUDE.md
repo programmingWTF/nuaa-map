@@ -116,7 +116,7 @@ git push origin <分支名>
 nuaa-map/
 ├── frontend/          # ✅ ②③组：前端（React + TypeScript + Vite）
 │   ├── public/
-│   │   └── tianmuhu-map.jpg  # ✅ 天目湖校区卫星底图（1536×1536）
+│   │   └── tianmuhu-map.jpg  # ✅ 天目湖校区卫星底图（3840×3328）
 │   └── src/
 │       ├── components/    # MapView / HotspotLayer / BuildingPopover / ChatWidget / Minimap / TopBar
 │       ├── hooks/         # useMapInteraction（缩放/拖拽/捏合）
@@ -143,14 +143,57 @@ nuaa-map/
 
 ### 地图与坐标
 
-- 当前底图：`frontend/public/tianmuhu-map.jpg`（1536×1536 像素），由 36 块 Zoom 3 瓦片拼接而成
-- 瓦片来源：`https://map.nuaa.edu.cn/mapdata/zoom3/{col}_{row}.jpg`（col 44-49, row 13-18, 每块 256×256）
+- 当前底图：`frontend/public/tianmuhu-map.jpg`（3840×3328 像素），由官方地图瓦片拼接而成
+- 瓦片来源：`https://map.nuaa.edu.cn/mapdata/zoom3/{col}_{row}.jpg`（col 44-58, row 13-25，共 195 张）
 - 拼接脚本：`scripts/stitch-tianmuhu-tiles.py`
 - 坐标系统基于地图图片的**像素坐标**：以图片左上角为原点 (0, 0)，x 轴向右，y 轴向下
-- 建筑坐标提取方法：从官方地图 DOM 全局坐标减去瓦片网格原点偏移量（ORIGIN_X=8877, ORIGIN_Y=1757）
-- 原始参考数据在 `data/extracted-map/`（含 29 个建筑全局坐标 + 瓦片样本）
+- 建筑坐标提取方法：从官方地图 XML API 获取全局坐标后转换（详见下方）
 - ①组手绘地图交付后：替换 `MAP_SRC` 常量，⑥组重新标注坐标
 - ⑥组负责在每个建筑上标注像素位置和可点击区域
+
+#### 从官方地图 API 提取建筑坐标
+
+官方地图网站 `map.nuaa.edu.cn` 使用瓦片 + XML 标记系统，建筑数据通过 XML 文件暴露：
+
+**1. API 端点**
+```
+https://map.nuaa.edu.cn/xml/gadgets/{zoom}/{col},{row}.xml
+```
+- `zoom`：缩放级别，天目湖校区使用 zoom 3 和 zoom 4
+- `col,row`：瓦片网格坐标
+- 天目湖校区 Zoom 3 范围：col 43-51, row 13-17
+- 天目湖校区 Zoom 4 范围：col 19-27, row 5-9
+
+**2. XML 格式**
+```xml
+<gadgets>
+  <gadget>
+    <id>878</id>           <!-- 唯一标识 -->
+    <x0>48682</x0>         <!-- 全局 X 坐标（Zoom 5 级别像素） -->
+    <y0>15428</y0>         <!-- 全局 Y 坐标（Zoom 5 级别像素） -->
+    <type>1</type>         <!-- 1=建筑名称标签, 6=全景VR链接, 7=停车场, 15=校门图标 -->
+    <title>巡天楼</title>    <!-- 建筑名称 -->
+    <url />                <!-- type=6 时含全景 URL -->
+    <maxzoom>4</maxzoom>
+  </gadget>
+</gadgets>
+```
+
+**3. 坐标转换公式**
+
+XML 中的 `(x0, y0)` 是全局 Zoom 5 像素坐标，需转换为当前底图的 Zoom 3 像素坐标：
+
+```
+// 合并公式（直接一步到位）
+pixel_x = round(x0 / 4 - 10287)
+pixel_y = round(y0 / 4 - 2326)
+```
+
+**4. 注意事项**
+- **校区切换**：网站默认显示「明故宫校区」，需点击左上角校区按钮切换到「天目湖校区」。此切换会影响页面 DOM 中的建筑列表，但不影响 XML API——API 的瓦片坐标因校区而异（天目湖 zoom 3 的 col/row 远大于明故宫）
+- **type 含义**：只有 `type=1` 是建筑名称标签（核心数据）；`type=6` 是全景 VR 链接（与 type=1 重叠但含 `url` 字段）；`type=7` 是停车场；`type=15` 是校门图标。提取建筑清单时只需 `type=1`，按 `title` 去重
+- **提取脚本参考**：`data/extracted-map/tianmuhu-buildings-xml.json` 包含 2026-07-04 提取的全部 36 栋建筑原始坐标
+- **采集方法**：用 Playwright 打开网站 → 切换到目标校区 → 用 `fetch()` 批量请求 XML → 解析并转换坐标。也可直接在浏览器控制台中执行 `fetch()` 请求（同域无 CORS 限制）
 
 ### 数据格式
 
