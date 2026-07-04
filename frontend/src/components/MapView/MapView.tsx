@@ -2,6 +2,7 @@ import { useRef, useState, useEffect, useCallback, useLayoutEffect } from 'react
 import { useMapInteraction } from '../../hooks/useMapInteraction';
 import { HotspotLayer } from './HotspotLayer';
 import { BuildingPopover } from '../BuildingPopover/BuildingPopover';
+import { FreshmanWindow } from '../FreshmanWindow/FreshmanWindow';
 import type { Building, BuildingClickData, MapImageMeta, MapTransform } from '../../types';
 import './MapView.css';
 
@@ -150,6 +151,8 @@ export function MapView({ buildings, selectedBuilding, onBuildingClick, onMapSta
           }}
         />
       )}
+
+      <FreshmanWindow />
 
       {/* 缩放控件 */}
       <div className="map-controls">
