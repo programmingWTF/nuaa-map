@@ -1,0 +1,263 @@
+- generic:
+  - navigation [ref=e1]:
+    - generic [ref=e2]:
+      - img "南京航空航天大学三维校园GIS,智慧校园可视化平台" [ref=e5]
+      - generic [ref=e6]:
+        - list [ref=e7]:
+          - listitem [ref=e8]:
+            - button " 天目湖校区" [expanded] [active] [ref=e103] [cursor=pointer]:  天目湖校区
+          - listitem [ref=e11]:
+            - button " 机构设置" [ref=e12] [cursor=pointer]:  机构设置
+          - listitem [ref=e14]:
+            - button " 校内建筑" [ref=e15] [cursor=pointer]:  校内建筑
+          - listitem [ref=e17]:
+            - link " 生活设施" [ref=e18] [cursor=pointer]:
+              - /url: "#"
+          - listitem [ref=e19]:
+            - button " VR校园" [ref=e20] [cursor=pointer]:  VR校园
+          - listitem [ref=e22]:
+            - button " 导航路线" [ref=e23] [cursor=pointer]:  导航路线
+          - listitem [ref=e25]:
+            - button " 工具" [ref=e26] [cursor=pointer]:  工具
+        - text: 
+        - list [ref=e28]:
+          - listitem [ref=e29]:
+            - button " 移动版" [ref=e30] [cursor=pointer]:  移动版
+  - iframe [ref=e37]:
+    - generic [active] [ref=f3e1]:
+      - img [ref=f3e3]
+      - generic [ref=f3e4]:
+        - generic [ref=f3e5]:
+          - generic:
+            - img [ref=f3e678]
+            - img [ref=f3e679]
+            - img [ref=f3e680]
+            - img [ref=f3e681]
+            - img [ref=f3e682]
+            - img [ref=f3e683]
+            - img [ref=f3e684]
+            - img [ref=f3e685]
+            - img [ref=f3e686]
+            - img [ref=f3e687]
+            - img [ref=f3e688]
+            - img [ref=f3e689]
+            - img [ref=f3e690]
+            - img [ref=f3e691]
+            - img [ref=f3e692]
+            - img [ref=f3e693]
+            - img [ref=f3e694]
+            - img [ref=f3e695]
+            - img [ref=f3e696]
+            - img [ref=f3e697]
+            - img [ref=f3e698]
+            - img [ref=f3e699]
+            - img [ref=f3e700]
+            - img [ref=f3e701]
+            - img [ref=f3e702]
+            - img [ref=f3e703]
+            - img [ref=f3e704]
+            - img [ref=f3e705]
+            - img [ref=f3e706]
+            - img [ref=f3e707]
+            - img [ref=f3e708]
+            - img [ref=f3e709]
+            - img [ref=f3e710]
+            - img [ref=f3e711]
+            - img [ref=f3e712]
+            - img [ref=f3e713]
+            - img [ref=f3e714]
+            - img [ref=f3e715]
+            - img [ref=f3e716]
+            - img [ref=f3e717]
+            - img [ref=f3e718]
+            - img [ref=f3e719]
+            - img [ref=f3e720]
+            - img [ref=f3e721]
+            - img [ref=f3e722]
+        - generic [ref=f3e51]:
+          - img [ref=f3e53]
+          - img [ref=f3e54]
+      - generic:
+        - generic [ref=f3e723]:
+          - generic [ref=f3e724]: 看台
+          - img [ref=f3e725]
+        - generic [ref=f3e726]:
+          - generic [ref=f3e727]: 校医院
+          - img [ref=f3e728]
+        - generic [ref=f3e729]:
+          - generic [ref=f3e730]: 综合服务楼
+          - img [ref=f3e731]
+        - generic [ref=f3e732]:
+          - generic [ref=f3e733]: 师生服务大厅
+          - img [ref=f3e734]
+        - generic [ref=f3e735]:
+          - generic [ref=f3e736]: 西北门
+          - img [ref=f3e737]
+        - generic [ref=f3e738]:
+          - generic [ref=f3e739]: 垃圾中转站开闭所
+          - img [ref=f3e740]
+        - generic [ref=f3e741]:
+          - generic [ref=f3e742]: 职工公寓
+          - img [ref=f3e743]
+        - generic [ref=f3e744]:
+          - generic [ref=f3e745]: 风雨操场
+          - img [ref=f3e746]
+        - generic [ref=f3e747]:
+          - generic [ref=f3e748]: 西门
+          - img [ref=f3e749]
+        - generic [ref=f3e750]:
+          - generic [ref=f3e751]: 知行楼
+          - img [ref=f3e752]
+        - generic [ref=f3e753]:
+          - generic [ref=f3e754]: 笃行楼
+          - img [ref=f3e755]
+        - generic [ref=f3e756]:
+          - generic [ref=f3e757]: 西体育场
+          - img [ref=f3e758]
+        - generic [ref=f3e759]:
+          - generic [ref=f3e760]: 南山苑1号楼
+          - img [ref=f3e761]
+        - generic [ref=f3e762]:
+          - generic [ref=f3e763]: 南山苑2号楼
+          - img [ref=f3e764]
+        - generic [ref=f3e765]:
+          - generic [ref=f3e766]: 南山苑餐厅
+          - img [ref=f3e767]
+        - generic [ref=f3e768]:
+          - generic [ref=f3e769]: 巡天楼
+          - img [ref=f3e770]
+        - generic [ref=f3e771]:
+          - generic [ref=f3e772]: 泗水湖
+          - img [ref=f3e773]
+        - generic [ref=f3e774]:
+          - generic [ref=f3e775]: 问天图书馆
+          - img [ref=f3e776]
+        - generic [ref=f3e777]:
+          - generic [ref=f3e778]: 南山苑4号楼
+          - img [ref=f3e779]
+        - generic [ref=f3e780]:
+          - generic [ref=f3e781]: 东北门
+          - img [ref=f3e782]
+        - generic [ref=f3e783]:
+          - generic [ref=f3e784]: 牧星楼
+          - img [ref=f3e785]
+        - generic [ref=f3e786]:
+          - generic [ref=f3e787]: 东篱苑5号楼
+          - img [ref=f3e788]
+        - generic [ref=f3e789]:
+          - generic [ref=f3e790]: 南山苑3号楼
+          - img [ref=f3e791]
+        - generic [ref=f3e792]:
+          - generic [ref=f3e793]: 明慧楼C
+          - img [ref=f3e794]
+        - generic [ref=f3e795]:
+          - generic [ref=f3e796]: 明慧楼D
+          - img [ref=f3e797]
+        - generic [ref=f3e798]:
+          - generic [ref=f3e799]: 东篱苑餐厅
+          - img [ref=f3e800]
+        - generic [ref=f3e801]:
+          - generic [ref=f3e802]: 东篱苑6号楼
+          - img [ref=f3e803]
+        - generic [ref=f3e804]:
+          - generic [ref=f3e805]: 东篱苑8号楼
+          - img [ref=f3e806]
+        - generic [ref=f3e807]:
+          - generic [ref=f3e808]: 南门
+          - img [ref=f3e809]
+        - generic [ref=f3e810]:
+          - generic [ref=f3e811]: 尚德楼
+          - img [ref=f3e812]
+        - generic [ref=f3e813]:
+          - generic [ref=f3e814]: 体育馆游泳馆
+          - img [ref=f3e815]
+        - generic [ref=f3e816]:
+          - generic [ref=f3e817]: 东体育场
+          - img [ref=f3e818]
+        - generic [ref=f3e819]:
+          - generic [ref=f3e820]: 明慧楼A
+          - img [ref=f3e821]
+        - generic [ref=f3e822]:
+          - generic [ref=f3e823]: 明慧楼B
+          - img [ref=f3e824]
+        - generic [ref=f3e825]:
+          - generic [ref=f3e826]: 东篱苑7号楼
+          - img [ref=f3e827]
+        - generic [ref=f3e828]:
+          - generic [ref=f3e829]: 东门
+          - img [ref=f3e830]
+      - generic:
+        - generic:
+          - generic:
+            - generic "向上" [ref=f3e57] [cursor=pointer]
+            - generic [ref=f3e59]:
+              - generic "向左" [ref=f3e60] [cursor=pointer]
+              - generic "返回中心" [ref=f3e61] [cursor=pointer]
+              - generic "向右" [ref=f3e62] [cursor=pointer]
+            - generic "向下" [ref=f3e65] [cursor=pointer]
+            - img "放大" [ref=f3e68] [cursor=pointer]
+            - img [ref=f3e70]
+            - img "缩小" [ref=f3e72] [cursor=pointer]
+            - img "缩放到1级" [ref=f3e74] [cursor=pointer]
+            - img "缩放到2级" [ref=f3e76] [cursor=pointer]
+            - img "缩放到3级" [ref=f3e78] [cursor=pointer]
+            - img "缩放到4级" [ref=f3e80] [cursor=pointer]
+            - generic "拖动滑竿" [ref=f3e81] [cursor=pointer]
+      - generic [ref=f3e84]:
+        - img [ref=f3e674]
+        - img [ref=f3e675]
+        - img [ref=f3e676]
+        - img [ref=f3e677]
+      - link [ref=f3e93] [cursor=pointer]:
+        - /url: javascript:void(0);
+        - img [ref=f3e94]
+      - generic [ref=f3e96]:
+        - text: © 2025
+        - link "南京航空航天大学" [ref=f3e97] [cursor=pointer]:
+          - /url: http://www.nuaa.edu.cn
+  - checkbox "标签 文化 道路 实景 巴士 班车 无线 AED 充电 停车 出入" [ref=e38]:
+    - generic [ref=e39] [cursor=pointer]:
+      - checkbox "标签" [checked] [ref=e40]
+      - generic [ref=e42]: 标签
+    - generic [ref=e43] [cursor=pointer]:
+      - checkbox "文化" [ref=e44]
+      - generic [ref=e46]: 文化
+    - generic [ref=e47] [cursor=pointer]:
+      - checkbox "道路" [ref=e48]
+      - generic [ref=e50]: 道路
+    - generic [ref=e51] [cursor=pointer]:
+      - checkbox "实景" [ref=e52]
+      - generic [ref=e54]: 实景
+    - generic [ref=e55] [cursor=pointer]:
+      - checkbox "巴士" [ref=e56]
+      - generic [ref=e58]: 巴士
+    - generic [ref=e59] [cursor=pointer]:
+      - checkbox "班车" [ref=e60]
+      - generic [ref=e62]: 班车
+    - generic [ref=e63] [cursor=pointer]:
+      - checkbox "无线" [ref=e64]
+      - generic [ref=e66]: 无线
+    - generic [ref=e67] [cursor=pointer]:
+      - checkbox "AED" [ref=e68]
+      - generic [ref=e70]: AED
+    - generic [ref=e71] [cursor=pointer]:
+      - checkbox "充电" [ref=e72]
+      - generic [ref=e74]: 充电
+    - generic [ref=e75] [cursor=pointer]:
+      - checkbox "停车" [ref=e76]
+      - generic [ref=e78]: 停车
+    - generic [ref=e79] [cursor=pointer]:
+      - checkbox "出入" [ref=e80]
+      - generic [ref=e82]: 出入
+  - generic [ref=e83]:
+    - search [ref=e84]:
+      - generic [ref=e85]:
+        - textbox "校园搜索..." [ref=e86]
+        - generic [ref=e87]:
+          - button "" [ref=e88] [cursor=pointer]
+          - button "" [ref=e89] [cursor=pointer]
+    - text: 
+  - status [ref=e90]
+  - status [ref=e91]
+  - status [ref=e92]
+  - status [ref=e93]
