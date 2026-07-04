@@ -14,6 +14,8 @@ type FreshmanPayload = {
   answer?: string;
 };
 
+type PanelPhase = 'hidden' | 'entering' | 'visible' | 'exiting';
+
 const STORAGE_KEY = 'nuaa-map-freshman-qa';
 const API_URL = '/api/freshman-questions';
 
@@ -85,10 +87,29 @@ export function FreshmanWindow() {
   const [question, setQuestion] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [expanded, setExpanded] = useState(false);
+  const [panelPhase, setPanelPhase] = useState<PanelPhase>('hidden');
   const [submitting, setSubmitting] = useState(false);
   const [statusText, setStatusText] = useState('正在同步问答数据...');
   const [askResult, setAskResult] = useState<{ question: string; answer: string } | null>(null);
-  const [activeSection, setActiveSection] = useState<'ask' | 'faq'>('ask');
+
+  /* ── 面板动画阶段管理 ── */
+  const openPanel = () => {
+    setExpanded(true);
+    setPanelPhase('entering');
+  };
+
+  const closePanel = () => {
+    setExpanded(false);
+    setPanelPhase('exiting');
+  };
+
+  const handlePanelAnimEnd = () => {
+    if (panelPhase === 'entering') {
+      setPanelPhase('visible');
+    } else if (panelPhase === 'exiting') {
+      setPanelPhase('hidden');
+    }
+  };
 
   useEffect(() => {
     const loadEntries = async () => {
@@ -134,7 +155,7 @@ export function FreshmanWindow() {
 
     setQuestion('');
     setSubmitting(true);
-    setExpanded(true);
+    if (!expanded) openPanel();
     setAskResult(null);
     setStatusText('正在等待后端回复...');
 
@@ -150,12 +171,10 @@ export function FreshmanWindow() {
       const serverEntry = normalizeEntries([data])[0];
       const answerText = serverEntry?.answer?.trim() || '暂时没有收到回复，请稍后再试。';
       setAskResult({ question: trimmedQuestion, answer: answerText });
-      setActiveSection('faq');
       setSearchTerm(trimmedQuestion);
       setStatusText('已找到可参考答案，您可以继续查看常见问题并标记结果');
     } catch {
       setAskResult({ question: trimmedQuestion, answer: '暂时没有收到回复，已保存为待处理问题。' });
-      setActiveSection('faq');
       setSearchTerm(trimmedQuestion);
       setStatusText('已保存到本地，等待后端接入');
     } finally {
@@ -195,7 +214,7 @@ export function FreshmanWindow() {
       const clickedInsidePanel = panelRef.current?.contains(target);
       const clickedToggle = toggleRef.current?.contains(target);
       if (!clickedInsidePanel && !clickedToggle) {
-        setExpanded(false);
+        closePanel();
       }
     };
 
@@ -204,7 +223,11 @@ export function FreshmanWindow() {
   }, [expanded]);
 
   const handleToggleClick = () => {
-    setExpanded((prev) => !prev);
+    if (expanded) {
+      closePanel();
+    } else {
+      openPanel();
+    }
   };
 
   const filteredEntries = useMemo(() => {
@@ -239,16 +262,23 @@ export function FreshmanWindow() {
         onMouseDown={(event) => event.stopPropagation()}
         onMouseMove={(event) => event.stopPropagation()}
         onMouseUp={(event) => event.stopPropagation()}
+        aria-expanded={expanded}
+        aria-label={expanded ? '关闭新生问答' : '打开新生问答'}
       >
         <span className="freshman-window__icon">✦</span>
         <span>新生问答</span>
         <span className="freshman-window__count">{entries.length}</span>
       </button>
 
-      {expanded && (
+      {panelPhase !== 'hidden' && (
         <div
           ref={panelRef}
-          className="freshman-window__panel"
+          className={`freshman-window__panel ${
+            panelPhase === 'entering' ? 'freshman-window__panel--entering' :
+            panelPhase === 'exiting' ? 'freshman-window__panel--exiting' :
+            ''
+          }`}
+          onAnimationEnd={handlePanelAnimEnd}
           onMouseDown={(event) => event.stopPropagation()}
           onMouseMove={(event) => event.stopPropagation()}
           onMouseUp={(event) => event.stopPropagation()}
@@ -272,20 +302,20 @@ export function FreshmanWindow() {
                   />
                 </label>
                 <button className="freshman-window__submit" type="submit" disabled={submitting || !question.trim()}>
-                  {submitting ? '提交中...' : '提交'}
+                  {submitting ? '提交中...' : '提交问题'}
                 </button>
               </form>
 
               {askResult && (
                 <div className="freshman-window__reply">
-                  <div className="freshman-window__section-title">可参考答案</div>
+                  <div className="freshman-window__section-title">参考答案</div>
                   <p className="freshman-window__reply-text">{askResult.answer}</p>
                   <div className="freshman-window__reply-actions">
                     <button className="freshman-window__submit freshman-window__submit--secondary" type="button" onClick={handleMarkResolved}>
-                      已解决
+                      ✓ 已解决
                     </button>
                     <button className="freshman-window__submit" type="button" onClick={handleMarkPending}>
-                      未解决
+                      ? 未解决
                     </button>
                   </div>
                 </div>
@@ -304,7 +334,12 @@ export function FreshmanWindow() {
                 />
               </label>
 
-              <div className="freshman-window__search-meta">共 {filteredEntries.length} 条记录</div>
+              <div className="freshman-window__search-meta">
+                共 {filteredEntries.length} 条记录
+                {searchTerm.trim() && entries.length !== filteredEntries.length && (
+                  <span>（已过滤）</span>
+                )}
+              </div>
 
               <div
                 className="freshman-window__list"
@@ -313,16 +348,22 @@ export function FreshmanWindow() {
                 onMouseUp={(event) => event.stopPropagation()}
                 onWheelCapture={(event) => event.stopPropagation()}
               >
-                {filteredEntries.map((item) => (
-                  <article key={item.id} className="freshman-window__item">
-                    <div className="freshman-window__item-title">Q: {item.question}</div>
-                    <p className="freshman-window__item-answer">{item.answer || '等待后续回复…'}</p>
-                    <div className="freshman-window__item-meta">
-                      <time className="freshman-window__item-time">{item.createdAt}</time>
-                      {item.status === 'pending' && <span className="freshman-window__chip">待人工回复</span>}
-                    </div>
-                  </article>
-                ))}
+                {filteredEntries.length === 0 ? (
+                  <div className="freshman-window__empty">
+                    {searchTerm.trim() ? '没有匹配的问题，试试其他关键词' : '暂无常见问题'}
+                  </div>
+                ) : (
+                  filteredEntries.map((item) => (
+                    <article key={item.id} className="freshman-window__item">
+                      <div className="freshman-window__item-title">Q: {item.question}</div>
+                      <p className="freshman-window__item-answer">{item.answer || '等待后续回复…'}</p>
+                      <div className="freshman-window__item-meta">
+                        <time className="freshman-window__item-time">{item.createdAt}</time>
+                        {item.status === 'pending' && <span className="freshman-window__chip">待人工回复</span>}
+                      </div>
+                    </article>
+                  ))
+                )}
               </div>
             </div>
           </div>
