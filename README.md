@@ -95,6 +95,7 @@ frontend/src/
 | [GitHub 协作入门指南](docs/github-guide.md) | 零基础学 Git/GitHub，从安装到 PR |
 | [AI 工具使用指南](AGENTS.md) | 各组如何用 AI Agent 提效 |
 | [项目规则书](CLAUDE.md) | AI 自动遵守的项目规范与架构 |
+| [部署配置](#部署) | Docker 部署、自动 CI/CD、部署文件说明 |
 | [QA 知识库模板](docs/templates/qa-knowledge.json) | ④组：问答数据模板 |
 | [建筑信息模板](docs/templates/building-info.json) | ④组：建筑信息模板 |
 
@@ -107,3 +108,33 @@ npm run dev      # 启动开发服务器（热更新）
 npm run build    # 生产构建
 npm run preview  # 预览生产构建
 ```
+
+## 部署
+
+本项目通过 Docker 部署在内网 NAS 服务器上，由 GitHub Actions 驱动自动部署。
+
+| 配置项 | 值 |
+|--------|-----|
+| 服务器 | `192.168.0.150`（内网） |
+| 部署路径 | `/vol1/1000/Docker/NUAAMap/` |
+| 服务端口 | `3100` |
+| 外网访问 | Cloudflare Tunnel |
+
+### 自动部署流程
+
+```
+main 分支 push → GitHub Actions → SSH 到服务器
+    → git pull origin main → docker compose up -d --build
+```
+
+### ⚠️ 部署文件（禁止随意修改）
+
+> [!WARNING]
+> 以下文件直接关联生产环境自动部署，**非管理员请勿修改**。如需变更，必须同步更新服务器上的对应配置。
+
+| 文件 | 用途 |
+|------|------|
+| `Dockerfile` | Docker 多阶段构建（Node.js 编译 → Nginx 静态服务） |
+| `docker-compose.yml` | Docker 服务编排（端口 3100 → 容器 80） |
+| `.dockerignore` | Docker 构建上下文排除规则 |
+| `.github/workflows/deploy.yml` | GitHub Actions 自动部署工作流 |
