@@ -1,23 +1,34 @@
+---
+description: NUAAMap 项目规则书 — AI 工具自动读取并遵守
+---
+
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## 项目概述
 
-NUAAMap 是南京航空航天大学天目湖校区的智能校园地图网站，面向新生及访客提供交互式地图浏览与 AI 智能问答服务。
+**NUAAMap** 是南京航空航天大学天目湖校区的智能校园地图网站，面向新生及访客提供交互式地图浏览与 AI 智能问答服务。
 
-- **仓库**：https://github.com/programmingWTF/nuaa-map.git
-- **团队规模**：14 人，分 6 个小组（详见 README.md）
-- **目标用户**：南航新生、访客
-- **地图类型**：**手绘地图**（①组手绘 → 扫描为高清图片 → 前端以此为底图叠加交互热区）；当前开发阶段使用官方地图卫星底图 `frontend/public/tianmuhu-map.jpg`（1536×1536，提取自 map.nuaa.edu.cn）
+| 项目属性 | 详情 |
+|----------|------|
+| 仓库地址 | https://github.com/programmingWTF/nuaa-map.git |
+| 团队规模 | 14 人，分 6 个小组（详见 [README.md](README.md)） |
+| 目标用户 | 南航新生、访客 |
+| 地图类型 | **手绘地图**（①组手绘 → 扫描为高清图片 → 前端以此为底图叠加交互热区） |
+| 当前底图 | 官方卫星底图 `frontend/public/tianmuhu-map.jpg`（3840×3328 像素，提取自 map.nuaa.edu.cn） |
+| 建筑数量 | 36 栋天目湖真实建筑（坐标提取自官方地图 XML API） |
 
-## ⚠️ AI 工具行为准则（必读）
+## AI 工具行为准则（必读）
 
 当团队成员使用 Claude Code 或其他 AI 工具来修改本仓库代码时，**必须**遵守以下规则。这些规则同样适用于你（AI）——每次被调用时自动执行。
 
 ### 修改代码前：必须先创建分支
 
-**绝对禁止直接在 `main` 分支上提交代码。** 每次修改前：
+> [!IMPORTANT]
+> **绝对禁止直接在 `main` 分支上提交代码。**
+
+每次修改前：
 
 ```bash
 git checkout main
@@ -39,14 +50,27 @@ git checkout -b <前缀>/<功能描述>
 
 ### 提交信息格式
 
-必须使用 Conventional Commits：
+必须使用 [Conventional Commits](https://www.conventionalcommits.org/) 格式：
 
 ```
 <type>(<scope>): <中文描述>
 ```
 
-- **type**：`feat` / `fix` / `docs` / `style` / `refactor` / `test` / `chore` / `data` / `asset`
-- **scope**：`map` / `interact` / `platform` / `data` / `ai` / `convert` / `docs`
+| 字段 | 可选值 |
+|------|--------|
+| **type** | `feat` `fix` `docs` `style` `refactor` `test` `chore` `data` `asset` |
+| **scope** | `map` `interact` `platform` `data` `ai` `convert` `docs` |
+
+示例：
+
+```
+feat(interact): 点击建筑热区弹出详情面板
+data(ai): 添加宿舍区问答数据
+data(map): 更新东区宿舍楼建筑信息
+fix(interact): 修复弹窗在上方时离热区过远的问题
+style(interact): 为新生问答窗口添加航迹云主题动画
+docs(docs): 统一使用 GitHub 标准 Alert 语法
+```
 
 ### 完整工作流
 
@@ -69,17 +93,37 @@ git commit -m "<type>(<scope>): <描述>"
 git push origin <分支名>
 ```
 
-推送后提醒用户：**"代码已推送到分支 `<分支名>`，请去 GitHub 创建 Pull Request 合并到 main。"**
+推送后提醒用户：**代码已推送到分支 `<分支名>`，请去 GitHub 创建 Pull Request 合并到 main。**
 
 ### 遇到冲突时
 
-如果 push 被拒绝（远程有新提交），先 `git pull origin main --rebase` 解决冲突后再 push。
+如果 push 被拒绝（远程有新提交），先解决冲突后再 push：
+
+```bash
+git pull origin main --rebase
+# 解决冲突后继续
+git push origin <分支名>
+```
 
 ---
 
 ## 技术架构
 
-本项目为 Web 应用，分为三条主线：
+### 技术栈
+
+| 层级 | 技术 | 说明 |
+|------|------|------|
+| 前端框架 | React 19 + TypeScript | 组件化开发，类型安全 |
+| 构建工具 | Vite 8 | 极速 HMR 开发体验 |
+| 样式方案 | CSS Custom Properties | 设计令牌体系，`frontend/src/index.css` 的 `:root {}` 中集中管理 |
+| 地图方案 | 手绘扫描图 + CSS Transform | 不依赖 GIS/瓦片地图库，像素坐标热区叠加 |
+| 后端 API | FastAPI / Express（待开发）| RESTful API，流式输出支持 |
+| AI 智能体 | LangChain + RAG（待开发）| 检索增强生成，知识库基于④组 QA 数据 |
+| 数据格式 | JSON | 建筑信息 + QA 知识库，统一 JSON Schema |
+
+### 三条主线
+
+本项目分为三条并行的开发线：
 
 1. **地图交互线**：手绘地图扫描图 → ⑥标注像素坐标 → ②前端热区叠加
 2. **AI 问答线**（核心）：④组采集 QA 知识库 → ⑤组直接用于 RAG / Prompt → 前端聊天界面
@@ -88,83 +132,113 @@ git push origin <分支名>
 ### 数据流
 
 ```
-┌─ 地图交互线 ────────────────────────────────────┐
-│  ①手绘地图扫描图                                  │
-│      → ⑥组标注像素坐标                            │
-│          → ②组前端：底图 + 热区叠加                 │
-│  ④组建筑信息 → ⑥合并坐标 → ②前端详情面板           │
-│                                                  │
-│  [当前开发阶段]                                    │
-│  官方地图瓦片 → 拼接 → tianmuhu-map.jpg            │
-│      → 提取建筑坐标 → mock-buildings.json (28个)   │
-│          → 前端热区叠加                             │
-└─────────────────────────────────────────────────┘
+┌─ 地图交互线 ──────────────────────────────────────────┐
+│  ①手绘地图扫描图                                        │
+│      → ⑥组标注像素坐标                                  │
+│          → ②组前端：底图 + 热区叠加                      │
+│  ④组建筑信息 → ⑥合并坐标 → ②前端详情面板                │
+│                                                        │
+│  [当前开发阶段]                                          │
+│  官方地图瓦片 → 拼接 → tianmuhu-map.jpg (3840×3328)     │
+│      → XML API 提取坐标 → mock-buildings.json (36栋)    │
+│          → 前端热区叠加                                   │
+└────────────────────────────────────────────────────────┘
 
-┌─ AI 问答线 ─────────────────────────────────────┐
-│  ④组 QA 知识库 → data/qa/                        │
-│      → ⑤组 RAG 检索 + Prompt 工程                  │
-│          → 后端 /api/chat                          │
-│              → ②组前端聊天界面                      │
-└─────────────────────────────────────────────────┘
+┌─ AI 问答线 ───────────────────────────────────────────┐
+│  ④组 QA 知识库 → data/qa/                              │
+│      → ⑤组 RAG 检索 + Prompt 工程                       │
+│          → 后端 /api/chat                               │
+│              → ②组前端 ChatWidget / BuildingPopover      │
+└────────────────────────────────────────────────────────┘
 ```
 
+> [!NOTE]
 > ④组的 QA 知识库直接供给⑤组使用，无需⑥组转换。两条线并行推进，同等重要。
+
+---
 
 ## 目录结构
 
 ```
 nuaa-map/
-├── frontend/          # ✅ ②③组：前端（React + TypeScript + Vite）
+├── frontend/                    # ✅ ②③组：前端（React + TypeScript + Vite）
 │   ├── public/
-│   │   └── tianmuhu-map.jpg  # ✅ 天目湖校区卫星底图（3840×3328）
+│   │   └── tianmuhu-map.jpg     # ✅ 天目湖校区卫星底图（3840×3328）
 │   └── src/
-│       ├── components/    # MapView / HotspotLayer / BuildingPopover / ChatWidget / Minimap / TopBar
-│       ├── hooks/         # useMapInteraction（缩放/拖拽/捏合）
-│       ├── types/         # Building, MapTransform, ChatMessage 等类型
-│       └── data/          # 建筑数据（28个真实天目湖建筑 + 真实坐标）
+│       ├── components/          # UI 组件
+│       │   ├── MapView/         # 地图容器（缩放/拖拽）+ HotspotLayer 热区层
+│       │   ├── BuildingPopover/ # 建筑气泡弹窗（内嵌建筑专属 AI 问答）
+│       │   ├── ChatWidget/      # AI 浮动聊天组件（呼吸光晕按钮）
+│       │   ├── FreshmanWindow/  # 新生问答窗口（航迹云主题动画）
+│       │   ├── Minimap/         # 缩略图导航（左下角，支持拖拽实时平移）
+│       │   ├── SearchBar/       # 建筑搜索栏
+│       │   └── TopBar/          # 顶部导航栏（Logo + 搜索入口）
+│       ├── hooks/               # 自定义 Hook
+│       │   └── useMapInteraction.ts  # 地图交互（滚轮/捏合缩放、拖拽平移）
+│       ├── types/               # TypeScript 类型定义
+│       │   └── index.ts         # Building, MapTransform, ChatMessage 等
+│       └── data/                # 建筑数据
+│           └── mock-buildings.json  # 36 栋天目湖真实建筑 + 像素坐标
 ├── assets/map/
-│   └── tiles-tianmuhu/    # ✅ 天目湖官方地图瓦片（36块，用于拼接）
+│   └── tiles-tianmuhu/          # ✅ 天目湖官方地图瓦片（195 张 zoom3 瓦片）
 ├── data/
-│   ├── extracted-map/     # ✅ 官方地图提取参考数据与文档
-│   ├── qa/                # 📋 ④组：问答知识库 → ⑤组直接使用
-│   ├── raw/               # 📋 ④组：建筑信息 JSON（无坐标）
-│   └── positions/         # 📋 ⑥组：建筑信息 + 像素坐标 → ②前端
-├── backend/           # 📋 ③组：后端 API
-├── ai-agent/          # 📋 ⑤组：RAG 管道
+│   ├── extracted-map/           # ✅ 官方地图 XML API 提取的原始数据与文档
+│   │   ├── README.md            # 提取方法说明
+│   │   ├── tianmuhu-buildings-xml.json   # 36 栋建筑 XML 原始坐标
+│   │   ├── tianmuhu-buildings.json       # 坐标转换后的建筑数据
+│   │   └── tianmuhu-buildings-local.json # 本地坐标系建筑数据
+│   ├── qa/                      # 📋 ④组：问答知识库 → ⑤组直接使用
+│   ├── raw/                     # 📋 ④组：建筑信息 JSON（无坐标）
+│   └── positions/               # 📋 ⑥组：建筑信息 + 像素坐标 → ②前端
+├── backend/                     # 📋 ③组：后端 API
+├── ai-agent/                    # 📋 ⑤组：RAG 管道
 ├── scripts/
-│   └── stitch-tianmuhu-tiles.py  # ✅ 瓦片拼接脚本
-├── docs/              # 项目文档 + 数据模板
-└── .github/           # 📋 CI/CD 配置
+│   └── stitch-tianmuhu-tiles.py # ✅ 瓦片拼接脚本
+├── docs/
+│   ├── templates/               # 数据模板
+│   │   ├── qa-knowledge.json    # QA 知识库模板
+│   │   └── building-info.json   # 建筑信息模板
+│   ├── team.md                  # 各组详细职责
+│   └── github-guide.md          # GitHub 协作入门指南
+├── .github/                     # 📋 CI/CD 配置
+├── CLAUDE.md                    # 项目规则书（本文件，AI 自动读取）
+├── AGENTS.md                    # AI 辅助开发指南（面向团队成员）
+├── CONTRIBUTING.md              # 团队协作规范
+└── README.md                    # 项目说明
 ```
 
-> ✅ = 已搭建 | 📋 = 规划中。启动前端：`cd frontend && npm install && npm run dev`
+> ✅ = 已搭建 | 📋 = 规划中
+
+---
 
 ## 关键约定
 
 ### 地图与坐标
 
-- 当前底图：`frontend/public/tianmuhu-map.jpg`（3840×3328 像素），由官方地图瓦片拼接而成
-- 瓦片来源：`https://map.nuaa.edu.cn/mapdata/zoom3/{col}_{row}.jpg`（col 44-58, row 13-25，共 195 张）
-- 拼接脚本：`scripts/stitch-tianmuhu-tiles.py`
-- 坐标系统基于地图图片的**像素坐标**：以图片左上角为原点 (0, 0)，x 轴向右，y 轴向下
-- 建筑坐标提取方法：从官方地图 XML API 获取全局坐标后转换（详见下方）
-- ①组手绘地图交付后：替换 `MAP_SRC` 常量，⑥组重新标注坐标
-- ⑥组负责在每个建筑上标注像素位置和可点击区域
+- **当前底图**：`frontend/public/tianmuhu-map.jpg`（3840×3328 像素），由官方地图瓦片拼接而成
+- **瓦片来源**：`https://map.nuaa.edu.cn/mapdata/zoom3/{col}_{row}.jpg`（col 44–58, row 13–25，共 195 张）
+- **拼接脚本**：`scripts/stitch-tianmuhu-tiles.py`
+- **坐标系统**：基于地图图片的**像素坐标**，以图片左上角为原点 (0, 0)，x 轴向右，y 轴向下
+- **①组手绘地图交付后**：替换 `MAP_SRC` 常量，⑥组重新标注坐标
+- **⑥组职责**：在每个建筑上标注像素位置和可点击区域
 
 #### 从官方地图 API 提取建筑坐标
 
-官方地图网站 `map.nuaa.edu.cn` 使用瓦片 + XML 标记系统，建筑数据通过 XML 文件暴露：
+官方地图网站 `map.nuaa.edu.cn` 使用瓦片 + XML 标记系统，建筑数据通过 XML 文件暴露。
 
 **1. API 端点**
+
 ```
 https://map.nuaa.edu.cn/xml/gadgets/{zoom}/{col},{row}.xml
 ```
-- `zoom`：缩放级别，天目湖校区使用 zoom 3 和 zoom 4
-- `col,row`：瓦片网格坐标
-- 天目湖校区 Zoom 3 范围：col 43-51, row 13-17
-- 天目湖校区 Zoom 4 范围：col 19-27, row 5-9
+
+| 参数 | 天目湖校区范围 |
+|------|---------------|
+| Zoom 3 | col 43–51, row 13–17 |
+| Zoom 4 | col 19–27, row 5–9 |
 
 **2. XML 格式**
+
 ```xml
 <gadgets>
   <gadget>
@@ -184,12 +258,13 @@ https://map.nuaa.edu.cn/xml/gadgets/{zoom}/{col},{row}.xml
 XML 中的 `(x0, y0)` 是全局 Zoom 5 像素坐标，需转换为当前底图的 Zoom 3 像素坐标：
 
 ```
-// 合并公式（直接一步到位）
+// 合并公式（一步到位）
 pixel_x = round(x0 / 4 - 10287)
 pixel_y = round(y0 / 4 - 2326)
 ```
 
 **4. 注意事项**
+
 - **校区切换**：网站默认显示「明故宫校区」，需点击左上角校区按钮切换到「天目湖校区」。此切换会影响页面 DOM 中的建筑列表，但不影响 XML API——API 的瓦片坐标因校区而异（天目湖 zoom 3 的 col/row 远大于明故宫）
 - **type 含义**：只有 `type=1` 是建筑名称标签（核心数据）；`type=6` 是全景 VR 链接（与 type=1 重叠但含 `url` 字段）；`type=7` 是停车场；`type=15` 是校门图标。提取建筑清单时只需 `type=1`，按 `title` 去重
 - **提取脚本参考**：`data/extracted-map/tianmuhu-buildings-xml.json` 包含 2026-07-04 提取的全部 36 栋建筑原始坐标
@@ -197,32 +272,57 @@ pixel_y = round(y0 / 4 - 2326)
 
 ### 数据格式
 
-- **QA 知识库**：遵循 `docs/templates/qa-knowledge.json`，按主题分类，每个问题配准确答案
-- **建筑信息**：遵循 `docs/templates/building-info.json`，④组只填文字，坐标由⑥组补充
-- 每个建筑必须有唯一 `id`，格式：`building-<数字编号>`
+- **QA 知识库**：遵循 `docs/templates/qa-knowledge.json`，按主题分类，每主题一个文件 `qa-<主题>.json`，每个问题配准确答案
+- **建筑信息**：遵循 `docs/templates/building-info.json`，④组只填文字信息，坐标由⑥组补充
+- **建筑 ID**：每个建筑必须有唯一 `id`，格式 `building-<数字编号>`
+- **建筑分类**：`teaching` | `dormitory` | `canteen` | `library` | `sports` | `service` | `gate` | `landscape` | `facility` | `other`
 
 ### 前端交互
 
-- 地图：手绘图片 + CSS Transform 热区叠加模式（不依赖 GIS/瓦片地图），支持平滑缩放拖拽
-- **边界约束**：拖拽和缩放均钳制在图片边界内，不会露出白色/黑色背景；最小缩放 = 容器宽/图片宽
+- **地图方案**：手绘图片 + CSS Transform 热区叠加模式（不依赖 GIS/瓦片地图库），支持平滑缩放拖拽
+- **边界约束**：拖拽和缩放均钳制在图片边界内，不会露出白色/黑色背景；最小缩放 = 容器宽 / 图片宽
 - **宽度适配**：初始加载时地图左右边界对齐浏览器窗口（`scale = cw / iw, x = 0`），上下居中
-- 点击建筑热区 → 气泡弹窗（BuildingPopover），定位在标记上方，内嵌建筑专属 AI 问答
-- AI 聊天入口：右下角浮动按钮（ChatWidget），呼吸光晕动画，展开为对话面板
-- 缩略图导航：左下角 Minimap，支持点击跳转和拖拽实时平移；按地图真实比例渲染，X/Y 轴独立 scale
-- 设计系统：「航迹云」主题——深度玻璃态毛玻璃（blur 24-36px）+ 彩虹渐变光泽 + 浮动光斑背景 + 光扫hover动效
-- 移动端：气泡降级为底部 Sheet，聊天面板全屏化
+- **地图尺寸**：运行时从 `img.naturalWidth` / `img.naturalHeight` 读取，不硬编码
+- **建筑热区**：点击建筑热区 → 气泡弹窗（BuildingPopover），定位在标记上方，内嵌建筑专属 AI 问答
+- **AI 聊天入口**：右下角浮动按钮（ChatWidget），呼吸光晕动画，展开为对话面板
+- **新生问答窗口**：FreshmanWindow，航迹云主题动画
+- **缩略图导航**：左下角 Minimap，支持点击跳转和拖拽实时平移；按地图真实比例渲染，X/Y 轴独立 scale
+- **建筑搜索**：SearchBar，支持空间搜索
+- **移动端适配**：气泡降级为底部 Sheet，聊天面板全屏化
+
+### 设计系统
+
+- **主题名称**：「航迹云」(Contrail)
+- **核心风格**：深度玻璃态毛玻璃（blur 24–36px）+ 彩虹渐变光泽 + 浮动光斑背景 + 光扫 hover 动效
+- **设计令牌**：集中管理在 `frontend/src/index.css` 的 `:root {}` 中
+- **建筑标记**：分类色标（教学楼/宿舍/食堂/图书馆等不同颜色）+ 航路点风格 + 脉冲发光动画
+- **弹窗**：摄影化设计，含建筑图片展示 + 周边设施横滑区域
 
 ### 智能体
 
-- 知识库以④组的 `data/qa/` 为核心检索内容
-- 支持流式输出（Server-Sent Events 或 WebSocket）
-- API 接口需与③组协商确定协议
+- **知识源 A**：`data/qa/`（④组问答数据）
+- **知识源 B**：`data/positions/`（建筑详细信息）
+- **输出方式**：支持流式输出（Server-Sent Events 或 WebSocket）
+- **接入口**：ChatWidget（通用问答）和 BuildingPopover（建筑专属问答）均预留 `/api/chat` 接口
+- **接口协议**：需与③组协商确定
+- **RAG 管道代码**：放在 `ai-agent/` 目录
 
-### Git 分支
+---
 
-- `main` — 主分支，所有代码最终合并到这里
-- 各组按前缀建分支：`map/` `interact/` `platform/` `data/` `ai/` `convert/`
-- 提交信息遵循 Conventional Commits 格式（详见 CONTRIBUTING.md）
+## 常用命令
+
+```bash
+# 启动前端开发服务器（热更新）
+cd frontend && npm install && npm run dev
+
+# 生产构建
+cd frontend && npm run build
+
+# 预览生产构建
+cd frontend && npm run preview
+```
+
+---
 
 ## 常见开发任务
 
@@ -232,45 +332,61 @@ pixel_y = round(y0 / 4 - 2326)
 2. 按 `docs/templates/qa-knowledge.json` 模板填写问题和答案
 3. 放入 `data/qa/qa-<主题>.json`
 4. ⑤组直接读取此目录构建 RAG 知识库
-5. 提交时使用 `data(ai): 添加xxx问答数据`
+5. 提交格式：`data(ai): 添加xxx问答数据`
 
 ### 添加建筑信息（④组）
 
-1. 按 `docs/templates/building-info.json` 模板填写文字信息
+1. 按 `docs/templates/building-info.json` 模板填写文字信息（不含坐标）
 2. 放入 `data/raw/building-<id>.json`
 3. ⑥组补充坐标后输出到 `data/positions/`
-4. 提交时使用 `data(map): 添加xxx建筑信息`
+4. 提交格式：`data(map): 添加xxx建筑信息`
 
 ### 更新手绘地图（①组）
 
 1. 将新手绘地图扫描图放入 `assets/map/` 目录
 2. 命名格式：`hand-drawn-map-v<版本号>.<扩展名>`
 3. 更新 `assets/map/manifest.json`
-4. ⚠️ 如果布局变化，通知⑥组重新标注坐标
+4. 如果布局变化，通知⑥组重新标注坐标
 
 ### 前端开发（②③组）
 
-- 地图底图使用 `<img>` + CSS Transform 热区叠加，不使用 GIS 库
-- 地图尺寸自适应（运行时从 `img.naturalWidth/Height` 读取），不硬编码
+- 地图底图使用 `<img>` + CSS Transform 热区叠加，**不使用 GIS 库**
 - 聊天组件需支持流式输出（预留 SSE 接入口）
-- 启动开发服务器：`cd frontend && npm run dev`
-- 现有组件：`MapView`（地图）、`HotspotLayer`（热区）、`BuildingPopover`（气泡）、`ChatWidget`（聊天）、`Minimap`（缩略图）、`TopBar`（导航栏）
-- 建筑数据：`frontend/src/data/mock-buildings.json`，当前包含天目湖校区 28 个真实建筑（坐标提取自官方地图网站），格式与⑥组最终产出一致
-- 建筑分类：teaching | dormitory | canteen | library | sports | service | gate | landscape | facility | other
-- 设计令牌集中管理在 `frontend/src/index.css` 的 `:root {}` 中
+- 现有组件：`MapView`（地图容器，含 HotspotLayer 热区层）、`BuildingPopover`（气泡弹窗）、`ChatWidget`（AI 聊天）、`FreshmanWindow`（新生问答）、`Minimap`（缩略图导航）、`SearchBar`（搜索栏）、`TopBar`（导航栏）
+- 建筑数据：`frontend/src/data/mock-buildings.json`，包含天目湖校区 36 栋真实建筑（坐标提取自官方地图 XML API）
+- 类型定义：`frontend/src/types/index.ts`
+- 地图交互 Hook：`frontend/src/hooks/useMapInteraction.ts`
 
 ### 智能体开发（⑤组）
 
-- 知识源 A：`data/qa/`（④组问答数据）
-- 知识源 B：`data/positions/`（建筑详细信息）
+- 知识源：`data/qa/` + `data/positions/`
+- 提供 `/api/chat` 端点，支持流式输出
 - RAG 管道代码放在 `ai-agent/` 目录
+
+### 数据转换（⑥组）
+
+- 标注工具：在 `scripts/` 下创建坐标采集页面
+- 合并脚本：将 `data/raw/` 的建筑信息与像素坐标合并输出到 `data/positions/`
+
+---
 
 ## 跨组依赖关系
 
 ```
 ①手绘地图 → ②前端底图渲染
-①手绘地图 → ⑥标注像素坐标 → ②前端热区
-④建筑信息 → ⑥合并坐标 → ②前端详情
-④QA知识库 → ⑤RAG知识库 → 后端API → ②前端聊天
+①手绘地图 → ⑥标注像素坐标 → ②前端热区叠加
+④建筑信息 → ⑥合并坐标 → ②前端详情面板
+④QA知识库 → ⑤RAG知识库 → ③后端API → ②前端聊天
 ③后端/部署 → 所有模块线上运行
 ```
+
+### 各组接口约定
+
+| 上游 → 下游 | 交付物 | 位置 |
+|-------------|--------|------|
+| ① → ②⑥ | 手绘地图高清扫描图（≥ 4K，PNG/JPEG） | `assets/map/` |
+| ④ → ⑤ | QA 知识库 JSON（按模板） | `data/qa/` |
+| ④ → ⑥ | 建筑信息 JSON（无坐标，按模板） | `data/raw/` |
+| ⑥ → ② | 建筑信息 JSON + 像素坐标 | `data/positions/` |
+| ⑤ → ③ | AI 接口协议 / RAG 管道 | `ai-agent/` |
+| ③ → ② | `/api/chat` REST/SSE 端点 | `backend/` |
