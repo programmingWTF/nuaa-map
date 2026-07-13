@@ -572,7 +572,7 @@
 /* ── 移动端适配 ── */
 @media (max-width: 640px) {
   .freshman-window {
-    top: calc(var(--topbar-height-mobile) + 8px);
+    top: calc(var(--topbar-height-mobile) + 56px);
     right: 12px;
     left: 12px;
     width: auto;

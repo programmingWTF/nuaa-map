@@ -89,7 +89,7 @@ export function BuildingPopover({
   const catColor = CATEGORY_COLORS[building.category];
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, [chatMsgs]);
-  useEffect(() => { inputRef.current?.focus(); }, []);
+  useEffect(() => { inputRef.current?.focus({ preventScroll: true }); }, []);
   useEffect(() => {
     const el = popoverRef.current;
     if (!el) return;

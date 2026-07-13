@@ -55,7 +55,7 @@
 
 @media (max-width:640px) {
   .map-hint { display: flex; bottom: 20px; left: 50%; transform: translateX(-50%); font-size: 11px; padding: 4px 14px; white-space: nowrap; background: rgba(255,255,255,0.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); animation: hint-fade 4s ease-out 6s forwards; }
-  .map-controls { position: absolute; bottom: auto; top: 12px; left: auto; right: var(--mobile-gutter); transform: none; flex-direction: column; gap: 6px; z-index: 30; }
+  .map-controls { position: absolute; bottom: auto; top: 8px; left: 50%; right: auto; transform: translateX(-50%); flex-direction: row; gap: 8px; z-index: 30; }
   .map-ctrl-btn { width: var(--touch-target-min); height: var(--touch-target-min); border-radius: var(--radius-sm); }
 }
 @keyframes hint-fade { to { opacity: 0; transform: translateX(-50%) translateY(4px); pointer-events: none; } }
