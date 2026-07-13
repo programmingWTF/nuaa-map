@@ -53,4 +53,17 @@
   box-shadow:var(--glass-highlight);
 }
 
-@media (max-width:640px) { .map-hint { display:none; } .map-controls { bottom:16px; gap:6px; } .map-ctrl-btn { width:40px; height:40px; } }
+@media (max-width:640px) {
+  .map-hint { display: flex; bottom: 20px; left: 50%; transform: translateX(-50%); font-size: 11px; padding: 4px 14px; white-space: nowrap; background: rgba(255,255,255,0.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); animation: hint-fade 4s ease-out 6s forwards; }
+  .map-controls { position: absolute; bottom: auto; top: 8px; left: 50%; right: auto; transform: translateX(-50%); flex-direction: row; gap: 8px; z-index: 30; }
+  .map-ctrl-btn { width: var(--touch-target-min); height: var(--touch-target-min); border-radius: var(--radius-sm); }
+}
+@keyframes hint-fade { to { opacity: 0; transform: translateX(-50%) translateY(4px); pointer-events: none; } }
+
+/* 横屏手机 — 空间更紧凑 */
+@media (max-width: 926px) and (orientation: landscape) {
+  .topbar { height: 48px; padding: 0 10px; }
+  .topbar-search-input { height: 32px; }
+  .minimap { display: none; }
+  .map-controls { top: 56px; }
+}

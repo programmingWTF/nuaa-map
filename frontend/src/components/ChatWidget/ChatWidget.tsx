@@ -23,6 +23,13 @@ export function ChatWidget({ selectedBuilding, onViewBuilding }: ChatWidgetProps
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
   useEffect(() => { if (isOpen) inputRef.current?.focus(); }, [isOpen]);
 
+  /* 移动端聊天打开时锁定背景滚动 */
+  useEffect(() => {
+    if (isOpen) document.body.classList.add('body--chat-open');
+    else document.body.classList.remove('body--chat-open');
+    return () => document.body.classList.remove('body--chat-open');
+  }, [isOpen]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setIsOpen(false); };
     window.addEventListener('keydown', onKey);

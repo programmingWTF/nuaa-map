@@ -110,8 +110,30 @@
 }
 
 @media (max-width:640px) {
-  .topbar { padding:0 12px; }
-  .topbar-title { display:none; }
-  .topbar-search { max-width:200px; }
-  .topbar-search-kbd { display:none; }
+  .topbar {
+    padding: 0 var(--mobile-gutter);
+    height: var(--topbar-height-mobile);
+  }
+  .topbar-brand { gap: 8px; }
+  .topbar-logo { font-size: 15px; padding: 4px 10px; }
+  .topbar-title { font-size: var(--text-sm); }
+  .topbar-search { max-width: none; flex: 1; margin-left: 10px; }
+  .topbar-search-input { height: 36px; font-size: var(--text-xs); }
+  .topbar-search-kbd { display: none; }
+  .topbar-search-panel {
+    position: fixed;
+    top: calc(var(--topbar-height-mobile) + 8px);
+    left: var(--mobile-gutter);
+    right: var(--mobile-gutter);
+    max-height: 50dvh;
+  }
+  .topbar-search-clear {
+    width: var(--touch-target-min);
+    height: var(--touch-target-min);
+    right: 8px;
+  }
+  .topbar-search-item {
+    min-height: var(--touch-target-min);
+    padding: 12px 14px;
+  }
 }

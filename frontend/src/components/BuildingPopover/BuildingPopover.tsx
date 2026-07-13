@@ -89,7 +89,7 @@ export function BuildingPopover({
   const catColor = CATEGORY_COLORS[building.category];
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, [chatMsgs]);
-  useEffect(() => { inputRef.current?.focus(); }, []);
+  useEffect(() => { inputRef.current?.focus({ preventScroll: true }); }, []);
   useEffect(() => {
     const el = popoverRef.current;
     if (!el) return;
@@ -198,6 +198,13 @@ export function BuildingPopover({
           </div>
 
           <div className="popover-body">
+            {/* 移动端图片 — 右侧缩略图，放在最前让文字环绕 */}
+            {building.imageUrl && (
+              <div className="popover-hero-mobile" style={{ backgroundImage: `url(${building.imageUrl})` }} />
+            )}
+            {!building.imageUrl && (
+              <div className="popover-hero-mobile" style={{ background: catColor }} />
+            )}
             <p className="popover-desc">{building.description}</p>
             <div className="popover-meta">
               {building.openTime && (

@@ -1,4 +1,4 @@
-import { useRef, useCallback, useEffect } from 'react';
+import { useRef, useCallback, useEffect, useState } from 'react';
 import type { MapTransform } from '../../types';
 import './Minimap.css';
 
@@ -20,6 +20,7 @@ export function Minimap({
   containerWidth, containerHeight, onNavigate,
 }: MinimapProps) {
   const canvasRef = useRef<HTMLDivElement>(null);
+  const [collapsed, setCollapsed] = useState(true);
   // 缩略图高度按图片真实比例计算（地图 1536×1536 → 1:1 → minimap 180×180）
   const minimapH = imageHeight > 0 ? Math.round(MINIMAP_W * imageHeight / imageWidth) : 120;
   // X/Y 分别使用独立 scale，避免方形地图在非方形缩略图上的坐标偏移
@@ -149,7 +150,14 @@ export function Minimap({
   if (imageWidth === 0) return null;
 
   return (
-    <div className="minimap">
+    <div className={`minimap${collapsed ? ' minimap--collapsed' : ''}`}>
+      <button
+        className="minimap-toggle"
+        onClick={() => setCollapsed(c => !c)}
+        aria-label={collapsed ? '展开缩略图' : '折叠缩略图'}
+      >
+        {collapsed ? '▲' : '▼'}
+      </button>
       <div className="minimap-label">总览</div>
       <div
         ref={canvasRef}
