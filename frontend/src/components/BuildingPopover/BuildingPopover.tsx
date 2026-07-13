@@ -198,6 +198,13 @@ export function BuildingPopover({
           </div>
 
           <div className="popover-body">
+            {/* 移动端图片 — 右侧缩略图，放在最前让文字环绕 */}
+            {building.imageUrl && (
+              <div className="popover-hero-mobile" style={{ backgroundImage: `url(${building.imageUrl})` }} />
+            )}
+            {!building.imageUrl && (
+              <div className="popover-hero-mobile" style={{ background: catColor }} />
+            )}
             <p className="popover-desc">{building.description}</p>
             <div className="popover-meta">
               {building.openTime && (
@@ -217,14 +224,6 @@ export function BuildingPopover({
               <div className="popover-tags">
                 {building.facilities.map(f => <span key={f} className="popover-tag">{f}</span>)}
               </div>
-            )}
-
-            {/* 移动端图片 — 右侧缩略图，替代顶部窄条 */}
-            {building.imageUrl && (
-              <div className="popover-hero-mobile" style={{ backgroundImage: `url(${building.imageUrl})` }} />
-            )}
-            {!building.imageUrl && (
-              <div className="popover-hero-mobile" style={{ background: catColor }} />
             )}
 
             {/* 周边设施 */}
