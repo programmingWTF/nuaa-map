@@ -219,6 +219,14 @@ export function BuildingPopover({
               </div>
             )}
 
+            {/* 移动端图片 — 右侧缩略图，替代顶部窄条 */}
+            {building.imageUrl && (
+              <div className="popover-hero-mobile" style={{ backgroundImage: `url(${building.imageUrl})` }} />
+            )}
+            {!building.imageUrl && (
+              <div className="popover-hero-mobile" style={{ background: catColor }} />
+            )}
+
             {/* 周边设施 */}
             {nearby.length > 0 && (
               <div className="popover-nearby">
