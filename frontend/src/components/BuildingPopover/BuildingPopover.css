@@ -112,10 +112,14 @@
 
 @media (max-width:640px) {
   .popover-anchor { top:auto!important; bottom:0!important; left:0!important; width:100%!important; transform:none!important; }
-  .popover { max-width:100vw!important; max-height:60dvh; border-radius:var(--radius-lg) var(--radius-lg) 0 0; }
+  .popover { max-width:100vw!important; max-height:60dvh; border-radius:var(--radius-lg) var(--radius-lg) 0 0; padding-bottom: var(--sab); }
   .popover-hero { height:80px; }
   .popover::before,.popover::after { display:none; }
   .popover-arrow { display:none; }
   .popover-backdrop { background:rgba(15,23,42,0.3); }
   .popover-nearby-list { gap:6px; }
+  .popover-close { width: var(--touch-target-min); height: var(--touch-target-min); }
+  .popover-chat-send { width: var(--touch-target-min); height: var(--touch-target-min); }
+  .popover-chat-input { height: 40px; }
+  .popover-nearby-card { min-height: 40px; padding: 10px 12px; }
 }

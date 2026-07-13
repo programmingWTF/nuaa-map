@@ -7,6 +7,7 @@ import type { Building, BuildingClickData, MapImageMeta, MapTransform } from '..
 import './MapView.css';
 
 const MAP_SRC = '/tianmuhu-map.jpg';
+const IS_TOUCH = 'ontouchstart' in window;
 
 export interface MapViewState {
   transform: MapTransform;
@@ -183,7 +184,7 @@ export function MapView({ buildings, selectedBuilding, onBuildingClick, onMapSta
       </div>
 
       {imageMeta.loaded && (
-        <p className="map-hint">滚轮缩放 · 拖拽平移 · 点击建筑查看详情</p>
+        <p className="map-hint">{IS_TOUCH ? '双指缩放 · 单指拖拽 · 点击建筑查看详情' : '滚轮缩放 · 拖拽平移 · 点击建筑查看详情'}</p>
       )}
     </div>
   );

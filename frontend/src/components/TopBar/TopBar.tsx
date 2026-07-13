@@ -63,14 +63,18 @@ export function TopBar({ buildings, onSearchSelect }: TopBarProps) {
     return () => window.removeEventListener('keydown', onKey);
   }, [close]);
 
-  /* 点击外部关闭 */
+  /* 点击外部关闭（桌面 mousedown + 移动端 touchstart） */
   useEffect(() => {
     if (!isOpen) return;
-    const onClick = (e: MouseEvent) => {
+    const onOutside = (e: MouseEvent | TouchEvent) => {
       if (panelRef.current && !panelRef.current.contains(e.target as Node)) close();
     };
-    document.addEventListener('mousedown', onClick);
-    return () => document.removeEventListener('mousedown', onClick);
+    document.addEventListener('mousedown', onOutside as EventListener);
+    document.addEventListener('touchstart', onOutside as EventListener);
+    return () => {
+      document.removeEventListener('mousedown', onOutside as EventListener);
+      document.removeEventListener('touchstart', onOutside as EventListener);
+    };
   }, [isOpen, close]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

@@ -86,3 +86,11 @@
 }
 .hotspot:hover .hotspot-label,
 .hotspot--selected .hotspot-label { color:var(--color-orange-500); background:rgba(255,255,255,0.85); box-shadow:var(--shadow-card), var(--glass-highlight); }
+
+/* 移动端：放大标记以便手指点击 */
+@media (max-width: 640px) {
+  .hotspot-marker { width: 32px; height: 32px; }
+  .hotspot-marker-outer { width: 32px; height: 32px; border-width: 3px; }
+  .hotspot-marker-inner { width: 12px; height: 12px; }
+  .hotspot-label { font-size: 11px; padding: 3px 10px; }
+}

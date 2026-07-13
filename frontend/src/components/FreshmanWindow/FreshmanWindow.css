@@ -572,20 +572,25 @@
 /* ── 移动端适配 ── */
 @media (max-width: 640px) {
   .freshman-window {
-    top: 12px;
+    top: calc(var(--topbar-height-mobile) + 8px);
     right: 12px;
     left: 12px;
     width: auto;
+    z-index: 25;
+    pointer-events: none;
   }
+  .freshman-window > * { pointer-events: auto; }
 
   .freshman-window__panel {
     padding: 14px;
-    max-height: min(520px, calc(100dvh - 100px));
+    max-height: min(60dvh, calc(100dvh - 140px));
   }
 
   .freshman-window__toggle {
-    align-self: stretch;
-    justify-content: center;
+    align-self: flex-end;
+    width: auto;
+    padding: 8px 14px;
+    font-size: 0.82rem;
   }
 
   @keyframes freshman-panel-in {
