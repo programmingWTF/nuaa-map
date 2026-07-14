@@ -463,7 +463,7 @@
     "description": "户外运动场，含篮球场和网球场。",
     "openTime": "全天开放",
     "floors": 0,
-    "images": ["/buildings/dongcao/01.jpg", "/buildings/dongcao/02.jpg", "/buildings/dongcao/03.jpg"]
+    "images": ["/buildings/dongcao/01.jpg", "/buildings/dongcao/02.jpg"]
   },
   {
     "id": "building-030",
