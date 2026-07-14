@@ -175,9 +175,8 @@
     "openTime": "周一至周五 7:00-21:30",
     "floors": 5,
     "images": [
-      "/buildings/minghui/01.jpg",
-      "/buildings/minghui/02.jpg",
-      "/buildings/minghui/03.jpg"
+      "/buildings/minghui/a-01.jpg",
+      "/buildings/minghui/a-02.jpg"
     ]
   },
   {
@@ -193,7 +192,11 @@
     "description": "理工科实验教学楼B座。",
     "openTime": "周一至周五 7:00-21:30",
     "floors": 5,
-    "images": ["/buildings/minghui/01.jpg", "/buildings/minghui/02.jpg"]
+    "images": [
+      "/buildings/minghui/b-01.jpg",
+      "/buildings/minghui/b-02.jpg",
+      "/buildings/minghui/b-03.jpg"
+    ]
   },
   {
     "id": "building-013",
@@ -208,7 +211,9 @@
     "description": "理工科实验教学楼C座。",
     "openTime": "周一至周五 7:00-21:30",
     "floors": 5,
-    "images": ["/buildings/minghui/02.jpg", "/buildings/minghui/03.jpg"]
+    "images": [
+      "/buildings/minghui/c-01.jpg"
+    ]
   },
   {
     "id": "building-014",
@@ -223,7 +228,10 @@
     "description": "理工科实验教学楼D座。",
     "openTime": "周一至周五 7:00-21:30",
     "floors": 5,
-    "images": ["/buildings/minghui/03.jpg", "/buildings/minghui/01.jpg"]
+    "images": [
+      "/buildings/minghui/d-01.jpg",
+      "/buildings/minghui/d-02.jpg"
+    ]
   },
   {
     "id": "building-015",
@@ -471,11 +479,7 @@
     },
     "description": "室内综合运动场馆，可进行篮球、羽毛球等活动。",
     "openTime": "周一至周日 9:00-21:00",
-    "floors": 1,
-    "images": [
-      "/buildings/fengyu/01.jpg",
-      "/buildings/fengyu/02.jpg"
-    ]
+    "floors": 1
   },
   {
     "id": "building-031",
