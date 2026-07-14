@@ -84,8 +84,7 @@
     "floors": 6,
     "images": [
       "/buildings/xuntian/01.jpg",
-      "/buildings/xuntian/02.jpg",
-      "/buildings/xuntian/03.jpg"
+      "/buildings/xuntian/02.jpg"
     ]
   },
   {
@@ -103,8 +102,7 @@
     "floors": 5,
     "images": [
       "/buildings/muxing/01.jpg",
-      "/buildings/muxing/02.jpg",
-      "/buildings/muxing/03.jpg"
+      "/buildings/muxing/02.jpg"
     ]
   },
   {
@@ -283,7 +281,8 @@
     "openTime": "早餐 6:30-9:00 | 午餐 11:00-13:00 | 晚餐 17:00-19:30",
     "floors": 2,
     "images": [
-      "/buildings/dongli/02.jpg"
+      "/buildings/dongli/02.jpg",
+      "/buildings/dongli/03.jpg"
     ]
   },
   {
@@ -479,7 +478,8 @@
     },
     "description": "室内综合运动场馆，可进行篮球、羽毛球等活动。",
     "openTime": "周一至周日 9:00-21:00",
-    "floors": 1
+    "floors": 1,
+    "images": ["/buildings/fengyu/01.jpg"]
   },
   {
     "id": "building-031",
@@ -512,7 +512,10 @@
     "description": "一站式师生事务办理中心。",
     "openTime": "周一至周五 8:00-12:00, 14:00-17:00",
     "floors": 1,
-    "images": ["/buildings/fuwu/01.jpg"]
+    "images": [
+      "/buildings/fuwu/01.jpg",
+      "/buildings/fuwu/02.jpg"
+    ]
   },
   {
     "id": "building-033",
