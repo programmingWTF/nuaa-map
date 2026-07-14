@@ -79,17 +79,46 @@ export function BuildingPopover({
   const [chatMsgs, setChatMsgs] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
+  const [carouselIdx, setCarouselIdx] = useState(0);
   const popoverRef = useRef<HTMLDivElement>(null);
   const nearbyRef = useRef<HTMLDivElement>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const carouselTimerRef = useRef<ReturnType<typeof setInterval>>();
+  const inputBlurGuard = useRef(false); // 防止移动端键盘收起时误关弹窗
 
   const openStatus = getOpenStatus(building.openTime);
   const nearby = getNearby(building, buildings);
   const catColor = CATEGORY_COLORS[building.category];
 
+  /* 图片列表：优先 images 数组，回退到单张 imageUrl */
+  const imageList = building.images && building.images.length > 0
+    ? building.images
+    : building.imageUrl ? [building.imageUrl] : [];
+
+  /* 切换建筑时重置轮播索引 */
+  useEffect(() => { setCarouselIdx(0); }, [building.id]);
+
+  /* 自动轮播（5秒切换） */
+  useEffect(() => {
+    if (imageList.length <= 1) return;
+    carouselTimerRef.current = setInterval(() => {
+      setCarouselIdx(prev => (prev + 1) % imageList.length);
+    }, 5000);
+    return () => clearInterval(carouselTimerRef.current);
+  }, [imageList.length, building.id]);
+
+  const goPrev = () => {
+    clearInterval(carouselTimerRef.current);
+    setCarouselIdx(prev => (prev - 1 + imageList.length) % imageList.length);
+  };
+  const goNext = () => {
+    clearInterval(carouselTimerRef.current);
+    setCarouselIdx(prev => (prev + 1) % imageList.length);
+  };
+
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, [chatMsgs]);
-  useEffect(() => { inputRef.current?.focus({ preventScroll: true }); }, []);
+  useEffect(() => { inputRef.current?.focus(); }, []);
   useEffect(() => {
     const el = popoverRef.current;
     if (!el) return;
@@ -160,7 +189,10 @@ export function BuildingPopover({
 
   return (
     <>
-      <div className="popover-backdrop" onClick={onClose} />
+      <div className="popover-backdrop" onClick={() => {
+        if (inputBlurGuard.current) return; // 键盘刚收起，不关
+        onClose();
+      }} />
       <div
         className={`popover-anchor${anchorAbove ? ' popover-anchor--above' : ''}`}
         style={{ left: popLeft, top: anchorTop, width: POPOVER_W }}
@@ -174,15 +206,59 @@ export function BuildingPopover({
           <div className={`popover-arrow popover-arrow--${arrowDir}`}
             style={{ left: `calc(50% + ${arrowOff}px)` }} />
 
-          {/* 照片区：有图用图，无图用分类色块 */}
-          <div className="popover-hero" style={{ background: building.imageUrl ? `url(${building.imageUrl}) center/cover` : catColor }}>
-            {openStatus && (
-              <span className={`popover-status ${openStatus.open ? 'popover-status--open' : ''}`}>
-                <span className="popover-status-dot" />
-                {openStatus.label}
-              </span>
-            )}
-          </div>
+          {/* 照片区：有图轮播，无图用分类色块 */}
+          {imageList.length > 0 ? (
+            <div className="popover-hero popover-hero--carousel">
+              <img
+                className="popover-hero-img"
+                src={imageList[carouselIdx]}
+                alt={`${building.name} 照片 ${carouselIdx + 1}`}
+              />
+              {imageList.length > 1 && (
+                <>
+                  <button className="popover-carousel-btn popover-carousel-btn--prev"
+                    onClick={goPrev} aria-label="上一张">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                      <polyline points="15 18 9 12 15 6"/>
+                    </svg>
+                  </button>
+                  <button className="popover-carousel-btn popover-carousel-btn--next"
+                    onClick={goNext} aria-label="下一张">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                      <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                  </button>
+                  <div className="popover-carousel-dots">
+                    {imageList.map((_, i) => (
+                      <button
+                        key={i}
+                        className={`popover-carousel-dot ${i === carouselIdx ? 'popover-carousel-dot--active' : ''}`}
+                        onClick={() => { clearInterval(carouselTimerRef.current); setCarouselIdx(i); }}
+                        aria-label={`第 ${i + 1} 张`}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+              {openStatus && (
+                <span className={`popover-status ${openStatus.open ? 'popover-status--open' : ''}`}>
+                  <span className="popover-status-dot" />
+                  {openStatus.label}
+                </span>
+              )}
+            </div>
+          ) : (
+            <div className="popover-hero" style={{ background: catColor }}>
+              {openStatus && (
+                <span className={`popover-status ${openStatus.open ? 'popover-status--open' : ''}`}>
+                  <span className="popover-status-dot" />
+                  {openStatus.label}
+                </span>
+              )}
+            </div>
+          )}
 
           <div className="popover-header">
             <div>
@@ -198,13 +274,6 @@ export function BuildingPopover({
           </div>
 
           <div className="popover-body">
-            {/* 移动端图片 — 右侧缩略图，放在最前让文字环绕 */}
-            {building.imageUrl && (
-              <div className="popover-hero-mobile" style={{ backgroundImage: `url(${building.imageUrl})` }} />
-            )}
-            {!building.imageUrl && (
-              <div className="popover-hero-mobile" style={{ background: catColor }} />
-            )}
             <p className="popover-desc">{building.description}</p>
             <div className="popover-meta">
               {building.openTime && (
@@ -276,6 +345,8 @@ export function BuildingPopover({
                   placeholder={`问问关于${building.name}的问题…`}
                   value={chatInput} onChange={e => setChatInput(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendQuestion(); }}}
+                  onFocus={() => { inputBlurGuard.current = false; }}
+                  onBlur={() => { inputBlurGuard.current = true; setTimeout(() => { inputBlurGuard.current = false; }, 300); }}
                   disabled={chatLoading} />
                 <button className="popover-chat-send" onClick={sendQuestion}
                   disabled={!chatInput.trim() || chatLoading} aria-label="发送">

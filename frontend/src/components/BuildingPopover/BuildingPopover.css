@@ -34,8 +34,49 @@
   background:linear-gradient(transparent, rgba(255,255,255,0.85));
 }
 
-/* 移动端右侧缩略图（桌面端隐藏） */
-.popover-hero-mobile { display: none; }
+/* ── 图片轮播 ── */
+.popover-hero--carousel {
+  overflow:hidden; cursor:default;
+}
+.popover-hero-img {
+  width:100%; height:100%; object-fit:cover;
+  display:block;
+  animation: carousel-fade-in 0.4s ease;
+}
+@keyframes carousel-fade-in {
+  from { opacity:0.6; }
+  to   { opacity:1; }
+}
+
+/* 左右箭头 */
+.popover-carousel-btn {
+  position:absolute; top:50%; transform:translateY(-50%); z-index:3;
+  width:28px; height:28px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(255,255,255,0.75); color:var(--color-slate-600);
+  backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+  opacity:0; transition:opacity 0.25s ease, background 0.2s;
+}
+.popover-hero--carousel:hover .popover-carousel-btn { opacity:1; }
+.popover-carousel-btn:hover { background:rgba(255,255,255,0.95); color:var(--color-navy); }
+.popover-carousel-btn--prev { left:8px; }
+.popover-carousel-btn--next { right:8px; }
+
+/* 指示器圆点 */
+.popover-carousel-dots {
+  position:absolute; bottom:32px; left:50%; transform:translateX(-50%); z-index:3;
+  display:flex; gap:6px;
+}
+.popover-carousel-dot {
+  width:6px; height:6px; border-radius:50%; border:none; padding:0;
+  background:rgba(255,255,255,0.5);
+  cursor:pointer; transition:all 0.25s ease;
+}
+.popover-carousel-dot--active {
+  background:#fff;
+  box-shadow:0 0 6px rgba(37,99,235,0.5);
+  width:18px; border-radius:3px;
+}
 
 /* 开放状态徽章 */
 .popover-status {
@@ -115,27 +156,12 @@
 
 @media (max-width:640px) {
   .popover-anchor { top:auto!important; bottom:0!important; left:0!important; width:100%!important; transform:none!important; }
-  .popover { max-width:100vw!important; max-height:60dvh; border-radius:var(--radius-lg) var(--radius-lg) 0 0; padding-bottom: var(--sab); }
-  .popover-hero { display: none; }
-  .popover-hero-mobile {
-    display: block;
-    float: right;
-    width: 42%;
-    max-width: 160px;
-    aspect-ratio: 4 / 3;
-    margin: 0 0 8px 10px;
-    border-radius: var(--radius-sm);
-    background-size: cover;
-    background-position: center;
-  }
+  .popover { max-width:100vw!important; max-height:60dvh; border-radius:var(--radius-lg) var(--radius-lg) 0 0; }
+  .popover-hero { height:80px; }
+  .popover-carousel-btn { opacity:1; width:24px; height:24px; } /* 移动端常驻箭头 */
+  .popover-carousel-dots { bottom:28px; }
   .popover::before,.popover::after { display:none; }
   .popover-arrow { display:none; }
   .popover-backdrop { background:rgba(15,23,42,0.3); }
   .popover-nearby-list { gap:6px; }
-  .popover-close { width: var(--touch-target-min); height: var(--touch-target-min); }
-  .popover-chat-send { width: var(--touch-target-min); height: var(--touch-target-min); }
-  .popover-chat-input { height: 40px; }
-  .popover-nearby-card { min-height: 40px; padding: 10px 12px; }
-  /* 确保 nearby 在图片下方换行 */
-  .popover-nearby { clear: both; }
 }
