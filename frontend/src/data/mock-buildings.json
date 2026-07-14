@@ -449,7 +449,7 @@
     "description": "标准田径场及足球场，适合日常锻炼。",
     "openTime": "全天开放",
     "floors": 0,
-    "images": ["/buildings/xicao/01.jpg", "/buildings/xicao/02.jpg"]
+    "images": ["/buildings/xicao/01.jpg"]
   },
   {
     "id": "building-029",
