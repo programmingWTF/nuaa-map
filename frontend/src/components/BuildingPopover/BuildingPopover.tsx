@@ -104,7 +104,7 @@ export function BuildingPopover({
     if (imageList.length <= 1) return;
     carouselTimerRef.current = setInterval(() => {
       setCarouselIdx(prev => (prev + 1) % imageList.length);
-    }, 5000);
+    }, 3000);
     return () => clearInterval(carouselTimerRef.current);
   }, [imageList.length, building.id]);
 
