@@ -546,7 +546,8 @@
     },
     "description": "校园中心景观湖，环湖步道景色优美。",
     "openTime": "全天开放",
-    "floors": 0
+    "floors": 0,
+    "images": ["/buildings/sishuihu.jpg"]
   },
   {
     "id": "building-035",
