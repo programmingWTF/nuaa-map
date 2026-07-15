@@ -19,9 +19,32 @@ function App() {
   const [mapState, setMapState] = useState<MapViewState>(DEFAULT_MAP_STATE);
   const buildings = mockBuildings as Building[];
 
+  /* 点击地标 → 居中适当放大 + 弹出详情；关闭 → 适度缩小 */
   const handleBuildingClick = useCallback((data: BuildingClickData | null) => {
     setSelectedBuilding(data?.building ?? null);
-  }, []);
+    const { containerWidth, containerHeight, imageWidth, imageHeight } = mapState;
+    if (!imageWidth || !imageHeight || !containerWidth || !containerHeight) return;
+
+    if (!data) {
+      // 关闭弹窗 → 适度缩小，保持视野中心
+      const cur = mapState.transform;
+      const fitScale = containerWidth / imageWidth;
+      const newScale = Math.max(cur.scale * 0.6, fitScale);
+      const mx = (containerWidth / 2 - cur.x) / cur.scale;
+      const my = (containerHeight / 2 - cur.y) / cur.scale;
+      window.dispatchEvent(new CustomEvent('map-navigate', {
+        detail: { scale: newScale, x: containerWidth / 2 - mx * newScale, y: containerHeight / 2 - my * newScale },
+      }));
+      return;
+    }
+    const b = data.building;
+    const hotspotCX = b.hotspot.x + b.hotspot.width / 2;
+    const hotspotCY = b.hotspot.y + b.hotspot.height / 2;
+    const scale = Math.max(mapState.transform.scale * 1.5, 1.5);
+    const tx = containerWidth / 2 - hotspotCX * scale;
+    const ty = containerHeight / 2 - hotspotCY * scale;
+    window.dispatchEvent(new CustomEvent('map-navigate', { detail: { scale, x: tx, y: ty } }));
+  }, [mapState]);
 
   const handleMinimapNavigate = useCallback((t: MapTransform) => {
     window.dispatchEvent(new CustomEvent('map-navigate', { detail: t }));

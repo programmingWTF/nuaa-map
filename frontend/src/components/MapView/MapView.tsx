@@ -103,15 +103,20 @@ export function MapView({ buildings, selectedBuilding, onBuildingClick, onMapSta
     return () => window.removeEventListener('resize', onResize);
   }, [setTransform]);
 
-  /* 响应 Minimap 导航事件 */
+  /* 响应 Minimap 导航事件 / App 居中放大事件（钳制边界） */
   useEffect(() => {
     const onNav = (e: Event) => {
       const detail = (e as CustomEvent).detail as MapTransform;
-      if (detail) setTransform(detail);
+      if (!detail || !imageMeta.loaded || !containerRef.current) return;
+      const el = containerRef.current;
+      const cw = el.clientWidth;
+      const ch = el.clientHeight;
+      if (cw === 0 || ch === 0) return;
+      setTransform(clampTransform(detail, cw, ch, imageMeta.width, imageMeta.height));
     };
     window.addEventListener('map-navigate', onNav);
     return () => window.removeEventListener('map-navigate', onNav);
-  }, [setTransform]);
+  }, [setTransform, imageMeta]);
 
   /* 计算选中建筑的当前屏幕坐标（用于气泡定位） */
   const selectedPopoverState = selectedBuilding
