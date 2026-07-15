@@ -145,6 +145,32 @@ Issue 标题统一使用以下格式：
 
 如果两个模板都不适用，点击页面底部的 **"Open a blank issue"** 自由填写。
 
+#### 认领 Issue：怎么知道有没有人在做
+
+在动手改代码之前，先确认没人已经在做这个 Issue：
+
+| 方法 | 怎么看 |
+|------|--------|
+| 看 Assignee | Issue 页面右侧 **Assignees** 栏有头像 → **有人在做了**，换一个 |
+| 看 Linked PR | Issue 时间线里有 "linked a pull request" → 已经有 PR 在修了 |
+| 没人做？ | 在评论区发一句「我来做这个」，然后点右侧 Assignees → 把自己设上去 |
+
+> [!IMPORTANT]
+> **动手前先 Assign。** 避免两个人闷头修同一个 Bug，最后白干。
+
+#### PR 引用 Issue：自动关闭
+
+在 PR 描述中用 GitHub 关键词引用 Issue，合并后 Issue 会**自动关闭**：
+
+```markdown
+Closes #58
+```
+
+等价写法：`Fixes #58` / `Resolves #58`。可以一行引用多个：`Closes #58, closes #59`。
+
+> [!TIP]
+> 在 PR 描述的第一行就写上 `Closes #编号`，这样 Reviewer 点进 PR 就能直接跳去看 Issue 上下文。
+
 ---
 
 ## 技术架构
