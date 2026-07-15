@@ -99,22 +99,27 @@ export function BuildingPopover({
   /* 切换建筑时重置轮播索引 */
   useEffect(() => { setCarouselIdx(0); }, [building.id]);
 
-  /* 自动轮播（5秒切换） */
-  useEffect(() => {
+  /* 自动轮播（3秒切换，手动翻页后重置计时） */
+  const startCarouselTimer = useCallback(() => {
+    clearInterval(carouselTimerRef.current);
     if (imageList.length <= 1) return;
     carouselTimerRef.current = setInterval(() => {
       setCarouselIdx(prev => (prev + 1) % imageList.length);
     }, 3000);
+  }, [imageList.length]);
+
+  useEffect(() => {
+    startCarouselTimer();
     return () => clearInterval(carouselTimerRef.current);
-  }, [imageList.length, building.id]);
+  }, [startCarouselTimer, building.id]);
 
   const goPrev = () => {
-    clearInterval(carouselTimerRef.current);
     setCarouselIdx(prev => (prev - 1 + imageList.length) % imageList.length);
+    startCarouselTimer();
   };
   const goNext = () => {
-    clearInterval(carouselTimerRef.current);
     setCarouselIdx(prev => (prev + 1) % imageList.length);
+    startCarouselTimer();
   };
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, [chatMsgs]);
@@ -235,7 +240,7 @@ export function BuildingPopover({
                       <button
                         key={i}
                         className={`popover-carousel-dot ${i === carouselIdx ? 'popover-carousel-dot--active' : ''}`}
-                        onClick={() => { clearInterval(carouselTimerRef.current); setCarouselIdx(i); }}
+                        onClick={() => { setCarouselIdx(i); startCarouselTimer(); }}
                         aria-label={`第 ${i + 1} 张`}
                       />
                     ))}

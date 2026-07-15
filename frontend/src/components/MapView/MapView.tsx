@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useCallback, useLayoutEffect } from 'react';
-import { useMapInteraction } from '../../hooks/useMapInteraction';
+import { useMapInteraction, clampTransform } from '../../hooks/useMapInteraction';
 import { HotspotLayer } from './HotspotLayer';
 import { BuildingPopover } from '../BuildingPopover/BuildingPopover';
 import { FreshmanWindow } from '../FreshmanWindow/FreshmanWindow';
@@ -29,6 +29,12 @@ export function MapView({ buildings, selectedBuilding, onBuildingClick, onMapSta
   const imageRef = useRef<HTMLImageElement>(null);
   const [imageMeta, setImageMeta] = useState<MapImageMeta>({ width: 0, height: 0, loaded: false });
   const [containerSize, setContainerSize] = useState({ w: 0, h: 0 });
+
+  // Refs 保存最新值，供 resize 事件使用（避免闭包过期）
+  const imageMetaRef = useRef(imageMeta);
+  imageMetaRef.current = imageMeta;
+  const containerSizeRef = useRef(containerSize);
+  containerSizeRef.current = containerSize;
 
   const { transform, setTransform, isDragging, handlers, resetTransform } = useMapInteraction({
     containerRef,
@@ -69,11 +75,33 @@ export function MapView({ buildings, selectedBuilding, onBuildingClick, onMapSta
     resetTransform();
   }, [imageMeta.loaded, containerSize.w, containerSize.h, resetTransform]);
 
+  /* 窗口缩放时保持当前视野中心，不再重置视角 */
   useEffect(() => {
-    const onResize = () => { if (imageMeta.loaded) resetTransform(); };
+    const onResize = () => {
+      const meta = imageMetaRef.current;
+      if (!meta.loaded || !containerRef.current) return;
+      const el = containerRef.current;
+      const newCw = el.clientWidth;
+      const newCh = el.clientHeight;
+      if (newCw === 0 || newCh === 0) return;
+      const oldSize = containerSizeRef.current;
+      setTransform(prev => {
+        // 缩放前视口中心对应的地图坐标
+        const oldCw = oldSize.w || newCw;
+        const oldCh = oldSize.h || newCh;
+        const mx = (oldCw / 2 - prev.x) / prev.scale;
+        const my = (oldCh / 2 - prev.y) / prev.scale;
+        // 新缩放比例适配宽度
+        const newScale = newCw / meta.width;
+        return clampTransform(
+          { scale: newScale, x: newCw / 2 - mx * newScale, y: newCh / 2 - my * newScale },
+          newCw, newCh, meta.width, meta.height,
+        );
+      });
+    };
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
-  }, [imageMeta.loaded, resetTransform]);
+  }, [setTransform]);
 
   /* 响应 Minimap 导航事件 */
   useEffect(() => {

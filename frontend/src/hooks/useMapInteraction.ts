@@ -10,7 +10,7 @@ interface UseMapInteractionOptions {
 }
 
 /** 钳制变换，确保图片始终覆盖容器（拖拽不超出边界，不留白边） */
-function clampTransform(
+export function clampTransform(
   t: MapTransform,
   cw: number, ch: number,
   iw: number, ih: number,
