@@ -84,7 +84,7 @@ export function BuildingPopover({
   const nearbyRef = useRef<HTMLDivElement>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const carouselTimerRef = useRef<ReturnType<typeof setInterval>>();
+  const carouselTimerRef = useRef<ReturnType<typeof setInterval>>(undefined);
   const inputBlurGuard = useRef(false); // 防止移动端键盘收起时误关弹窗
 
   const openStatus = getOpenStatus(building.openTime);
