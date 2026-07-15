@@ -1,5 +1,4 @@
 import { useRef, useState, useEffect, useCallback, useLayoutEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { useMapInteraction, clampTransform } from '../../hooks/useMapInteraction';
 import { HotspotLayer } from './HotspotLayer';
 import { BuildingPopover } from '../BuildingPopover/BuildingPopover';
@@ -31,9 +30,6 @@ export function MapView({ buildings, selectedBuilding, onBuildingClick, onMapSta
   const [imageMeta, setImageMeta] = useState<MapImageMeta>({ width: 0, height: 0, loaded: false });
   const [containerSize, setContainerSize] = useState({ w: 0, h: 0 });
 
-  // 追踪 map-container 在页面中的偏移（供 Portal 定位用）
-  const [containerOffset, setContainerOffset] = useState({ left: 0, top: 0 });
-
   // Refs 保存最新值，供 resize 事件使用（避免闭包过期）
   const imageMetaRef = useRef(imageMeta);
   imageMetaRef.current = imageMeta;
@@ -51,13 +47,8 @@ export function MapView({ buildings, selectedBuilding, onBuildingClick, onMapSta
     if (!el) return;
     const ro = new ResizeObserver(([entry]) => {
       setContainerSize({ w: entry.contentRect.width, h: entry.contentRect.height });
-      const rect = el.getBoundingClientRect();
-      setContainerOffset({ left: rect.left, top: rect.top });
     });
     ro.observe(el);
-    // 初始偏移
-    const rect = el.getBoundingClientRect();
-    setContainerOffset({ left: rect.left, top: rect.top });
     return () => ro.disconnect();
   }, []);
 
@@ -133,7 +124,6 @@ export function MapView({ buildings, selectedBuilding, onBuildingClick, onMapSta
     : null;
 
   return (
-    <>
     <div
       className={`map-container ${isDragging ? 'map-container--dragging' : ''}`}
       ref={containerRef}
@@ -169,6 +159,27 @@ export function MapView({ buildings, selectedBuilding, onBuildingClick, onMapSta
         )}
       </div>
 
+      {/* 建筑气泡弹窗（渲染在变换层之外，不随地图缩放） */}
+      {selectedBuilding && selectedPopoverState && (
+        <BuildingPopover
+          building={selectedBuilding}
+          screenX={selectedPopoverState.screenX}
+          screenY={selectedPopoverState.screenY}
+          screenWidth={selectedPopoverState.screenW}
+          screenHeight={selectedPopoverState.screenH}
+          containerWidth={containerSize.w}
+          buildings={buildings}
+          onClose={() => onBuildingClick(null)}
+          onNavigateToBuilding={(bld) => {
+            const sx = transform.x + bld.hotspot.x * transform.scale;
+            const sy = transform.y + bld.hotspot.y * transform.scale;
+            const sw = bld.hotspot.width * transform.scale;
+            const sh = bld.hotspot.height * transform.scale;
+            onBuildingClick({ building: bld, screenX: sx, screenY: sy, screenWidth: sw, screenHeight: sh });
+          }}
+        />
+      )}
+
       {!selectedBuilding && <FreshmanWindow />}
 
       {/* 缩放控件 */}
@@ -203,27 +214,5 @@ export function MapView({ buildings, selectedBuilding, onBuildingClick, onMapSta
         <p className="map-hint">滚轮缩放 · 拖拽平移 · 点击建筑查看详情</p>
       )}
     </div>
-    {/* Portal 到 body 避免被 map-container overflow:hidden 裁切 */}
-    {selectedBuilding && selectedPopoverState && createPortal(
-      <BuildingPopover
-        building={selectedBuilding}
-        screenX={containerOffset.left + selectedPopoverState.screenX}
-        screenY={containerOffset.top + selectedPopoverState.screenY}
-        screenWidth={selectedPopoverState.screenW}
-        screenHeight={selectedPopoverState.screenH}
-        containerWidth={window.innerWidth}
-        buildings={buildings}
-        onClose={() => onBuildingClick(null)}
-        onNavigateToBuilding={(bld) => {
-          const sx = transform.x + bld.hotspot.x * transform.scale;
-          const sy = transform.y + bld.hotspot.y * transform.scale;
-          const sw = bld.hotspot.width * transform.scale;
-          const sh = bld.hotspot.height * transform.scale;
-          onBuildingClick({ building: bld, screenX: sx, screenY: sy, screenWidth: sw, screenHeight: sh });
-        }}
-      />,
-      document.body,
-    )}
-  </>
   );
 }
