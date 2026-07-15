@@ -2,6 +2,12 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import type { Building, ChatMessage } from '../../types';
 import './BuildingPopover.css';
 
+/** R2/CDN 图片基础 URL，未配置时回退到本地路径 */
+const IMAGE_BASE = import.meta.env.VITE_IMAGE_BASE_URL || '';
+
+const resolveImageUrl = (path: string) =>
+  IMAGE_BASE ? `${IMAGE_BASE}${path}` : path;
+
 interface BuildingPopoverProps {
   building: Building;
   screenX: number; screenY: number;
@@ -93,8 +99,8 @@ export function BuildingPopover({
 
   /* 图片列表：优先 images 数组，回退到单张 imageUrl */
   const imageList = building.images && building.images.length > 0
-    ? building.images
-    : building.imageUrl ? [building.imageUrl] : [];
+    ? building.images.map(resolveImageUrl)
+    : building.imageUrl ? [resolveImageUrl(building.imageUrl)] : [];
 
   /* 切换建筑时重置轮播索引 */
   useEffect(() => { setCarouselIdx(0); }, [building.id]);
