@@ -157,6 +157,7 @@ git push --set-upstream origin data/dorm-east
    - **base**: `main`（合并到哪里）
    - **compare**: 你的分支（从哪里合并）
 5. 填写标题和描述，说清楚做了什么
+   - **重要**：在描述第一行写 `Closes #编号`（如 `Closes #58`），合并后 GitHub 会自动关闭对应 Issue
 6. 点 **Create pull request**
 7. 在群里 @ 同组的同学帮忙 Review
 
@@ -196,6 +197,41 @@ git push origin 你的分支名
 
 # 7. 去 GitHub 网页创建 PR
 ```
+
+---
+
+## Issue 协作技巧
+
+### 怎么知道 Issue 有没有人在做？
+
+在开始写代码之前，先看一眼 Issue 有没有被认领：
+
+1. 打开 Issue 页面，看右侧 **Assignees** 一栏
+   - 如果有人头像 → **已经有人在做了**，换个 Issue 或去评论区问问还需不需要帮手
+2. 翻一下 Issue 评论区，看有没有人说「我来做」
+3. 看时间线里有没有 "linked a pull request" → 说明已经有 PR 在修了
+
+### 怎么认领 Issue？
+
+1. 在 Issues 列表里找一个没人做的 Issue（没有 Assignee 的）
+2. 打开 Issue，在评论区发一句「我来做这个」
+3. 点击右侧 **Assignees** → 点自己的头像 → 把自己设上去
+4. 开始写代码！
+
+> [!CAUTION]
+> **一定要先 Assign 再动手。** 两个人同时修一个 Bug → 一个人白干。花 10 秒点个 Assign，省几十分钟。
+
+### 怎么在 PR 里引用 Issue？
+
+在你创建 PR 的时候，在描述里写上：
+
+```markdown
+Closes #58
+```
+
+就这一行，合并 PR 后 GitHub 会自动帮你把 Issue 关掉。等价写法：`Fixes #58`、`Resolves #58`。多个 Issue 可以写在一起：`Closes #58, closes #59`。
+
+建议放在 PR 描述的第一行，这样 Reviewer 点进 PR 能直接看到关联的 Issue。
 
 ---
 
