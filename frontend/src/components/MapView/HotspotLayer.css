@@ -5,10 +5,18 @@
   align-items:center; justify-content:center; gap:5px;
   pointer-events:auto; background:transparent; border:none;
   cursor:pointer; transition:transform 0.3s var(--ease-spring);
+  -webkit-tap-highlight-color: transparent;
 }
 .hotspot:hover { transform:scale(1.1); }
 
-.hotspot-marker { position:relative; width:26px; height:26px; display:flex; align-items:center; justify-content:center; }
+.hotspot-marker {
+  position:relative; width:26px; height:26px;
+  display:flex; align-items:center; justify-content:center;
+}
+/* 移动端放大触摸区域 */
+@media (max-width:640px) {
+  .hotspot-marker { width:44px; height:44px; }
+}
 
 /* ---- 默认态：按分类使用不同颜色 ---- */
 .hotspot-marker-outer {
@@ -19,11 +27,18 @@
   box-shadow:0 0 14px rgba(37,99,235,0.2), var(--glass-highlight);
   transition:all var(--transition-fast);
 }
+@media (max-width:640px) {
+  .hotspot-marker-outer { width:38px; height:38px; border-width:3px; }
+}
+
 .hotspot-marker-inner {
   position:absolute; width:10px; height:10px;
   background:var(--color-blue-500); transform:rotate(45deg); border-radius:2px;
   box-shadow:0 0 6px rgba(37,99,235,0.3);
   transition:all var(--transition-fast);
+}
+@media (max-width:640px) {
+  .hotspot-marker-inner { width:14px; height:14px; }
 }
 
 /* 分类色标：outer 边框 + inner 色块 + glow */
@@ -75,6 +90,15 @@
   box-shadow:0 0 10px rgba(249,115,22,0.4);
 }
 
+/* 移动端：橙色高亮外圈放大 */
+@media (max-width:640px) {
+  .hotspot:hover .hotspot-marker-outer,
+  .hotspot--selected .hotspot-marker-outer {
+    border-width:3.5px;
+    box-shadow:0 0 36px rgba(249,115,22,0.5), 0 0 72px rgba(249,115,22,0.15), var(--glass-highlight);
+  }
+}
+
 .hotspot-label {
   font-family:var(--font-display); font-size:12px; font-weight:700; color:var(--color-slate-800);
   background:rgba(255,255,255,0.6); backdrop-filter:blur(10px);
@@ -83,14 +107,13 @@
   border:1px solid rgba(255,255,255,0.5);
   box-shadow:var(--glass-highlight), var(--shadow-sm);
   transition:all var(--transition-fast);
+  user-select:none; -webkit-user-select:none;
 }
 .hotspot:hover .hotspot-label,
 .hotspot--selected .hotspot-label { color:var(--color-orange-500); background:rgba(255,255,255,0.85); box-shadow:var(--shadow-card), var(--glass-highlight); }
 
-/* 移动端：放大标记以便手指点击 */
-@media (max-width: 640px) {
-  .hotspot-marker { width: 32px; height: 32px; }
-  .hotspot-marker-outer { width: 32px; height: 32px; border-width: 3px; }
-  .hotspot-marker-inner { width: 12px; height: 12px; }
-  .hotspot-label { font-size: 11px; padding: 3px 10px; }
+/* 移动端：标签字号放大，间距增加 */
+@media (max-width:640px) {
+  .hotspot-label { font-size:13px; padding:5px 14px; }
+  .hotspot { gap:7px; }
 }

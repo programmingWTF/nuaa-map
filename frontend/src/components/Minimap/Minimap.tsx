@@ -1,4 +1,4 @@
-import { useRef, useCallback, useEffect, useState } from 'react';
+import { useRef, useCallback, useEffect } from 'react';
 import type { MapTransform } from '../../types';
 import './Minimap.css';
 
@@ -20,7 +20,6 @@ export function Minimap({
   containerWidth, containerHeight, onNavigate,
 }: MinimapProps) {
   const canvasRef = useRef<HTMLDivElement>(null);
-  const [collapsed, setCollapsed] = useState(true);
   // 缩略图高度按图片真实比例计算（地图 1536×1536 → 1:1 → minimap 180×180）
   const minimapH = imageHeight > 0 ? Math.round(MINIMAP_W * imageHeight / imageWidth) : 120;
   // X/Y 分别使用独立 scale，避免方形地图在非方形缩略图上的坐标偏移
@@ -34,6 +33,14 @@ export function Minimap({
     startTx: 0, startTy: 0,
     moved: false,        // 是否移动超过阈值
   });
+
+  // Refs 保存最新值，供全局 document mousemove 使用（避免闭包过期）
+  const navRef = useRef(onNavigate);
+  navRef.current = onNavigate;
+  const transformRef = useRef(transform);
+  transformRef.current = transform;
+  const scaleRef = useRef({ scaleX, scaleY });
+  scaleRef.current = { scaleX, scaleY };
 
   /* 视口指示器 */
   const visX = -transform.x / transform.scale;
@@ -63,28 +70,29 @@ export function Minimap({
     };
   }, [transform.x, transform.y]);
 
-  /* ── 鼠标移动 ── */
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!dragRef.current.active) return;
-
-    const dx = e.clientX - dragRef.current.startX;
-    const dy = e.clientY - dragRef.current.startY;
-
-    // 超过阈值 → 进入拖拽模式
-    if (!dragRef.current.moved && (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD)) {
-      dragRef.current.moved = true;
-    }
-    if (!dragRef.current.moved) return;
-
-    // 缩略图像素 → 地图像素 → transform 偏移
-    const mapDx = dx / scaleX;
-    const mapDy = dy / scaleY;
-    onNavigate({
-      ...transform,
-      x: dragRef.current.startTx - mapDx * transform.scale,
-      y: dragRef.current.startTy - mapDy * transform.scale,
-    });
-  }, [scaleX, scaleY, transform, onNavigate]);
+  /* ── 全局 mousemove（鼠标拖出缩略图也能继续拖拽） ── */
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      if (!dragRef.current.active) return;
+      const dx = e.clientX - dragRef.current.startX;
+      const dy = e.clientY - dragRef.current.startY;
+      if (!dragRef.current.moved && (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD)) {
+        dragRef.current.moved = true;
+      }
+      if (!dragRef.current.moved) return;
+      const { scaleX: sx, scaleY: sy } = scaleRef.current;
+      const mapDx = dx / sx;
+      const mapDy = dy / sy;
+      const t = transformRef.current;
+      navRef.current({
+        ...t,
+        x: dragRef.current.startTx - mapDx * t.scale,
+        y: dragRef.current.startTy - mapDy * t.scale,
+      });
+    };
+    document.addEventListener('mousemove', onMove);
+    return () => document.removeEventListener('mousemove', onMove);
+  }, []);
 
   /* ── 鼠标松开 ── */
   const handleMouseUp = useCallback((e: React.MouseEvent) => {
@@ -150,21 +158,13 @@ export function Minimap({
   if (imageWidth === 0) return null;
 
   return (
-    <div className={`minimap${collapsed ? ' minimap--collapsed' : ''}`}>
-      <button
-        className="minimap-toggle"
-        onClick={() => setCollapsed(c => !c)}
-        aria-label={collapsed ? '展开缩略图' : '折叠缩略图'}
-      >
-        {collapsed ? '▲' : '▼'}
-      </button>
+    <div className="minimap">
       <div className="minimap-label">总览</div>
       <div
         ref={canvasRef}
         className="minimap-canvas minimap-canvas--draggable"
         style={{ width: MINIMAP_W, height: minimapH }}
         onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}

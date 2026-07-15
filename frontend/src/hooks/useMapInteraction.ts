@@ -10,7 +10,7 @@ interface UseMapInteractionOptions {
 }
 
 /** 钳制变换，确保图片始终覆盖容器（拖拽不超出边界，不留白边） */
-function clampTransform(
+export function clampTransform(
   t: MapTransform,
   cw: number, ch: number,
   iw: number, ih: number,
@@ -50,6 +50,35 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
     if (!cw || cw === 0 || !imageSize) return 0.5;
     return cw / imageSize.width;
   }, [containerRef, imageSize]);
+
+  /* 双击放大 */
+  const lastTapRef = useRef(0);
+  const DOUBLE_TAP_MS = 300;
+  const handleDoubleTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    const container = containerRef.current;
+    if (!container || !imageSize) return;
+    const rect = container.getBoundingClientRect();
+    const now = Date.now();
+    const clientX = 'touches' in e ? (e as React.TouchEvent).touches[0]?.clientX ?? 0 : (e as React.MouseEvent).clientX;
+    const clientY = 'touches' in e ? (e as React.TouchEvent).touches[0]?.clientY ?? 0 : (e as React.MouseEvent).clientY;
+
+    if (now - lastTapRef.current < DOUBLE_TAP_MS) {
+      // 双击：以点击位置为中心放大
+      setTransform(prev => {
+        const targetScale = prev.scale >= 2 ? getMinScale() : Math.min(MAX_SCALE, prev.scale * 2);
+        const cx = clientX - rect.left;
+        const cy = clientY - rect.top;
+        const ratio = targetScale / prev.scale;
+        return clampTransform(
+          { scale: targetScale, x: cx - ratio * (cx - prev.x), y: cy - ratio * (cy - prev.y) },
+          rect.width, rect.height, imageSize.width, imageSize.height,
+        );
+      });
+      lastTapRef.current = 0;
+    } else {
+      lastTapRef.current = now;
+    }
+  }, [containerRef, imageSize, getMinScale]);
 
   /* ── 滚轮缩放（以鼠标位置为中心，钳制边界） ── */
   const handleWheel = useCallback((e: WheelEvent) => {
@@ -218,6 +247,12 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
     return () => el.removeEventListener('wheel', handleWheel);
   }, [containerRef, handleWheel]);
 
+  /* 触摸开始：同时处理拖拽 + 双击检测 */
+  const handleTouchStartWithDoubleTap = useCallback((e: React.TouchEvent) => {
+    handleTouchStart(e);
+    handleDoubleTap(e);
+  }, [handleTouchStart, handleDoubleTap]);
+
   return {
     transform,
     setTransform,
@@ -226,9 +261,10 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
       onMouseDown: handleMouseDown,
       onMouseMove: handleMouseMove,
       onMouseUp: handleMouseUp,
-      onTouchStart: handleTouchStart,
+      onTouchStart: handleTouchStartWithDoubleTap,
       onTouchMove: handleTouchMove,
       onTouchEnd: handleTouchEnd,
+      onDoubleClick: handleDoubleTap,
     },
     resetTransform,
   };

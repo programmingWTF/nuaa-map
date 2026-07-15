@@ -81,7 +81,11 @@
     },
     "description": "主教学楼之一，配备多媒体教室和智慧教室。",
     "openTime": "周一至周五 7:00-21:30",
-    "floors": 6
+    "floors": 6,
+    "images": [
+      "/buildings/xuntian/01.jpg",
+      "/buildings/xuntian/02.jpg"
+    ]
   },
   {
     "id": "building-007",
@@ -95,7 +99,11 @@
     },
     "description": "综合性教学楼，设有多功能阶梯教室和实验室。",
     "openTime": "周一至周五 7:00-21:30",
-    "floors": 5
+    "floors": 5,
+    "images": [
+      "/buildings/muxing/01.jpg",
+      "/buildings/muxing/02.jpg"
+    ]
   },
   {
     "id": "building-008",
@@ -109,7 +117,11 @@
     },
     "description": "实践教学中心，配备各类专业实验室。",
     "openTime": "周一至周五 7:00-21:30",
-    "floors": 4
+    "floors": 4,
+    "images": [
+      "/buildings/duxing/01.jpg",
+      "/buildings/duxing/02.jpg"
+    ]
   },
   {
     "id": "building-009",
@@ -123,7 +135,11 @@
     },
     "description": "公共教学楼，以大型阶梯教室为主。",
     "openTime": "周一至周五 7:00-21:30",
-    "floors": 5
+    "floors": 5,
+    "images": [
+      "/buildings/zhixing/01.jpg",
+      "/buildings/zhixing/02.jpg"
+    ]
   },
   {
     "id": "building-010",
@@ -137,7 +153,11 @@
     },
     "description": "人文社科类教学与行政综合楼。",
     "openTime": "周一至周五 7:00-21:00",
-    "floors": 4
+    "floors": 4,
+    "images": [
+      "/buildings/shangde/01.jpg",
+      "/buildings/shangde/02.jpg"
+    ]
   },
   {
     "id": "building-011",
@@ -151,7 +171,11 @@
     },
     "description": "理工科实验教学楼A座。",
     "openTime": "周一至周五 7:00-21:30",
-    "floors": 5
+    "floors": 5,
+    "images": [
+      "/buildings/minghui/a-01.jpg",
+      "/buildings/minghui/a-02.jpg"
+    ]
   },
   {
     "id": "building-012",
@@ -165,7 +189,12 @@
     },
     "description": "理工科实验教学楼B座。",
     "openTime": "周一至周五 7:00-21:30",
-    "floors": 5
+    "floors": 5,
+    "images": [
+      "/buildings/minghui/b-01.jpg",
+      "/buildings/minghui/b-02.jpg",
+      "/buildings/minghui/b-03.jpg"
+    ]
   },
   {
     "id": "building-013",
@@ -179,7 +208,10 @@
     },
     "description": "理工科实验教学楼C座。",
     "openTime": "周一至周五 7:00-21:30",
-    "floors": 5
+    "floors": 5,
+    "images": [
+      "/buildings/minghui/c-01.jpg"
+    ]
   },
   {
     "id": "building-014",
@@ -193,7 +225,11 @@
     },
     "description": "理工科实验教学楼D座。",
     "openTime": "周一至周五 7:00-21:30",
-    "floors": 5
+    "floors": 5,
+    "images": [
+      "/buildings/minghui/d-01.jpg",
+      "/buildings/minghui/d-02.jpg"
+    ]
   },
   {
     "id": "building-015",
@@ -207,7 +243,10 @@
     },
     "description": "天目湖校区标志性建筑，藏书丰富，配备电子阅览室、研讨间和自习区。",
     "openTime": "周一至周日 8:00-22:00",
-    "floors": 5
+    "floors": 5,
+    "images": [
+      "/buildings/tushuguan/01.jpg"
+    ]
   },
   {
     "id": "building-016",
@@ -221,7 +260,11 @@
     },
     "description": "南山苑宿舍区配套食堂，两层风味窗口。",
     "openTime": "早餐 6:30-9:00 | 午餐 11:00-13:00 | 晚餐 17:00-19:30",
-    "floors": 2
+    "floors": 2,
+    "images": [
+      "/buildings/nanshan/01.jpg",
+      "/buildings/nanshan/02.jpg"
+    ]
   },
   {
     "id": "building-017",
@@ -235,7 +278,11 @@
     },
     "description": "东篱苑宿舍区配套食堂，提供各地风味美食。",
     "openTime": "早餐 6:30-9:00 | 午餐 11:00-13:00 | 晚餐 17:00-19:30",
-    "floors": 2
+    "floors": 2,
+    "images": [
+      "/buildings/dongli/02.jpg",
+      "/buildings/dongli/03.jpg"
+    ]
   },
   {
     "id": "building-018",
@@ -248,7 +295,12 @@
       "height": 70
     },
     "description": "本科生宿舍，四人间，上床下桌，独立卫浴。",
-    "floors": 7
+    "floors": 7,
+    "images": [
+      "/buildings/nanshan-sushe/b1-01.jpg",
+      "/buildings/nanshan-sushe/b1-02.jpg",
+      "/buildings/nanshan-sushe/b1-03.jpg"
+    ]
   },
   {
     "id": "building-019",
@@ -261,7 +313,10 @@
       "height": 70
     },
     "description": "本科生宿舍，四人间，配备空调和热水器。",
-    "floors": 7
+    "floors": 7,
+    "images": [
+      "/buildings/nanshan-sushe/b2-01.jpg"
+    ]
   },
   {
     "id": "building-020",
@@ -274,7 +329,10 @@
       "height": 70
     },
     "description": "本科生宿舍，四人间，独立卫浴。",
-    "floors": 7
+    "floors": 7,
+    "images": [
+      "/buildings/nanshan-sushe/b3-01.jpg"
+    ]
   },
   {
     "id": "building-021",
@@ -287,7 +345,10 @@
       "height": 70
     },
     "description": "本科生宿舍，四人间，配备空调和热水器。",
-    "floors": 7
+    "floors": 7,
+    "images": [
+      "/buildings/nanshan-sushe/b4-01.jpg"
+    ]
   },
   {
     "id": "building-022",
@@ -300,7 +361,11 @@
       "height": 70
     },
     "description": "研究生宿舍，两人间，配备独立卫浴和空调。",
-    "floors": 11
+    "floors": 11,
+    "images": [
+      "/buildings/dongli-sushe/01.jpg",
+      "/buildings/dongli-sushe/02.jpg"
+    ]
   },
   {
     "id": "building-023",
@@ -352,7 +417,8 @@
       "height": 55
     },
     "description": "教职工周转公寓。",
-    "floors": 6
+    "floors": 6,
+    "images": ["/buildings/zhigong/01.jpg", "/buildings/zhigong/02.jpg", "/buildings/zhigong/03.jpg"]
   },
   {
     "id": "building-027",
@@ -366,7 +432,8 @@
     },
     "description": "含室内篮球场、羽毛球场、游泳馆及健身房。",
     "openTime": "周一至周日 9:00-21:00",
-    "floors": 2
+    "floors": 2,
+    "images": ["/buildings/jianxiang/01.jpg"]
   },
   {
     "id": "building-028",
@@ -380,7 +447,8 @@
     },
     "description": "标准田径场及足球场，适合日常锻炼。",
     "openTime": "全天开放",
-    "floors": 0
+    "floors": 0,
+    "images": ["/buildings/xicao/01.jpg"]
   },
   {
     "id": "building-029",
@@ -394,7 +462,8 @@
     },
     "description": "户外运动场，含篮球场和网球场。",
     "openTime": "全天开放",
-    "floors": 0
+    "floors": 0,
+    "images": ["/buildings/dongcao/01.jpg", "/buildings/dongcao/02.jpg"]
   },
   {
     "id": "building-030",
@@ -408,7 +477,8 @@
     },
     "description": "室内综合运动场馆，可进行篮球、羽毛球等活动。",
     "openTime": "周一至周日 9:00-21:00",
-    "floors": 1
+    "floors": 1,
+    "images": ["/buildings/fengyu/01.jpg"]
   },
   {
     "id": "building-031",
@@ -422,7 +492,11 @@
     },
     "description": "校园生活服务中心，超市、快递、文印等。",
     "openTime": "周一至周日 8:00-20:00",
-    "floors": 2
+    "floors": 2,
+    "images": [
+      "/buildings/zonghe/01.jpg",
+      "/buildings/zonghe/02.jpg"
+    ]
   },
   {
     "id": "building-032",
@@ -436,7 +510,11 @@
     },
     "description": "一站式师生事务办理中心。",
     "openTime": "周一至周五 8:00-12:00, 14:00-17:00",
-    "floors": 1
+    "floors": 1,
+    "images": [
+      "/buildings/fuwu/01.jpg",
+      "/buildings/fuwu/02.jpg"
+    ]
   },
   {
     "id": "building-033",
@@ -450,7 +528,11 @@
     },
     "description": "提供基本医疗服务，24小时急诊，支持校园医保。",
     "openTime": "门诊 8:00-17:00 | 急诊 24小时",
-    "floors": 2
+    "floors": 2,
+    "images": [
+      "/buildings/xiaoyiyuan/01.jpg",
+      "/buildings/xiaoyiyuan/02.jpg"
+    ]
   },
   {
     "id": "building-034",
@@ -464,7 +546,8 @@
     },
     "description": "校园中心景观湖，环湖步道景色优美。",
     "openTime": "全天开放",
-    "floors": 0
+    "floors": 0,
+    "images": ["/buildings/sishuihu.jpg"]
   },
   {
     "id": "building-035",

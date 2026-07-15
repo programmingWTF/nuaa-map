@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { TopBar } from './components/TopBar/TopBar';
 import { MapView } from './components/MapView/MapView';
 import type { MapViewState } from './components/MapView/MapView';
@@ -18,13 +18,6 @@ function App() {
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
   const [mapState, setMapState] = useState<MapViewState>(DEFAULT_MAP_STATE);
   const buildings = mockBuildings as Building[];
-
-  /* iOS 设备检测，用于安全区域适配 */
-  useEffect(() => {
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
-      || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    if (isIOS) document.documentElement.classList.add('ios');
-  }, []);
 
   const handleBuildingClick = useCallback((data: BuildingClickData | null) => {
     setSelectedBuilding(data?.building ?? null);
@@ -63,19 +56,23 @@ function App() {
           onMapStateChange={setMapState}
         />
       </main>
-      <Minimap
-        imageSrc={mapState.imageSrc || '/placeholder-map.svg'}
-        imageWidth={mapState.imageWidth}
-        imageHeight={mapState.imageHeight}
-        transform={mapState.transform}
-        containerWidth={mapState.containerWidth}
-        containerHeight={mapState.containerHeight}
-        onNavigate={handleMinimapNavigate}
-      />
-      <ChatWidget
-        selectedBuilding={selectedBuilding}
-        onViewBuilding={(bld) => handleSearchSelect(bld)}
-      />
+      {!selectedBuilding && (
+        <Minimap
+          imageSrc={mapState.imageSrc || '/placeholder-map.svg'}
+          imageWidth={mapState.imageWidth}
+          imageHeight={mapState.imageHeight}
+          transform={mapState.transform}
+          containerWidth={mapState.containerWidth}
+          containerHeight={mapState.containerHeight}
+          onNavigate={handleMinimapNavigate}
+        />
+      )}
+      {!selectedBuilding && (
+        <ChatWidget
+          selectedBuilding={selectedBuilding}
+          onViewBuilding={(bld) => handleSearchSelect(bld)}
+        />
+      )}
     </div>
   );
 }

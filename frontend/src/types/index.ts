@@ -17,6 +17,8 @@ export interface Building {
   floors?: number;
   facilities?: string[];
   imageUrl?: string;
+  /** 多张图片，用于轮播。为空时回退到 imageUrl */
+  images?: string[];
 }
 
 /** 地图交互状态 */
