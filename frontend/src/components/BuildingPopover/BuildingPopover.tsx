@@ -204,28 +204,24 @@ export function BuildingPopover({
           className="popover"
           style={{ maxHeight: POPOVER_MAX_H }}
           role="dialog" aria-label={`${building.name} 详情`}
+          onTouchStart={e => {
+            if (e.touches.length === 1) {
+              swipeStartY.current = e.touches[0].clientY;
+              swipeActive.current = true;
+            }
+          }}
+          onTouchMove={e => {
+            if (!swipeActive.current || e.touches.length !== 1) return;
+            const dy = e.touches[0].clientY - swipeStartY.current;
+            if (dy > 60) { swipeActive.current = false; onClose(); }
+          }}
+          onTouchEnd={() => { swipeActive.current = false; }}
         >
           <div className={`popover-arrow popover-arrow--${arrowDir}`}
             style={{ left: `calc(50% + ${arrowOff}px)` }} />
 
           {/* 移动端下滑手柄 */}
           <div className="popover-drag-handle" />
-
-          {/* 移动端下滑关闭 */}
-          <div className="popover-body-scroll"
-            onTouchStart={e => {
-              if (e.touches.length === 1) {
-                swipeStartY.current = e.touches[0].clientY;
-                swipeActive.current = true;
-              }
-            }}
-            onTouchMove={e => {
-              if (!swipeActive.current || e.touches.length !== 1) return;
-              const dy = e.touches[0].clientY - swipeStartY.current;
-              if (dy > 60) { swipeActive.current = false; onClose(); }
-            }}
-            onTouchEnd={() => { swipeActive.current = false; }}
-          >
 
           {/* 照片区：有图轮播，无图用分类色块 */}
           {imageList.length > 0 ? (
@@ -379,7 +375,6 @@ export function BuildingPopover({
               </div>
             </div>
           </div>
-          </div> {/* popover-body-scroll */}
         </div>
       </div>
     </>
