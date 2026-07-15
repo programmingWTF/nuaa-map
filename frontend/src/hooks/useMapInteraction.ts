@@ -44,6 +44,13 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
     midX: 0, midY: 0,
   });
 
+  /* 动态最小缩放 = 容器宽度 / 图片宽度（保证左右边界对齐窗口） */
+  const getMinScale = useCallback(() => {
+    const cw = containerRef.current?.clientWidth;
+    if (!cw || cw === 0 || !imageSize) return 0.5;
+    return cw / imageSize.width;
+  }, [containerRef, imageSize]);
+
   /* 双击放大 */
   const lastTapRef = useRef(0);
   const DOUBLE_TAP_MS = 300;
@@ -72,13 +79,6 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
       lastTapRef.current = now;
     }
   }, [containerRef, imageSize, getMinScale]);
-
-  /* 动态最小缩放 = 容器宽度 / 图片宽度（保证左右边界对齐窗口） */
-  const getMinScale = useCallback(() => {
-    const cw = containerRef.current?.clientWidth;
-    if (!cw || cw === 0 || !imageSize) return 0.5;
-    return cw / imageSize.width;
-  }, [containerRef, imageSize]);
 
   /* ── 滚轮缩放（以鼠标位置为中心，钳制边界） ── */
   const handleWheel = useCallback((e: WheelEvent) => {
