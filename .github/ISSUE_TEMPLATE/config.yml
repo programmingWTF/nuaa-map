@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 查看协作规范
+    url: https://github.com/programmingWTF/nuaa-map/blob/main/CONTRIBUTING.md
+    about: 提交 Issue 前请先阅读团队协作规范
+  - name: 查看 CLAUDE.md
+    url: https://github.com/programmingWTF/nuaa-map/blob/main/CLAUDE.md
+    about: AI 工具行为准则与 Issue 规范详见项目规则书
