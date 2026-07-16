@@ -19,23 +19,19 @@ function App() {
   const [mapState, setMapState] = useState<MapViewState>(DEFAULT_MAP_STATE);
   const buildings = mockBuildings as Building[];
 
-  /* 点击地标：视野内→不动，视野外→平移居中不缩放 */
+  /* 点击地标 → 平移居中（偏移让弹窗有空间），保持当前缩放 */
   const handleBuildingClick = useCallback((data: BuildingClickData | null) => {
     setSelectedBuilding(data?.building ?? null);
     if (!data) return;
-    const { containerWidth, containerHeight, imageWidth, imageHeight } = mapState;
+    const { containerWidth, containerHeight, imageWidth, imageHeight, transform } = mapState;
     if (!imageWidth || !imageHeight || !containerWidth || !containerHeight) return;
-    const sx = data.screenX, sy = data.screenY;
-    const sw = data.screenWidth, sh = data.screenHeight;
-    // 建筑已在视野内 → 不移动地图
-    if (sx + sw > 0 && sx < containerWidth && sy + sh > 0 && sy < containerHeight) return;
-    // 建筑在视野外 → 平移到视口中心，保持当前缩放
     const b = data.building;
     const cx = b.hotspot.x + b.hotspot.width / 2;
     const cy = b.hotspot.y + b.hotspot.height / 2;
-    const { scale } = mapState.transform;
+    const { scale } = transform;
+    // 弹窗在建筑上方 ~400px，建筑下移 200px 给弹窗留空间
     window.dispatchEvent(new CustomEvent('map-navigate', {
-      detail: { scale, x: containerWidth / 2 - cx * scale, y: containerHeight / 2 - cy * scale },
+      detail: { scale, x: containerWidth / 2 - cx * scale, y: containerHeight / 2 - cy * scale + 200 },
     }));
   }, [mapState]);
 
