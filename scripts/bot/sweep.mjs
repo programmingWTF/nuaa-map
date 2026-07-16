@@ -17,7 +17,7 @@ const CONFIG = {
   GH_TOKEN: process.env.GH_TOKEN || "",
   REPO: "programmingWTF/nuaa-map",
   REPO_API: "https://api.github.com/repos/programmingWTF/nuaa-map",
-  BOT_LOGIN: "nuaamap-bot",
+  BOT_LOGIN: "LiGuiyu-AI",
 
   DEEPSEEK_API: "https://token.nuaa.edu.cn/v1/chat/completions",
   DEEPSEEK_MODEL: "deepseek-v4-pro",
