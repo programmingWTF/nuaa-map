@@ -207,10 +207,16 @@ export function BuildingPopover({
 
   return (
     <>
-      <div className="popover-backdrop" onClick={() => {
-        if (inputBlurGuard.current) return; // 键盘刚收起，不关
-        onClose();
-      }} />
+      <div className="popover-backdrop"
+        onPointerDown={(e) => {
+          // 阻止穿透到背后的地标
+          e.stopPropagation();
+          e.preventDefault();
+          if (inputBlurGuard.current) return;
+          onClose();
+        }}
+        onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
+      />
       <div
         className={`popover-anchor${anchorAbove ? ' popover-anchor--above' : ''}`}
         style={{ left: popLeft, top: anchorTop, width: POPOVER_W }}
@@ -219,6 +225,9 @@ export function BuildingPopover({
           ref={popoverRef}
           className="popover"
           style={{ maxHeight: POPOVER_MAX_H }}
+          onTouchStart={(e) => { e.stopPropagation(); }}
+          onTouchMove={(e) => { e.stopPropagation(); }}
+          onTouchEnd={(e) => { e.stopPropagation(); }}
           role="dialog" aria-label={`${building.name} 详情`}
         >
           <div className={`popover-arrow popover-arrow--${arrowDir}`}
