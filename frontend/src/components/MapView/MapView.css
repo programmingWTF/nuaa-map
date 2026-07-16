@@ -22,7 +22,7 @@
 }
 @keyframes spin { to { transform:rotate(360deg); } }
 
-.map-layer { position:absolute; top:0; left:0; transition:opacity 0.4s ease, transform 0.25s cubic-bezier(0.25,0.1,0.25,1); }
+.map-layer { position:absolute; top:0; left:0; transition:opacity 0.4s ease, transform 0.25s cubic-bezier(0.25,0.1,0.25,1); will-change:transform; backface-visibility:hidden; -webkit-backface-visibility:hidden; }
 .map-container--dragging .map-layer { transition:opacity 0.4s ease, transform 0s; }
 .map-image { display:block; max-width:none; user-select:none; -webkit-user-drag:none; }
 
