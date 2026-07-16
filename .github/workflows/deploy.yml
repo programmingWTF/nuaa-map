@@ -21,11 +21,24 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
 
+          # Encode GitHub deploy key to safely pass through SSH
+          GH_KEY_B64=$(echo "${{ secrets.GH_DEPLOY_KEY }}" | base64 -w0)
+
           ssh -o StrictHostKeyChecking=accept-new \
               -o ProxyCommand="cloudflared access ssh --hostname ssh-server.liguiyu.com --service-token-id ${{ secrets.CF_SERVICE_TOKEN_ID }} --service-token-secret ${{ secrets.CF_SERVICE_TOKEN_SECRET }}" \
               LiGuiyu@ssh-server.liguiyu.com "
             cd /vol1/1000/Docker/NUAAMap
-            git fetch origin main
+
+            # Setup GitHub SSH key (one-time, survives across deploys)
+            if [ ! -f ~/.ssh/github_deploy_key ]; then
+              echo '$GH_KEY_B64' | base64 -d > ~/.ssh/github_deploy_key
+              chmod 600 ~/.ssh/github_deploy_key
+              ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
+              git remote set-url origin git@github.com:programmingWTF/nuaa-map.git
+            fi
+
+            GIT_SSH_COMMAND='ssh -i ~/.ssh/github_deploy_key -o StrictHostKeyChecking=accept-new' \
+              git fetch origin main
             git reset --hard origin/main
             docker compose up -d --build
           "
