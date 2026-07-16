@@ -160,6 +160,7 @@ export function MapView({ buildings, selectedBuilding, onBuildingClick, onMapSta
             transform={transform}
             onBuildingClick={onBuildingClick}
             selectedBuildingId={selectedBuilding?.id}
+            disabled={!!selectedBuilding}
           />
         )}
       </div>
