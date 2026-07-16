@@ -1,8 +1,9 @@
 // NUAAMap AI 维护 Bot
-// 部署在 NAS，通过 EasyConnect VPN 代理访问南航 DeepSeek API
-// 运行方式: GH_TOKEN=ghp_xxx DEEPSEEK_KEY=sk-xxx ALL_PROXY=socks5h://127.0.0.1:1080 node sweep.mjs
+// 部署在 NAS，DeepSeek 调用显式走 EasyConnect SOCKS5 代理
+// 运行方式: GH_TOKEN=ghp_xxx DEEPSEEK_KEY=sk-xxx node sweep.mjs
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
+import { execSync } from "node:child_process";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -74,12 +75,21 @@ function extractIssueNumber(issueUrl) {
 // ============================================================
 
 const VALID_LABELS = [
+  // 小组
   "小组：①手绘地图", "小组：②交互功能", "小组：③平台搭建",
-  "小组：④数据采集", "小组：⑤AI智能体", "小组：⑥坐标标注",
+  "小组：④数据采集", "小组：⑤AI智能体", "小组：⑥坐标标注", "小组：全体",
+  // 类型
   "类型：Bug", "类型：功能请求", "类型：文档", "类型：问题咨询", "类型：设计优化",
+  "类型：重构", "类型：性能优化",
+  // 优先级
   "优先级：紧急", "优先级：高", "优先级：中", "优先级：低",
+  // 状态
   "状态：需要更多信息", "状态：进行中", "状态：等待审核", "状态：已过时",
+  "状态：已确认", "状态：已修复", "状态：无法复现", "状态：重复", "状态：已驳回",
+  // 难度
   "难度：适合新手", "难度：中等", "难度：复杂",
+  // 规模
+  "规模：小", "规模：中", "规模：大",
 ];
 
 async function ensureLabelsExist() {
@@ -160,8 +170,58 @@ async function postComment(issueNumber, body) {
 }
 
 // ============================================================
-// DeepSeek AI 分析
+// DeepSeek API 调用（显式走 EasyConnect 代理）
 // ============================================================
+
+function callDeepSeek(messages) {
+  const body = JSON.stringify({
+    model: CONFIG.DEEPSEEK_MODEL,
+    messages,
+    temperature: 0.3,
+    max_tokens: 2000,
+  });
+
+  // 用 curl 显式指定 SOCKS5 代理，只影响这个 API 调用
+  const cmd = [
+    "curl -s --connect-timeout 15 --max-time 60",
+    "--proxy socks5h://127.0.0.1:1080",
+    `-H "Authorization: Bearer ${CONFIG.DEEPSEEK_KEY}"`,
+    `-H "Content-Type: application/json"`,
+    `-d '${body.replace(/'/g, "'\\''")}'`,
+    CONFIG.DEEPSEEK_API,
+  ].join(" ");
+
+  // 最多重试 3 次，每次间隔递增
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const stdout = execSync(cmd, {
+        encoding: "utf-8",
+        timeout: 65000,
+        stdio: ["pipe", "pipe", "pipe"],
+      });
+      const data = JSON.parse(stdout);
+      if (data.error) {
+        throw new Error(`API error: ${JSON.stringify(data.error)}`);
+      }
+      return data;
+    } catch (e) {
+      const isLastAttempt = attempt === 3;
+      if (isLastAttempt) {
+        const msg = e.stdout ? e.stdout.toString().slice(0, 100) : e.message;
+        throw new Error(`DeepSeek 不可达 (尝试${attempt}次): ${msg}`);
+      }
+      log(`  ⚠️ DeepSeek 第${attempt}次失败，${2 ** attempt}秒后重试...`);
+      const waitMs = 2 ** attempt * 1000;
+      sleep(waitMs);
+    }
+  }
+}
+
+// 同步 sleep
+function sleep(ms) {
+  const end = Date.now() + ms;
+  while (Date.now() < end) { /* spin */ }
+}
 
 const SYSTEM_PROMPT = `你是 NUAAMap 项目的 AI 维护助手。你在帮助一个大学生暑期社会实践团队管理 GitHub Issue 和 Pull Request。
 
@@ -221,29 +281,11 @@ async function analyzeItem(item) {
   const userMessage = context.join("\n\n---\n\n");
 
   try {
-    const res = await fetch(CONFIG.DEEPSEEK_API, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${CONFIG.DEEPSEEK_KEY}`,
-      },
-      body: JSON.stringify({
-        model: CONFIG.DEEPSEEK_MODEL,
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: userMessage },
-        ],
-        temperature: 0.3,
-        max_tokens: 2000,
-      }),
-    });
+    const data = callDeepSeek([
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user", content: userMessage },
+    ]);
 
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(`${res.status}: ${err.slice(0, 200)}`);
-    }
-
-    const data = await res.json();
     const content = data.choices?.[0]?.message?.content || "";
 
     // 提取 JSON
@@ -419,12 +461,32 @@ async function sweepDaily() {
   const now = Date.now();
   const DAY = 24 * 60 * 60 * 1000;
   let staleN = 0;
+  let labelN = 0;
 
   for (const item of allItems) {
+    const existingLabels = (item.labels || []).map((l) => l.name);
+
+    // 1. 缺中文标签 → AI 分析 + 补标签
+    const hasOurLabel = existingLabels.some((l) => VALID_LABELS.includes(l));
+    if (!hasOurLabel) {
+      const key = `labeled_${item.number}`;
+      if (!state.reviewed[key]) {
+        log(`  🏷️ #${item.number} 缺中文标签 → AI 分析`);
+        const result = await analyzeItem(item);
+        if (result?.labels?.length > 0) {
+          await addLabels(item.number, result.labels);
+          log(`     → ${result.labels.join(", ")}`);
+          labelN++;
+        }
+        state.reviewed[key] = { at: now };
+      }
+    }
+
+    // 2. 过时检查
     const updated = new Date(item.updated_at).getTime();
     const age = Math.floor((now - updated) / DAY);
 
-    if (age >= 60 && (item.labels || []).length === 0) {
+    if (age >= 60 && existingLabels.length === 0) {
       // 60 天+无标签 → 标记过时
       log(`  🕐 #${item.number} ${age}天未更新 | 无标签 → 标记过时`);
       await addLabels(item.number, ["状态：已过时"]);
@@ -456,7 +518,7 @@ async function sweepDaily() {
 
   state.lastDailySweep = today;
   saveState(state);
-  log(`  ✅ 处理 ${staleN} 个过时项`);
+  log(`  ✅ 补标签 ${labelN} 个，过时处理 ${staleN} 个`);
 }
 
 // ============================================================
