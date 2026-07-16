@@ -1,8 +1,9 @@
 // NUAAMap AI 维护 Bot
-// 部署在 NAS，通过 EasyConnect VPN 代理访问南航 DeepSeek API
-// 运行方式: GH_TOKEN=ghp_xxx DEEPSEEK_KEY=sk-xxx ALL_PROXY=socks5h://127.0.0.1:1080 node sweep.mjs
+// 部署在 NAS，DeepSeek 调用显式走 EasyConnect SOCKS5 代理
+// 运行方式: GH_TOKEN=ghp_xxx DEEPSEEK_KEY=sk-xxx node sweep.mjs
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
+import { execSync } from "node:child_process";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -169,8 +170,58 @@ async function postComment(issueNumber, body) {
 }
 
 // ============================================================
-// DeepSeek AI 分析
+// DeepSeek API 调用（显式走 EasyConnect 代理）
 // ============================================================
+
+function callDeepSeek(messages) {
+  const body = JSON.stringify({
+    model: CONFIG.DEEPSEEK_MODEL,
+    messages,
+    temperature: 0.3,
+    max_tokens: 2000,
+  });
+
+  // 用 curl 显式指定 SOCKS5 代理，只影响这个 API 调用
+  const cmd = [
+    "curl -s --connect-timeout 15 --max-time 60",
+    "--proxy socks5h://127.0.0.1:1080",
+    `-H "Authorization: Bearer ${CONFIG.DEEPSEEK_KEY}"`,
+    `-H "Content-Type: application/json"`,
+    `-d '${body.replace(/'/g, "'\\''")}'`,
+    CONFIG.DEEPSEEK_API,
+  ].join(" ");
+
+  // 最多重试 3 次，每次间隔递增
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const stdout = execSync(cmd, {
+        encoding: "utf-8",
+        timeout: 65000,
+        stdio: ["pipe", "pipe", "pipe"],
+      });
+      const data = JSON.parse(stdout);
+      if (data.error) {
+        throw new Error(`API error: ${JSON.stringify(data.error)}`);
+      }
+      return data;
+    } catch (e) {
+      const isLastAttempt = attempt === 3;
+      if (isLastAttempt) {
+        const msg = e.stdout ? e.stdout.toString().slice(0, 100) : e.message;
+        throw new Error(`DeepSeek 不可达 (尝试${attempt}次): ${msg}`);
+      }
+      log(`  ⚠️ DeepSeek 第${attempt}次失败，${2 ** attempt}秒后重试...`);
+      const waitMs = 2 ** attempt * 1000;
+      sleep(waitMs);
+    }
+  }
+}
+
+// 同步 sleep
+function sleep(ms) {
+  const end = Date.now() + ms;
+  while (Date.now() < end) { /* spin */ }
+}
 
 const SYSTEM_PROMPT = `你是 NUAAMap 项目的 AI 维护助手。你在帮助一个大学生暑期社会实践团队管理 GitHub Issue 和 Pull Request。
 
@@ -230,29 +281,11 @@ async function analyzeItem(item) {
   const userMessage = context.join("\n\n---\n\n");
 
   try {
-    const res = await fetch(CONFIG.DEEPSEEK_API, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${CONFIG.DEEPSEEK_KEY}`,
-      },
-      body: JSON.stringify({
-        model: CONFIG.DEEPSEEK_MODEL,
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: userMessage },
-        ],
-        temperature: 0.3,
-        max_tokens: 2000,
-      }),
-    });
+    const data = callDeepSeek([
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user", content: userMessage },
+    ]);
 
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(`${res.status}: ${err.slice(0, 200)}`);
-    }
-
-    const data = await res.json();
     const content = data.choices?.[0]?.message?.content || "";
 
     // 提取 JSON
