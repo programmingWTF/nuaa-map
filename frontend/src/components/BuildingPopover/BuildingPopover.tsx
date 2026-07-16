@@ -220,14 +220,13 @@ export function BuildingPopover({
       <div
         className={`popover-anchor${anchorAbove ? ' popover-anchor--above' : ''}`}
         style={{ left: popLeft, top: anchorTop, width: POPOVER_W }}
+        onTouchStart={(e) => { e.stopPropagation(); }}
+        onTouchMove={(e) => { e.stopPropagation(); }}
       >
         <div
           ref={popoverRef}
           className="popover"
           style={{ maxHeight: POPOVER_MAX_H }}
-          onTouchStart={(e) => { e.stopPropagation(); }}
-          onTouchMove={(e) => { e.stopPropagation(); }}
-          onTouchEnd={(e) => { e.stopPropagation(); }}
           role="dialog" aria-label={`${building.name} 详情`}
         >
           <div className={`popover-arrow popover-arrow--${arrowDir}`}
@@ -304,7 +303,9 @@ export function BuildingPopover({
             </button>
           </div>
 
-          <div className="popover-body">
+          <div className="popover-body"
+            onTouchStart={(e) => { e.stopPropagation(); }}
+            onTouchMove={(e) => { e.stopPropagation(); }}>
             <p className="popover-desc">{building.description}</p>
             <div className="popover-meta">
               {building.openTime && (
