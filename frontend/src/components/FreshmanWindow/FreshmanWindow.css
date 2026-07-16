@@ -589,7 +589,8 @@
   .freshman-window__toggle {
     align-self: flex-end;
     width: auto;
-    padding: 8px 14px;
+    min-height: 44px;
+    padding: 10px 16px;
     font-size: 0.82rem;
   }
 

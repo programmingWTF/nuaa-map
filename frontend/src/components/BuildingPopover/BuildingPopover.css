@@ -1,8 +1,8 @@
-.popover-backdrop { position:absolute; inset:0; z-index:50; }
+.popover-backdrop { position:absolute; inset:0; z-index:105; }
 
 /* 定位锚点 */
 .popover-anchor {
-  position:absolute; z-index:60;
+  position:absolute; z-index:106;
 }
 .popover-anchor--above {
   transform: translateY(-100%);
@@ -167,8 +167,12 @@
   .popover { max-width:100vw!important; max-height:65dvh; border-radius:var(--radius-lg) var(--radius-lg) 0 0; }
   .popover-hero { height:140px; }
   .popover-drag-handle { display:block; }
-  .popover-carousel-btn { opacity:1; width:24px; height:24px; }
-  .popover-carousel-dots { bottom:28px; }
+  .popover-carousel-btn { opacity:1; width:44px; height:44px; }
+  .popover-carousel-dots { bottom:32px; gap:10px; }
+  .popover-carousel-dot { width:10px; height:10px; }
+  .popover-carousel-dot--active { width:22px; }
+  .popover-close { width:44px; height:44px; }
+  .popover-chat-send { width:44px; height:44px; }
   .popover::before,.popover::after { display:none; }
   .popover-arrow { display:none; }
   .popover-backdrop { background:rgba(15,23,42,0.3); }

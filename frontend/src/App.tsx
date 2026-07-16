@@ -19,9 +19,25 @@ function App() {
   const [mapState, setMapState] = useState<MapViewState>(DEFAULT_MAP_STATE);
   const buildings = mockBuildings as Building[];
 
+  /* 点击地标：视野内→不动，视野外→平移居中不缩放 */
   const handleBuildingClick = useCallback((data: BuildingClickData | null) => {
     setSelectedBuilding(data?.building ?? null);
-  }, []);
+    if (!data) return;
+    const { containerWidth, containerHeight, imageWidth, imageHeight } = mapState;
+    if (!imageWidth || !imageHeight || !containerWidth || !containerHeight) return;
+    const sx = data.screenX, sy = data.screenY;
+    const sw = data.screenWidth, sh = data.screenHeight;
+    // 建筑已在视野内 → 不移动地图
+    if (sx + sw > 0 && sx < containerWidth && sy + sh > 0 && sy < containerHeight) return;
+    // 建筑在视野外 → 平移到视口中心，保持当前缩放
+    const b = data.building;
+    const cx = b.hotspot.x + b.hotspot.width / 2;
+    const cy = b.hotspot.y + b.hotspot.height / 2;
+    const { scale } = mapState.transform;
+    window.dispatchEvent(new CustomEvent('map-navigate', {
+      detail: { scale, x: containerWidth / 2 - cx * scale, y: containerHeight / 2 - cy * scale },
+    }));
+  }, [mapState]);
 
   const handleMinimapNavigate = useCallback((t: MapTransform) => {
     window.dispatchEvent(new CustomEvent('map-navigate', { detail: t }));
