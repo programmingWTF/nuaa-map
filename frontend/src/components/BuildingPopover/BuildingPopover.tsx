@@ -185,20 +185,30 @@ export function BuildingPopover({
   let arrowDir: 'bottom' | 'top';
   let anchorAbove = false;
 
-  // 上方空间是否足够
-  const fitsAbove = hotspotTop - POPOVER_MAX_H - GAP - ARROW_H >= 0;
-  // 下方空间是否足够（有 containerHeight 时才检查）
-  const fitsBelow = containerHeight > 0
-    ? hotspotBot + POPOVER_MAX_H + GAP + ARROW_H <= containerHeight
-    : true;
+  const spaceAbove = hotspotTop - GAP - ARROW_H;
+  const spaceBelow = containerHeight > 0
+    ? containerHeight - hotspotBot - GAP - ARROW_H
+    : POPOVER_MAX_H;
 
-  if (fitsAbove || !fitsBelow) {
+  if (spaceAbove >= POPOVER_MAX_H) {
+    // 上方空间够 → 放上方
     anchorTop = hotspotTop - GAP - ARROW_H;
     arrowDir = 'bottom';
     anchorAbove = true;
-  } else {
+  } else if (spaceBelow >= POPOVER_MAX_H) {
+    // 上方不够、下方够 → 放下方
     anchorTop = hotspotBot + GAP + ARROW_H;
     arrowDir = 'top';
+  } else {
+    // 上下都不够 → 哪边空间大放哪边
+    if (spaceAbove >= spaceBelow) {
+      anchorTop = hotspotTop - GAP - ARROW_H;
+      arrowDir = 'bottom';
+      anchorAbove = true;
+    } else {
+      anchorTop = hotspotBot + GAP + ARROW_H;
+      arrowDir = 'top';
+    }
   }
 
   let popLeft = hotspotCX - POPOVER_W / 2;
