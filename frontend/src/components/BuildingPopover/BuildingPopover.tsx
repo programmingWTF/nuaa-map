@@ -13,6 +13,7 @@ interface BuildingPopoverProps {
   screenX: number; screenY: number;
   screenWidth: number; screenHeight: number;
   containerWidth: number;
+  containerHeight: number;
   buildings: Building[];
   onClose: () => void;
   onNavigateToBuilding: (building: Building) => void;
@@ -80,7 +81,7 @@ function walkTime(px: number): string {
 
 export function BuildingPopover({
   building, screenX, screenY, screenWidth, screenHeight,
-  containerWidth, buildings, onClose, onNavigateToBuilding,
+  containerWidth, containerHeight, buildings, onClose, onNavigateToBuilding,
 }: BuildingPopoverProps) {
   const [chatMsgs, setChatMsgs] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
@@ -175,7 +176,7 @@ export function BuildingPopover({
     }, 1000);
   }, [chatInput, chatLoading, building]);
 
-  /* 定位 */
+  /* 定位（钳制在容器边界内，避免被 overflow:hidden 裁切） */
   const hotspotCX = screenX + screenWidth / 2;
   const hotspotTop = screenY;
   const hotspotBot = screenY + screenHeight;
@@ -184,13 +185,19 @@ export function BuildingPopover({
   let arrowDir: 'bottom' | 'top';
   let anchorAbove = false;
 
-  const belowTop = hotspotBot + GAP + ARROW_H;
-  if (hotspotTop - POPOVER_MAX_H - GAP - ARROW_H >= 0) {
+  // 上方空间是否足够
+  const fitsAbove = hotspotTop - POPOVER_MAX_H - GAP - ARROW_H >= 0;
+  // 下方空间是否足够（有 containerHeight 时才检查）
+  const fitsBelow = containerHeight > 0
+    ? hotspotBot + POPOVER_MAX_H + GAP + ARROW_H <= containerHeight
+    : true;
+
+  if (fitsAbove || !fitsBelow) {
     anchorTop = hotspotTop - GAP - ARROW_H;
     arrowDir = 'bottom';
     anchorAbove = true;
   } else {
-    anchorTop = belowTop;
+    anchorTop = hotspotBot + GAP + ARROW_H;
     arrowDir = 'top';
   }
 

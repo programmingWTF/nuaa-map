@@ -19,6 +19,13 @@ export function HotspotLayer({
       {buildings.map((b) => {
         const { x, y, width, height } = b.hotspot;
         const isSelected = b.id === selectedBuildingId;
+        // 移动端保证点击区域至少 44×44 屏幕像素（反算为地图坐标）
+        const MIN_TOUCH = 44;
+        const minMapSize = MIN_TOUCH / transform.scale;
+        const w = Math.max(width, minMapSize);
+        const h = Math.max(height, minMapSize);
+        const dx = (w - width) / 2;
+        const dy = (h - height) / 2;
 
         const handleClick = (e: React.MouseEvent) => {
           e.stopPropagation();
@@ -34,7 +41,7 @@ export function HotspotLayer({
           <button
             key={b.id}
             className={`hotspot hotspot--cat-${b.category} ${isSelected ? 'hotspot--selected' : ''}`}
-            style={{ left: x, top: y, width, height }}
+            style={{ left: x - dx, top: y - dy, width: w, height: h }}
             onClick={handleClick}
             aria-label={`查看 ${b.name} 详情`}
           >
