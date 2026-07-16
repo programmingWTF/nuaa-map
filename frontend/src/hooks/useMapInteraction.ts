@@ -32,6 +32,10 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
   const [transform, setTransform] = useState<MapTransform>({ scale: 1, x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
 
+  // 用 ref 持有最新 transform，避免 touch 回调依赖 transform state 导致不必要重建
+  const transformRef = useRef(transform);
+  transformRef.current = transform;
+
   const dragRef = useRef({
     active: false,
     startX: 0, startY: 0,
@@ -141,12 +145,13 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
 
   /* ── 触摸（移动端拖拽 + 双指缩放，钳制边界） ── */
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    const cur = transformRef.current;
     if (e.touches.length === 1) {
       const t = e.touches[0];
       dragRef.current = {
         active: true,
         startX: t.clientX, startY: t.clientY,
-        startTx: transform.x, startTy: transform.y,
+        startTx: cur.x, startTy: cur.y,
       };
       setIsDragging(true);
     } else if (e.touches.length === 2) {
@@ -155,15 +160,16 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
       const [t1, t2] = [e.touches[0], e.touches[1]];
       pinchRef.current = {
         lastDist: Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY),
-        startScale: transform.scale,
-        startX: transform.x, startY: transform.y,
+        startScale: cur.scale,
+        startX: cur.x, startY: cur.y,
         midX: (t1.clientX + t2.clientX) / 2,
         midY: (t1.clientY + t2.clientY) / 2,
       };
     }
-  }, [transform]);
+  }, []);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    e.preventDefault(); // 阻止浏览器默认手势（页面缩放/滚动），与 CSS touch-action: none 双保险
     const container = containerRef.current;
     if (!container || !imageSize) return;
     const rect = container.getBoundingClientRect();
@@ -239,12 +245,18 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
     return () => window.removeEventListener('mouseup', up);
   }, []);
 
-  // 注册滚轮事件
+  // 注册滚轮事件（必须 non-passive 才能 preventDefault）
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     el.addEventListener('wheel', handleWheel, { passive: false });
-    return () => el.removeEventListener('wheel', handleWheel);
+    // 移动端：强制 non-passive touchmove，阻止浏览器默认手势
+    const preventTouchMove = (e: TouchEvent) => { e.preventDefault(); };
+    el.addEventListener('touchmove', preventTouchMove, { passive: false });
+    return () => {
+      el.removeEventListener('wheel', handleWheel);
+      el.removeEventListener('touchmove', preventTouchMove);
+    };
   }, [containerRef, handleWheel]);
 
   /* 触摸开始：同时处理拖拽 + 双击检测 */

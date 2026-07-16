@@ -1,6 +1,6 @@
 .map-container {
   flex:1; position:relative; overflow:hidden; cursor:grab;
-  touch-action: manipulation; /* 禁止浏览器双击缩放，交给地图处理 */
+  touch-action: none; /* 完全禁用浏览器默认手势，自定义双指缩放接管所有触控 */
   background:
     radial-gradient(ellipse at 30% 40%, rgba(37,99,235,0.03) 0%, transparent 60%),
     radial-gradient(ellipse at 70% 60%, rgba(6,182,212,0.03) 0%, transparent 60%),
