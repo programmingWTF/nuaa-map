@@ -118,7 +118,7 @@
   .topbar-logo { font-size: 15px; padding: 4px 10px; }
   .topbar-title { font-size: var(--text-sm); }
   .topbar-search { max-width: none; flex: 1; margin-left: 10px; }
-  .topbar-search-input { height: 36px; font-size: var(--text-xs); }
+  .topbar-search-input { height: 36px; font-size: var(--text-xs); padding: 0 40px 0 34px; }
   .topbar-search-kbd { display: none; }
   .topbar-search-panel {
     position: fixed;
