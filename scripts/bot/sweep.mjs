@@ -111,9 +111,13 @@ function log(...args) {
 }
 
 function loadState() {
-  if (!existsSync(CONFIG.STATE_FILE)) return { reviewed: {}, lastDailySweep: null };
-  try { return JSON.parse(readFileSync(CONFIG.STATE_FILE, "utf-8")); }
-  catch { return { reviewed: {}, lastDailySweep: null }; }
+  const defaults = { reviewed: {}, lastDailySweep: null };
+  if (!existsSync(CONFIG.STATE_FILE)) return defaults;
+  try {
+    const raw = JSON.parse(readFileSync(CONFIG.STATE_FILE, "utf-8"));
+    return { ...defaults, ...raw, reviewed: { ...defaults.reviewed, ...(raw.reviewed || {}) } };
+  }
+  catch { return defaults; }
 }
 
 function saveState(state) {
