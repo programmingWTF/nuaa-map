@@ -2,7 +2,9 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import type { MapTransform } from '../types';
 
 const MAX_SCALE = 4;
-const ZOOM_SPEED = 0.001;
+const ZOOM_SPEED_MOUSE = 0.001;      // 鼠标滚轮速度（保持原有灵敏度）
+const ZOOM_SPEED_TRACKPAD = 0.06;    // 触控板缩放速度（提升体验）
+const TRACKPAD_THRESHOLD = 30;        // 判断触控板的 deltaY 阈值
 
 interface UseMapInteractionOptions {
   containerRef: React.RefObject<HTMLDivElement | null>;
@@ -98,7 +100,9 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
 
     setTransform(prev => {
       const minScale = getMinScale();
-      const delta = -e.deltaY * ZOOM_SPEED;
+      // 触控板双指缩放 deltaY 通常远大于鼠标滚轮，通过阈值区分
+      const zoomSpeed = Math.abs(e.deltaY) > TRACKPAD_THRESHOLD ? ZOOM_SPEED_TRACKPAD : ZOOM_SPEED_MOUSE;
+      const delta = -e.deltaY * zoomSpeed;
       const newScale = Math.min(MAX_SCALE, Math.max(minScale, prev.scale + delta * prev.scale));
       const ratio = newScale / prev.scale;
       return clampTransform(
