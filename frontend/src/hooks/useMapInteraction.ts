@@ -155,8 +155,8 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
       };
       setIsDragging(true);
     } else if (e.touches.length === 2) {
+      // 不重置 isDragging，保持 CSS transition 为 0s，避免 pinch 缩放时过渡动画抖动
       dragRef.current.active = false;
-      setIsDragging(false);
       const [t1, t2] = [e.touches[0], e.touches[1]];
       pinchRef.current = {
         lastDist: Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY),
