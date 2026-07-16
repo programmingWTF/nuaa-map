@@ -243,6 +243,9 @@ export function BuildingPopover({
           ref={popoverRef}
           className="popover"
           style={{ maxHeight: POPOVER_MAX_H }}
+          onTouchStart={(e) => { e.stopPropagation(); }}
+          onTouchMove={(e) => { e.stopPropagation(); }}
+          onTouchEnd={(e) => { e.stopPropagation(); }}
           role="dialog" aria-label={`${building.name} 详情`}
         >
           <div className={`popover-arrow popover-arrow--${arrowDir}`}
