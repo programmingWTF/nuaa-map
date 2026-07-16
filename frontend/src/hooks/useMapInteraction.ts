@@ -197,16 +197,19 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
       const minScale = getMinScale();
       const newScale = Math.min(MAX_SCALE, Math.max(minScale, pinchRef.current.startScale * ratio));
 
-      const midX = pinchRef.current.midX - rect.left;
-      const midY = pinchRef.current.midY - rect.top;
+      // 缩放原点用初始中点，焦点跟当前双指中点，自然跟踪 pinch+pan
+      const originX = pinchRef.current.midX - rect.left;
+      const originY = pinchRef.current.midY - rect.top;
+      const focusX = (t1.clientX + t2.clientX) / 2 - rect.left;
+      const focusY = (t1.clientY + t2.clientY) / 2 - rect.top;
       const scaleRatio = newScale / pinchRef.current.startScale;
 
       setTransform(
         clampTransform(
           {
             scale: newScale,
-            x: midX - scaleRatio * (midX - pinchRef.current.startX),
-            y: midY - scaleRatio * (midY - pinchRef.current.startY),
+            x: focusX - scaleRatio * (originX - pinchRef.current.startX),
+            y: focusY - scaleRatio * (originY - pinchRef.current.startY),
           },
           cw, ch, iw, ih,
         ),
@@ -253,9 +256,17 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
     // 移动端：强制 non-passive touchmove，阻止浏览器默认手势
     const preventTouchMove = (e: TouchEvent) => { e.preventDefault(); };
     el.addEventListener('touchmove', preventTouchMove, { passive: false });
+    // iOS Safari：阻止 gesture 事件，防止浏览器自带缩放与自定义缩放冲突
+    const preventGesture = (e: Event) => { e.preventDefault(); };
+    el.addEventListener('gesturestart', preventGesture);
+    el.addEventListener('gesturechange', preventGesture);
+    el.addEventListener('gestureend', preventGesture);
     return () => {
       el.removeEventListener('wheel', handleWheel);
       el.removeEventListener('touchmove', preventTouchMove);
+      el.removeEventListener('gesturestart', preventGesture);
+      el.removeEventListener('gesturechange', preventGesture);
+      el.removeEventListener('gestureend', preventGesture);
     };
   }, [containerRef, handleWheel]);
 
