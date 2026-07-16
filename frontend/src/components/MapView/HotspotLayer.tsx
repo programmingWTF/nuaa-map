@@ -8,11 +8,12 @@ interface HotspotLayerProps {
   transform: MapTransform;
   onBuildingClick: (data: BuildingClickData) => void;
   selectedBuildingId?: string;
+  disabled?: boolean;
 }
 
 export function HotspotLayer({
   buildings, imageWidth, imageHeight, transform,
-  onBuildingClick, selectedBuildingId,
+  onBuildingClick, selectedBuildingId, disabled,
 }: HotspotLayerProps) {
   return (
     <div className="hotspot-layer" style={{ width: imageWidth, height: imageHeight }}>
@@ -41,7 +42,7 @@ export function HotspotLayer({
           <button
             key={b.id}
             className={`hotspot hotspot--cat-${b.category} ${isSelected ? 'hotspot--selected' : ''}`}
-            style={{ left: x - dx, top: y - dy, width: w, height: h }}
+            style={{ left: x - dx, top: y - dy, width: w, height: h, ...(disabled ? { pointerEvents: 'none' } : {}) }}
             onClick={handleClick}
             aria-label={`查看 ${b.name} 详情`}
           >

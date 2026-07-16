@@ -135,8 +135,16 @@ export function BuildingPopover({
     const el = popoverRef.current;
     if (!el) return;
     const onWheel = (e: WheelEvent) => { e.stopPropagation(); };
+    // 拦截触摸事件防止穿透到地图（原生事件 + passive 不阻止滚动）
+    const stopTouch = (e: TouchEvent) => { e.stopPropagation(); };
     el.addEventListener('wheel', onWheel);
-    return () => el.removeEventListener('wheel', onWheel);
+    el.addEventListener('touchstart', stopTouch, { passive: true });
+    el.addEventListener('touchmove', stopTouch, { passive: true });
+    return () => {
+      el.removeEventListener('wheel', onWheel);
+      el.removeEventListener('touchstart', stopTouch);
+      el.removeEventListener('touchmove', stopTouch);
+    };
   }, []);
 
   /* 周边区域：垂直滚轮 → 水平滚动 */
@@ -217,10 +225,16 @@ export function BuildingPopover({
 
   return (
     <>
-      <div className="popover-backdrop" onClick={() => {
-        if (inputBlurGuard.current) return; // 键盘刚收起，不关
-        onClose();
-      }} />
+      <div className="popover-backdrop"
+        onPointerDown={(e) => {
+          // 阻止穿透到背后的地标
+          e.stopPropagation();
+          e.preventDefault();
+          if (inputBlurGuard.current) return;
+          onClose();
+        }}
+        onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
+      />
       <div
         className={`popover-anchor${anchorAbove ? ' popover-anchor--above' : ''}`}
         style={{ left: popLeft, top: anchorTop, width: POPOVER_W }}
