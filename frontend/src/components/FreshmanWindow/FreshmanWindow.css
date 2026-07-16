@@ -29,6 +29,7 @@
   padding: 10px 16px;
   border-radius: var(--radius-full);
   background: rgba(255, 255, 255, 0.72);
+  overflow: hidden;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.7);
@@ -101,11 +102,13 @@
     transparent 60%
   );
   transform: translateX(-100%) skewX(-15deg);
+  opacity: 0;
   transition: none;
   pointer-events: none;
   z-index: 1;
 }
 .freshman-window__toggle:hover::before {
+  opacity: 1;
   animation: shimmer 0.6s ease-out forwards;
 }
 
@@ -352,6 +355,7 @@
   font-size: 0.82rem;
   position: relative;
   overflow: hidden;
+  overflow: hidden;
   transition: all var(--transition-spring);
   box-shadow: 0 2px 12px rgba(37, 99, 235, 0.2);
 }
@@ -370,9 +374,11 @@
     transparent 60%
   );
   transform: translateX(-100%) skewX(-15deg);
+  opacity: 0;
   transition: none;
 }
 .freshman-window__submit:not(:disabled):hover::after {
+  opacity: 1;
   animation: shimmer 0.55s ease-out forwards;
 }
 
@@ -507,11 +513,13 @@
     transparent 60%
   );
   transform: translateX(-100%) skewX(-15deg);
+  opacity: 0;
   transition: none;
   pointer-events: none;
   z-index: 1;
 }
 .freshman-window__item:hover::before {
+  opacity: 1;
   animation: shimmer 0.5s ease-out forwards;
 }
 
@@ -602,5 +610,21 @@
       opacity: 1;
       transform: translateY(0) scale(1);
     }
+  }
+}
+
+/* ── 移动端触屏光扫 :active 代替 :hover ── */
+@media (hover: none) {
+  .freshman-window__toggle:active::before {
+    opacity: 1;
+    animation: shimmer 0.6s ease-out forwards;
+  }
+  .freshman-window__submit:not(:disabled):active::after {
+    opacity: 1;
+    animation: shimmer 0.55s ease-out forwards;
+  }
+  .freshman-window__item:active::before {
+    opacity: 1;
+    animation: shimmer 0.5s ease-out forwards;
   }
 }
