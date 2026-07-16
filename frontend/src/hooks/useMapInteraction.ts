@@ -100,8 +100,11 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
 
     setTransform(prev => {
       const minScale = getMinScale();
-      // 触控板双指缩放 deltaY 通常远大于鼠标滚轮，通过阈值区分
-      const zoomSpeed = Math.abs(e.deltaY) > TRACKPAD_THRESHOLD ? ZOOM_SPEED_TRACKPAD : ZOOM_SPEED_MOUSE;
+      // Windows 触控板 pinch → ctrlKey=true, deltaY 小（3-10）
+      // macOS/普通触控板滑动 → deltaY 大（>30）
+      // 两种都是触控板，需用高速，否则缩放跟不上手指
+      const isTrackpad = e.ctrlKey || Math.abs(e.deltaY) > TRACKPAD_THRESHOLD;
+      const zoomSpeed = isTrackpad ? ZOOM_SPEED_TRACKPAD : ZOOM_SPEED_MOUSE;
       const delta = -e.deltaY * zoomSpeed;
       const newScale = Math.min(MAX_SCALE, Math.max(minScale, prev.scale + delta * prev.scale));
       const ratio = newScale / prev.scale;
