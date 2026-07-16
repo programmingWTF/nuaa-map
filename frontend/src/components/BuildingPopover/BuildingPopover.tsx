@@ -220,11 +220,15 @@ export function BuildingPopover({
           {/* 照片区：有图轮播，无图用分类色块 */}
           {imageList.length > 0 ? (
             <div className="popover-hero popover-hero--carousel">
-              <img
-                className="popover-hero-img"
-                src={imageList[carouselIdx]}
-                alt={`${building.name} 照片 ${carouselIdx + 1}`}
-              />
+              {/* 全部图片预加载，opacity 切换，切换无白闪 */}
+              {imageList.map((src, i) => (
+                <img
+                  key={i}
+                  className={`popover-hero-img ${i === carouselIdx ? 'popover-hero-img--active' : ''}`}
+                  src={src}
+                  alt={`${building.name} 照片 ${i + 1}`}
+                />
+              ))}
               {imageList.length > 1 && (
                 <>
                   <button className="popover-carousel-btn popover-carousel-btn--prev"
