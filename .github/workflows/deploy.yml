@@ -25,6 +25,7 @@ jobs:
               -o ProxyCommand="cloudflared access ssh --hostname ssh-server.liguiyu.com --service-token-id ${{ secrets.CF_SERVICE_TOKEN_ID }} --service-token-secret ${{ secrets.CF_SERVICE_TOKEN_SECRET }}" \
               LiGuiyu@ssh-server.liguiyu.com "
             cd /vol1/1000/Docker/NUAAMap
-            git pull origin main
+            git fetch origin main
+            git reset --hard origin/main
             docker compose up -d --build
           "
