@@ -162,6 +162,7 @@ async function ensureLabelsExist() {
       ...LABELS.type, ...LABELS.team, ...LABELS.status, ...LABELS.misc,
     ];
 
+    // 创建缺失的新标签
     let created = 0;
     for (const { name, color, desc } of allLabels) {
       if (existingNames.has(name)) continue;
@@ -172,8 +173,19 @@ async function ensureLabelsExist() {
       log(`  🏷️ 创建标签: ${name}`);
       created++;
     }
-    if (created === 0) log("  ✅ 所有标签已就绪");
-    else log(`  ✅ 创建了 ${created} 个新标签`);
+
+    // 删除不在新体系中的旧标签
+    let deleted = 0;
+    for (const label of existing) {
+      if (!VALID_LABELS.includes(label.name)) {
+        await ghAPI(`/labels/${encodeURIComponent(label.name)}`, { method: "DELETE" });
+        log(`  🗑️ 删除旧标签: ${label.name}`);
+        deleted++;
+      }
+    }
+
+    if (created === 0 && deleted === 0) log("  ✅ 所有标签已就绪");
+    else log(`  ✅ 创建 ${created} 个，清理 ${deleted} 个旧标签`);
   } catch (e) {
     log(`  ⚠️ 标签管理失败: ${e.message}`);
   }
