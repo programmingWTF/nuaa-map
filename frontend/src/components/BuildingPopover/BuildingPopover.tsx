@@ -135,8 +135,16 @@ export function BuildingPopover({
     const el = popoverRef.current;
     if (!el) return;
     const onWheel = (e: WheelEvent) => { e.stopPropagation(); };
+    // 拦截触摸事件防止穿透到地图（原生事件 + passive 不阻止滚动）
+    const stopTouch = (e: TouchEvent) => { e.stopPropagation(); };
     el.addEventListener('wheel', onWheel);
-    return () => el.removeEventListener('wheel', onWheel);
+    el.addEventListener('touchstart', stopTouch, { passive: true });
+    el.addEventListener('touchmove', stopTouch, { passive: true });
+    return () => {
+      el.removeEventListener('wheel', onWheel);
+      el.removeEventListener('touchstart', stopTouch);
+      el.removeEventListener('touchmove', stopTouch);
+    };
   }, []);
 
   /* 周边区域：垂直滚轮 → 水平滚动 */
@@ -220,8 +228,6 @@ export function BuildingPopover({
       <div
         className={`popover-anchor${anchorAbove ? ' popover-anchor--above' : ''}`}
         style={{ left: popLeft, top: anchorTop, width: POPOVER_W }}
-        onTouchStart={(e) => { e.stopPropagation(); }}
-        onTouchMove={(e) => { e.stopPropagation(); }}
       >
         <div
           ref={popoverRef}
@@ -303,9 +309,7 @@ export function BuildingPopover({
             </button>
           </div>
 
-          <div className="popover-body"
-            onTouchStart={(e) => { e.stopPropagation(); }}
-            onTouchMove={(e) => { e.stopPropagation(); }}>
+          <div className="popover-body">
             <p className="popover-desc">{building.description}</p>
             <div className="popover-meta">
               {building.openTime && (
