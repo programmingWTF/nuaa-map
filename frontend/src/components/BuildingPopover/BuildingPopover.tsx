@@ -238,8 +238,6 @@ export function BuildingPopover({
       <div
         className={`popover-anchor${anchorAbove ? ' popover-anchor--above' : ''}`}
         style={{ left: popLeft, top: anchorTop, width: POPOVER_W }}
-        onTouchStart={(e) => { e.stopPropagation(); }}
-        onTouchMove={(e) => { e.stopPropagation(); }}
       >
         <div
           ref={popoverRef}
@@ -321,9 +319,7 @@ export function BuildingPopover({
             </button>
           </div>
 
-          <div className="popover-body"
-            onTouchStart={(e) => { e.stopPropagation(); }}
-            onTouchMove={(e) => { e.stopPropagation(); }}>
+          <div className="popover-body">
             <p className="popover-desc">{building.description}</p>
             <div className="popover-meta">
               {building.openTime && (
