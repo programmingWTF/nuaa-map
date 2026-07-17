@@ -2,9 +2,9 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import type { MapTransform } from '../types';
 
 const MAX_SCALE = 4;
-const ZOOM_SPEED_MOUSE = 0.001;      // 鼠标滚轮速度（保持原有灵敏度）
-const ZOOM_SPEED_TRACKPAD = 0.06;    // 触控板缩放速度（提升体验）
-const TRACKPAD_THRESHOLD = 30;        // 判断触控板的 deltaY 阈值
+const ZOOM_SPEED_MOUSE = 0.0007;     // 鼠标滚轮速度（~7%/刻度）
+const ZOOM_SPEED_TRACKPAD = 0.012;   // 触控板双指缩放（事件频率高，需较低系数）
+const PINCH_DELTA_MAX = 50;          // 触控板 pinch 最大 deltaY：超过此值视为 Ctrl+滚轮
 
 interface UseMapInteractionOptions {
   containerRef: React.RefObject<HTMLDivElement | null>;
@@ -100,10 +100,10 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
 
     setTransform(prev => {
       const minScale = getMinScale();
-      // Windows 触控板 pinch → ctrlKey=true, deltaY 小（3-10）
-      // macOS/普通触控板滑动 → deltaY 大（>30）
-      // 两种都是触控板，需用高速，否则缩放跟不上手指
-      const isTrackpad = e.ctrlKey || Math.abs(e.deltaY) > TRACKPAD_THRESHOLD;
+      // Windows 触控板 pinch → ctrlKey=true, deltaY 很小（3-10）
+      // Ctrl+鼠标滚轮 → ctrlKey=true, deltaY 很大（~100）
+      // 用 deltaY 大小区分：小的才是触控板，大的当鼠标处理
+      const isTrackpad = e.ctrlKey && Math.abs(e.deltaY) < PINCH_DELTA_MAX;
       const zoomSpeed = isTrackpad ? ZOOM_SPEED_TRACKPAD : ZOOM_SPEED_MOUSE;
       const delta = -e.deltaY * zoomSpeed;
       const newScale = Math.min(MAX_SCALE, Math.max(minScale, prev.scale + delta * prev.scale));
