@@ -110,6 +110,26 @@ function log(...args) {
   console.log(`[${ts}]`, ...args);
 }
 
+/** 简单字符串哈希（djb2），用于内容指纹比较 */
+function hashString(str) {
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) + hash) + str.charCodeAt(i);
+    hash = hash & hash; // 保持 32 位整数
+  }
+  return hash.toString(36);
+}
+
+/**
+ * 计算 Issue/PR 的内容指纹
+ * 只包含标题和正文 — 标签、指派人、评论等元数据变动不会改变指纹
+ */
+function getContentFingerprint(item) {
+  const title = item.title || "";
+  const body = (item.body || "").slice(0, 5000);
+  return hashString(title + "\n" + body);
+}
+
 function loadState() {
   const defaults = { reviewed: {}, lastDailySweep: null };
   if (!existsSync(CONFIG.STATE_FILE)) return defaults;
@@ -523,13 +543,18 @@ async function sweepIncremental() {
       if (n >= CONFIG.MAX_ITEMS_PER_RUN) break;
       const num = item.number;
       const last = state.reviewed[num];
-      const updatedTs = new Date(item.updated_at).getTime();
-      if (last && updatedTs <= last.at) continue;
+      const fingerprint = getContentFingerprint(item);
+
+      // 内容指纹未变 → 只是标签/指派人/评论等元数据变动，跳过
+      if (last && fingerprint === last.hash) {
+        log(`  ⏭️ #${num} 内容未变，跳过（仅元数据变动）`);
+        continue;
+      }
 
       const createdTs = new Date(item.created_at).getTime();
-      const reason = createdTs > windowStart.getTime() ? "新创建" : "有更新";
+      const reason = !last ? "新创建" : "内容有更新";
       await processItem(item, reason);
-      state.reviewed[num] = { at: Date.now(), reason };
+      state.reviewed[num] = { at: Date.now(), hash: fingerprint, reason };
       n++;
     }
     log(`  ✅ 处理 ${n} 个`);
