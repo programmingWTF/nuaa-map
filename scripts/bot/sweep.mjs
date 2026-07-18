@@ -260,7 +260,7 @@ function callDeepSeek(messages) {
     model: CONFIG.DEEPSEEK_MODEL,
     messages,
     temperature: 0.3,
-    max_tokens: 2000,
+    max_tokens: 4000,
   });
 
   const cmd = [
@@ -306,6 +306,12 @@ const SYSTEM_PROMPT = `你是 NUAAMap 项目的 AI 维护助手（ClawSweeper）
 ## 项目背景
 NUAAMap 是南京航空航天大学天目湖校区的智能校园地图网站，技术栈 React + TypeScript + Vite。团队 14 人分 6 个小组。
 
+## 代码审查（重要！）
+你会收到实际的代码变更或相关代码文件。请：
+- **PR**：认真阅读 diff 和变更文件，审查代码逻辑、类型安全、组件设计、潜在 bug、性能问题
+- **Issue**：结合收到的相关代码判断 Issue 描述是否准确、影响范围、实现难度
+- 指出具体的代码行、文件路径，给出修改建议时附上示例代码
+
 ## 行为准则
 1. **友善第一**：这是学习项目。代码风格不好、commit 不规范都完全 OK。
 2. **鼓励优先**：先说好的地方，再给建议。用"可以试试"而不是"你应该"。
@@ -329,6 +335,111 @@ NUAAMap 是南京航空航天大学天目湖校区的智能校园地图网站，
 ## 输出 JSON
 {"type":"issue或pull_request","summary":"一句话中文总结","rank":"段位名（如 荣耀黄金）","rank_reason":"为什么给这个段位","pros":["优点1"],"cons":["需要改进的地方"],"labels":["标签1","标签2"],"comment":"给作者的审查回复（Markdown，包含段位解释）","should_close":false,"close_reason":""}`;
 
+// ============================================================
+// 代码上下文获取
+// ============================================================
+
+/** 获取 PR 的实际代码变更 diff */
+async function fetchPRDiff(prNumber) {
+  try {
+    const files = await ghAPI(`/pulls/${prNumber}/files?per_page=60`);
+    if (!files.length) return "(无文件变更)";
+
+    let diff = `共 ${files.length} 个文件变更：\n`;
+    for (const f of files) {
+      diff += `\n--- ${f.filename} (${f.status}: +${f.additions} -${f.deletions}) ---\n`;
+      if (f.patch) {
+        // 单个文件 patch 上限 4000 字符
+        const patch = f.patch.length > 4000
+          ? f.patch.slice(0, 4000) + `\n... (截断，共 ${f.patch.length} 字符)`
+          : f.patch;
+        diff += "```diff\n" + patch + "\n```\n";
+      } else {
+        diff += "(二进制或过大，无 patch)\n";
+      }
+    }
+    // 总上限 ~20000 字符
+    return diff.length > 20000 ? diff.slice(0, 20000) + "\n... (diff 过长已截断)" : diff;
+  } catch (e) {
+    return `(获取 diff 失败: ${e.message})`;
+  }
+}
+
+/** 获取 PR 中变更文件的原内容（供对比） */
+async function fetchPRFileContents(prNumber) {
+  try {
+    const files = await ghAPI(`/pulls/${prNumber}/files?per_page=20`);
+    let contents = "";
+    for (const f of files.slice(0, 8)) {
+      if (!f.contents_url) continue;
+      try {
+        const fileData = await ghAPI(f.contents_url);
+        const decoded = Buffer.from(fileData.content || "", "base64").toString("utf-8");
+        const snippet = decoded.length > 2500
+          ? decoded.slice(0, 2500) + "\n... (截断)"
+          : decoded;
+        contents += `\n### 文件: ${f.filename}\n\`\`\`${guessLang(f.filename)}\n${snippet}\n\`\`\`\n`;
+      } catch { /* 跳过无法读取的文件 */ }
+    }
+    return contents.length > 15000 ? contents.slice(0, 15000) + "\n... (截断)" : contents;
+  } catch {
+    return "";
+  }
+}
+
+/** 根据文件扩展名猜测语言 */
+function guessLang(filename) {
+  const ext = (filename || "").split(".").pop();
+  const map = { ts: "typescript", tsx: "tsx", js: "javascript", jsx: "jsx",
+    json: "json", css: "css", yml: "yaml", yaml: "yaml", md: "markdown",
+    py: "python", html: "html", svg: "svg" };
+  return map[ext] || "";
+}
+
+/** 从 Issue 标题和正文提取搜索关键词 */
+function extractKeywords(title, body) {
+  const text = (title + " " + (body || "")).toLowerCase();
+  // 匹配常见组件/文件名
+  const patterns = [
+    /(mapview|buildingpopover|chatwidget|freshmanwindow|minimap|searchbar|topbar|hotspotlayer)/gi,
+    /(usemapinteraction|mock-buildings|tianmuhu-map)/gi,
+    /(sweep\.mjs|bot-labels|bot-stale|deploy\.yml)/gi,
+    /(index\.css|index\.tsx|app\.tsx|main\.tsx)/gi,
+    /(缩放|拖拽|弹窗|热区|底图|标签|坐标|建筑|聊天|搜索|部署|构建|RAG|AI)/g,
+  ];
+  const keywords = [];
+  for (const p of patterns) {
+    const matches = text.match(p);
+    if (matches) keywords.push(...matches);
+  }
+  return [...new Set(keywords)].slice(0, 6);
+}
+
+/** 为 Issue 搜索相关代码文件 */
+async function fetchIssueCodeContext(title, body) {
+  const keywords = extractKeywords(title, body);
+  if (!keywords.length) return "";
+
+  let context = "";
+  for (const kw of keywords.slice(0, 4)) {
+    try {
+      const q = encodeURIComponent(`${kw} repo:${CONFIG.REPO}`);
+      const results = await ghAPI(`https://api.github.com/search/code?q=${q}&per_page=3`);
+      for (const item of (results.items || []).slice(0, 2)) {
+        try {
+          const content = await ghAPI(item.url);
+          const decoded = Buffer.from(content.content || "", "base64").toString("utf-8");
+          const snippet = decoded.length > 2000
+            ? decoded.slice(0, 2000) + "\n... (截断)"
+            : decoded;
+          context += `\n### ${item.path}\n\`\`\`${guessLang(item.path)}\n${snippet}\n\`\`\`\n`;
+        } catch { /* 跳过 */ }
+      }
+    } catch { /* 搜索失败，继续下一个关键词 */ }
+  }
+  return context.length > 12000 ? context.slice(0, 12000) + "\n... (截断)" : context;
+}
+
 async function analyzeItem(item) {
   const isPR = !!item.pull_request;
   const title = item.title || "";
@@ -347,11 +458,26 @@ async function analyzeItem(item) {
     `内容:\n${body}`,
   ];
 
+  // ——— PR：拉取实际代码 diff 和新文件内容 ———
   if (isPR) {
     context.push(
       `分支: ${item.head?.ref || "?"} → ${item.base?.ref || "?"}`,
       `文件: ${item.changed_files ?? "?"} | +${item.additions ?? "?"} -${item.deletions ?? "?"}`,
     );
+    log(`  📥 获取 PR diff...`);
+    const [diff, fileContents] = await Promise.all([
+      fetchPRDiff(item.number),
+      fetchPRFileContents(item.number),
+    ]);
+    if (diff) context.push(`## 代码变更 (diff)\n${diff}`);
+    if (fileContents) context.push(`## 变更文件内容\n${fileContents}`);
+  }
+
+  // ——— Issue：搜索相关代码 ———
+  if (!isPR) {
+    log(`  🔍 搜索相关代码...`);
+    const codeCtx = await fetchIssueCodeContext(title, body);
+    if (codeCtx) context.push(`## 相关代码\n${codeCtx}`);
   }
 
   try {
