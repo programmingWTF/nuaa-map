@@ -187,16 +187,15 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
 
     if (e.touches.length === 1 && dragRef.current.active) {
       const t = e.touches[0];
-      setTransform(prev =>
-        clampTransform(
-          {
-            ...prev,
-            x: dragRef.current.startTx + (t.clientX - dragRef.current.startX),
-            y: dragRef.current.startTy + (t.clientY - dragRef.current.startY),
-          },
-          cw, ch, iw, ih,
-        ),
+      const next = clampTransform(
+        { scale: transformRef.current.scale, x: dragRef.current.startTx + (t.clientX - dragRef.current.startX), y: dragRef.current.startTy + (t.clientY - dragRef.current.startY) },
+        cw, ch, iw, ih,
       );
+      const layer = container?.querySelector('.map-layer') as HTMLElement | null;
+      if (layer) {
+        layer.style.transform = `translate(${next.x}px, ${next.y}px) scale(${next.scale})`;
+      }
+      setTransform(next);
     } else if (e.touches.length === 2 && pinchRef.current.lastDist > 0) {
       const [t1, t2] = [e.touches[0], e.touches[1]];
       const dist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
@@ -204,21 +203,21 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
       const minScale = getMinScale();
       const newScale = Math.min(MAX_SCALE, Math.max(minScale, pinchRef.current.startScale * ratio));
 
-      // 缩放以当前双指中点为中心跟随手指，不是初始位置
       const focusX = (t1.clientX + t2.clientX) / 2 - rect.left;
       const focusY = (t1.clientY + t2.clientY) / 2 - rect.top;
       const scaleRatio = newScale / pinchRef.current.startScale;
 
-      setTransform(
-        clampTransform(
-          {
-            scale: newScale,
-            x: focusX - scaleRatio * (focusX - pinchRef.current.startX),
-            y: focusY - scaleRatio * (focusY - pinchRef.current.startY),
-          },
-          cw, ch, iw, ih,
-        ),
+      const next = clampTransform(
+        { scale: newScale, x: focusX - scaleRatio * (focusX - pinchRef.current.startX), y: focusY - scaleRatio * (focusY - pinchRef.current.startY) },
+        cw, ch, iw, ih,
       );
+
+      // 直接操作 DOM 避免 React 异步渲染导致抽搐
+      const layer = container?.querySelector('.map-layer') as HTMLElement | null;
+      if (layer) {
+        layer.style.transform = `translate(${next.x}px, ${next.y}px) scale(${next.scale})`;
+      }
+      setTransform(next);
     }
   }, [containerRef, imageSize, getMinScale]);
 
