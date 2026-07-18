@@ -176,24 +176,18 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
   }, []);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    e.preventDefault(); // 阻止浏览器默认手势（页面缩放/滚动），与 CSS touch-action: none 双保险
+    e.preventDefault();
     const container = containerRef.current;
     if (!container || !imageSize) return;
     const rect = container.getBoundingClientRect();
-    const cw = rect.width;
-    const ch = rect.height;
-    const iw = imageSize.width;
-    const ih = imageSize.height;
+    const cw = rect.width, ch = rect.height;
+    const iw = imageSize.width, ih = imageSize.height;
 
     if (e.touches.length === 1 && dragRef.current.active) {
       const t = e.touches[0];
       setTransform(prev =>
         clampTransform(
-          {
-            ...prev,
-            x: dragRef.current.startTx + (t.clientX - dragRef.current.startX),
-            y: dragRef.current.startTy + (t.clientY - dragRef.current.startY),
-          },
+          { ...prev, x: dragRef.current.startTx + (t.clientX - dragRef.current.startX), y: dragRef.current.startTy + (t.clientY - dragRef.current.startY) },
           cw, ch, iw, ih,
         ),
       );
@@ -203,18 +197,12 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
       const ratio = dist / pinchRef.current.lastDist;
       const minScale = getMinScale();
       const newScale = Math.min(MAX_SCALE, Math.max(minScale, pinchRef.current.startScale * ratio));
-
       const focusX = (t1.clientX + t2.clientX) / 2 - rect.left;
       const focusY = (t1.clientY + t2.clientY) / 2 - rect.top;
       const scaleRatio = newScale / pinchRef.current.startScale;
-
       setTransform(
         clampTransform(
-          {
-            scale: newScale,
-            x: focusX - scaleRatio * (focusX - pinchRef.current.startX),
-            y: focusY - scaleRatio * (focusY - pinchRef.current.startY),
-          },
+          { scale: newScale, x: focusX - scaleRatio * (focusX - pinchRef.current.startX), y: focusY - scaleRatio * (focusY - pinchRef.current.startY) },
           cw, ch, iw, ih,
         ),
       );
