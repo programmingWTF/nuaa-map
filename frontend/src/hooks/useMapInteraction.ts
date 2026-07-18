@@ -225,7 +225,14 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
   }, [containerRef, imageSize, getMinScale]);
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    // 还有手指在屏幕上（双指变单指），不重置状态，避免 transition 闪切
+    if (e.touches.length === 1) {
+      // 双指缩放 → 单指拖拽：重新初始化拖拽状态，保持 transition 0s
+      const t = e.touches[0];
+      const cur = transformRef.current;
+      dragRef.current = { active: true, startX: t.clientX, startY: t.clientY, startTx: cur.x, startTy: cur.y };
+      pinchRef.current.lastDist = 0;
+      return;
+    }
     if (e.touches.length > 0) return;
     dragRef.current.active = false;
     setIsDragging(false);
