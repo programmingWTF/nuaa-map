@@ -17,6 +17,7 @@ type FreshmanPayload = {
 type PanelPhase = 'hidden' | 'entering' | 'visible' | 'exiting';
 
 const STORAGE_KEY = 'nuaa-map-freshman-qa';
+const STORAGE_VERSION = 2; // 递增以清除旧缓存，防止旧 mock 数据覆盖真实 QA
 const API_URL = '/api/freshman-questions';
 
 // 从 QA 知识库加载预设问答
@@ -33,15 +34,21 @@ function readLocalEntries(): FreshmanEntry[] {
   try {
     const saved = window.localStorage.getItem(STORAGE_KEY);
     if (!saved) return [];
-    const parsed = JSON.parse(saved) as FreshmanEntry[];
-    return Array.isArray(parsed) ? parsed : [];
+    const parsed = JSON.parse(saved);
+    // 版本不匹配时抛弃旧缓存
+    if (parsed._v !== STORAGE_VERSION) {
+      window.localStorage.removeItem(STORAGE_KEY);
+      return [];
+    }
+    const entries = parsed._entries ?? parsed;
+    return Array.isArray(entries) ? entries : [];
   } catch {
     return [];
   }
 }
 
 function writeLocalEntries(entries: FreshmanEntry[]) {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ _v: STORAGE_VERSION, _entries: entries }));
 }
 
 function normalizeEntries(value: unknown): FreshmanEntry[] {
