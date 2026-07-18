@@ -185,18 +185,16 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
     const iw = imageSize.width;
     const ih = imageSize.height;
 
+    const layer = container.querySelector('.map-layer') as HTMLElement | null;
+
     if (e.touches.length === 1 && dragRef.current.active) {
       const t = e.touches[0];
-      setTransform(prev =>
-        clampTransform(
-          {
-            ...prev,
-            x: dragRef.current.startTx + (t.clientX - dragRef.current.startX),
-            y: dragRef.current.startTy + (t.clientY - dragRef.current.startY),
-          },
-          cw, ch, iw, ih,
-        ),
+      const next = clampTransform(
+        { scale: transformRef.current.scale, x: dragRef.current.startTx + (t.clientX - dragRef.current.startX), y: dragRef.current.startTy + (t.clientY - dragRef.current.startY) },
+        cw, ch, iw, ih,
       );
+      transformRef.current = next;
+      if (layer) layer.style.transform = `translate(${next.x}px, ${next.y}px) scale(${next.scale})`;
     } else if (e.touches.length === 2 && pinchRef.current.lastDist > 0) {
       const [t1, t2] = [e.touches[0], e.touches[1]];
       const dist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
@@ -208,24 +206,21 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
       const focusY = (t1.clientY + t2.clientY) / 2 - rect.top;
       const scaleRatio = newScale / pinchRef.current.startScale;
 
-      setTransform(
-        clampTransform(
-          {
-            scale: newScale,
-            x: focusX - scaleRatio * (focusX - pinchRef.current.startX),
-            y: focusY - scaleRatio * (focusY - pinchRef.current.startY),
-          },
-          cw, ch, iw, ih,
-        ),
+      const next = clampTransform(
+        { scale: newScale, x: focusX - scaleRatio * (focusX - pinchRef.current.startX), y: focusY - scaleRatio * (focusY - pinchRef.current.startY) },
+        cw, ch, iw, ih,
       );
+      transformRef.current = next;
+      if (layer) layer.style.transform = `translate(${next.x}px, ${next.y}px) scale(${next.scale})`;
     }
   }, [containerRef, imageSize, getMinScale]);
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     if (e.touches.length > 0) return;
     dragRef.current.active = false;
-    setIsDragging(false);
     pinchRef.current.lastDist = 0;
+    setTransform(transformRef.current);
+    setIsDragging(false);
   }, []);
 
   /* ── 适应屏幕：宽度适配，左右边界对齐窗口 ── */
