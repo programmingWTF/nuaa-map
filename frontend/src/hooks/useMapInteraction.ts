@@ -191,10 +191,9 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
         { scale: transformRef.current.scale, x: dragRef.current.startTx + (t.clientX - dragRef.current.startX), y: dragRef.current.startTy + (t.clientY - dragRef.current.startY) },
         cw, ch, iw, ih,
       );
+      transformRef.current = next;
       const layer = container?.querySelector('.map-layer') as HTMLElement | null;
-      if (layer) {
-        layer.style.transform = `translate(${next.x}px, ${next.y}px) scale(${next.scale})`;
-      }
+      if (layer) layer.style.transform = `translate(${next.x}px, ${next.y}px) scale(${next.scale})`;
       setTransform(next);
     } else if (e.touches.length === 2 && pinchRef.current.lastDist > 0) {
       const [t1, t2] = [e.touches[0], e.touches[1]];
@@ -212,18 +211,15 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
         cw, ch, iw, ih,
       );
 
-      // 直接操作 DOM 避免 React 异步渲染导致抽搐
+      transformRef.current = next;
       const layer = container?.querySelector('.map-layer') as HTMLElement | null;
-      if (layer) {
-        layer.style.transform = `translate(${next.x}px, ${next.y}px) scale(${next.scale})`;
-      }
+      if (layer) layer.style.transform = `translate(${next.x}px, ${next.y}px) scale(${next.scale})`;
       setTransform(next);
     }
   }, [containerRef, imageSize, getMinScale]);
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     if (e.touches.length === 1) {
-      // 双指缩放 → 单指拖拽：重新初始化拖拽状态，保持 transition 0s
       const t = e.touches[0];
       const cur = transformRef.current;
       dragRef.current = { active: true, startX: t.clientX, startY: t.clientY, startTx: cur.x, startTy: cur.y };
@@ -232,8 +228,9 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
     }
     if (e.touches.length > 0) return;
     dragRef.current.active = false;
-    setIsDragging(false);
     pinchRef.current.lastDist = 0;
+    // 延迟一帧重置 isDragging，等 React 把最后的 transform 渲染完
+    requestAnimationFrame(() => setIsDragging(false));
   }, []);
 
   /* ── 适应屏幕：宽度适配，左右边界对齐窗口 ── */
