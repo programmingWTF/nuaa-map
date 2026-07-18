@@ -358,39 +358,29 @@ async function fetchPRDiff(prNumber) {
     for (const f of files) {
       diff += `\n--- ${f.filename} (${f.status}: +${f.additions} -${f.deletions}) ---\n`;
       if (f.patch) {
-        // 单个文件 patch 上限 3000 字符
-        const patch = f.patch.length > 3000
-          ? f.patch.slice(0, 3000) + `\n... (截断，共 ${f.patch.length} 字符)`
+        // 单文件 patch 上限 1000 字符（NUAA 代理 WAF 限制）
+        const patch = f.patch.length > 1000
+          ? f.patch.slice(0, 1000) + `\n... (截断，共 ${f.patch.length} 字符)`
           : f.patch;
         diff += "```diff\n" + patch + "\n```\n";
       } else {
         diff += "(二进制或过大，无 patch)\n";
       }
     }
-    // 总上限 ~10000 字符
-    return diff.length > 10000 ? diff.slice(0, 10000) + "\n... (diff 过长已截断)" : diff;
+    // 总上限 ~3500 字符（含 JSON 开销后 <4800，保证通过 NUAA WAF）
+    return diff.length > 3500 ? diff.slice(0, 3500) + "\n... (diff 过长已截断)" : diff;
   } catch (e) {
     return `(获取 diff 失败: ${e.message})`;
   }
 }
 
-/** 获取 PR 中变更文件的原内容（供对比） */
+/** 获取 PR 变更文件概览（仅文件名+统计，WAF 限制不拉全文） */
 async function fetchPRFileContents(prNumber) {
   try {
     const files = await ghAPI(`/pulls/${prNumber}/files?per_page=20`);
-    let contents = "";
-    for (const f of files.slice(0, 5)) {
-      if (!f.contents_url) continue;
-      try {
-        const fileData = await ghAPI(f.contents_url);
-        const decoded = Buffer.from(fileData.content || "", "base64").toString("utf-8");
-        const snippet = decoded.length > 1500
-          ? decoded.slice(0, 1500) + "\n... (截断)"
-          : decoded;
-        contents += `\n### 文件: ${f.filename}\n\`\`\`${guessLang(f.filename)}\n${snippet}\n\`\`\`\n`;
-      } catch { /* 跳过无法读取的文件 */ }
-    }
-    return contents.length > 6000 ? contents.slice(0, 6000) + "\n... (截断)" : contents;
+    return files.slice(0, 8).map(f =>
+      `- ${f.filename} (${f.status}: +${f.additions} -${f.deletions})`
+    ).join("\n");
   } catch {
     return "";
   }
@@ -438,15 +428,15 @@ async function fetchIssueCodeContext(title, body) {
         try {
           const content = await ghAPI(item.url);
           const decoded = Buffer.from(content.content || "", "base64").toString("utf-8");
-          const snippet = decoded.length > 1500
-            ? decoded.slice(0, 1500) + "\n... (截断)"
+          const snippet = decoded.length > 600
+            ? decoded.slice(0, 600) + "\n... (截断)"
             : decoded;
           context += `\n### ${item.path}\n\`\`\`${guessLang(item.path)}\n${snippet}\n\`\`\`\n`;
         } catch { /* 跳过 */ }
       }
     } catch { /* 搜索失败，继续下一个关键词 */ }
   }
-  return context.length > 6000 ? context.slice(0, 6000) + "\n... (截断)" : context;
+  return context.length > 2000 ? context.slice(0, 2000) + "\n... (截断)" : context;
 }
 
 async function analyzeItem(item) {
@@ -490,9 +480,10 @@ async function analyzeItem(item) {
   }
 
   try {
+    // system prompt 合并到 user 消息中，节省 JSON 开销并降低 WAF 拦截概率
+    const userMsg = "[系统指令]\n" + SYSTEM_PROMPT + "\n\n---\n\n" + context.join("\n\n---\n\n");
     const data = callDeepSeek([
-      { role: "system", content: SYSTEM_PROMPT },
-      { role: "user", content: context.join("\n\n---\n\n") },
+      { role: "user", content: userMsg },
     ]);
 
     const content = data.choices?.[0]?.message?.content || "";
