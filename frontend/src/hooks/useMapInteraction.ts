@@ -50,6 +50,10 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
     midX: 0, midY: 0,
   });
 
+  // 缓存 map-layer DOM 引用和容器尺寸，避免 touchmove 中重复查询触发布局抖动
+  const layerRef = useRef<HTMLElement | null>(null);
+  const sizeRef = useRef({ cw: 0, ch: 0, iw: 0, ih: 0, left: 0, top: 0 });
+
   /* 动态最小缩放 = 容器宽度 / 图片宽度（保证左右边界对齐窗口） */
   const getMinScale = useCallback(() => {
     const cw = containerRef.current?.clientWidth;
@@ -152,6 +156,15 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
 
   /* ── 触摸（移动端拖拽 + 双指缩放，钳制边界） ── */
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    // 缓存 DOM 引用和容器尺寸，touchmove 中不再查询 DOM
+    if (!layerRef.current) {
+      layerRef.current = containerRef.current?.querySelector('.map-layer') as HTMLElement | null;
+    }
+    const container = containerRef.current;
+    if (container) {
+      const r = container.getBoundingClientRect();
+      sizeRef.current = { cw: r.width, ch: r.height, iw: imageSize?.width ?? 0, ih: imageSize?.height ?? 0, left: r.left, top: r.top };
+    }
     const cur = transformRef.current;
     if (e.touches.length === 1) {
       const t = e.touches[0];
@@ -177,12 +190,9 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     e.preventDefault();
-    const container = containerRef.current;
-    if (!container || !imageSize) return;
-    const rect = container.getBoundingClientRect();
-    const cw = rect.width, ch = rect.height;
-    const iw = imageSize.width, ih = imageSize.height;
-    const layer = container.querySelector('.map-layer') as HTMLElement | null;
+    const { cw, ch, iw, ih } = sizeRef.current;
+    if (cw === 0 || iw === 0) return;
+    const layer = layerRef.current;
 
     if (e.touches.length === 1 && dragRef.current.active) {
       const t = e.touches[0];
@@ -198,8 +208,9 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
       const ratio = dist / pinchRef.current.lastDist;
       const minScale = getMinScale();
       const newScale = Math.min(MAX_SCALE, Math.max(minScale, pinchRef.current.startScale * ratio));
-      const focusX = (t1.clientX + t2.clientX) / 2 - rect.left;
-      const focusY = (t1.clientY + t2.clientY) / 2 - rect.top;
+      const { left, top } = sizeRef.current;
+      const focusX = (t1.clientX + t2.clientX) / 2 - left;
+      const focusY = (t1.clientY + t2.clientY) / 2 - top;
       const scaleRatio = newScale / pinchRef.current.startScale;
       const next = clampTransform(
         { scale: newScale, x: focusX - scaleRatio * (focusX - pinchRef.current.startX), y: focusY - scaleRatio * (focusY - pinchRef.current.startY) },
@@ -208,7 +219,7 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
       transformRef.current = next;
       if (layer) layer.style.transform = `translate(${next.x}px, ${next.y}px) scale(${next.scale})`;
     }
-  }, [containerRef, imageSize, getMinScale]);
+  }, [getMinScale]);
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     if (e.touches.length > 0) return;
