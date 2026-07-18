@@ -122,12 +122,15 @@ function hashString(str) {
 
 /**
  * 计算 Issue/PR 的内容指纹
- * 只包含标题和正文 — 标签、指派人、评论等元数据变动不会改变指纹
+ * - Issue: title + body — 标签、指派人、评论等元数据不参与
+ * - PR: title + body + head.sha — push 新 commit 也会触发重新审查
  */
 function getContentFingerprint(item) {
   const title = item.title || "";
   const body = (item.body || "").slice(0, 5000);
-  return hashString(title + "\n" + body);
+  // PR 纳入最新 commit SHA，push 新代码后自动触发重新审查
+  const sha = item.head?.sha || "";
+  return hashString(title + "\n" + body + "\n" + sha);
 }
 
 function loadState() {
