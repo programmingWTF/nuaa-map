@@ -20,7 +20,7 @@ const CONFIG = {
   BOT_LOGIN: "LiGuiyu-AI",
 
   DEEPSEEK_API: "https://token.nuaa.edu.cn/v1/chat/completions",
-  DEEPSEEK_MODEL: "deepseek-v4-pro",
+  DEEPSEEK_MODEL: "glm-5.2",
   DEEPSEEK_KEY: process.env.DEEPSEEK_KEY || "",
 
   STATE_FILE: join(__dirname, "state.json"),
