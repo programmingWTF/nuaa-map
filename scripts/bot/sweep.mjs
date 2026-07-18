@@ -263,12 +263,16 @@ function callDeepSeek(messages) {
     max_tokens: 4000,
   });
 
+  // 请求体可能很大（含代码 diff），写临时文件避免 shell 转义问题和命令行长度限制
+  const tmpFile = `/tmp/sweep-body-${Date.now()}.json`;
+  writeFileSync(tmpFile, body, "utf-8");
+
   const cmd = [
     "curl -s --connect-timeout 15 --max-time 60",
     "--proxy socks5h://127.0.0.1:1080",
     `-H "Authorization: Bearer ${CONFIG.DEEPSEEK_KEY}"`,
     `-H "Content-Type: application/json"`,
-    `-d '${body.replace(/'/g, "'\\''")}'`,
+    `--data-binary @${tmpFile}`,
     CONFIG.DEEPSEEK_API,
   ].join(" ");
 
@@ -283,10 +287,12 @@ function callDeepSeek(messages) {
       if (data.error) {
         throw new Error(`API error: ${JSON.stringify(data.error)}`);
       }
+      try { require("fs").unlinkSync(tmpFile); } catch {}
       return data;
     } catch (e) {
       if (attempt === 3) {
-        const msg = e.stdout ? e.stdout.toString().slice(0, 100) : e.message;
+        try { require("fs").unlinkSync(tmpFile); } catch {}
+        const msg = e.stdout ? e.stdout.toString().slice(0, 200) : e.message;
         throw new Error(`DeepSeek 不可达 (尝试${attempt}次): ${msg}`);
       }
       log(`  ⚠️ DeepSeek 第${attempt}次失败，${2 ** attempt}秒后重试...`);
@@ -349,17 +355,17 @@ async function fetchPRDiff(prNumber) {
     for (const f of files) {
       diff += `\n--- ${f.filename} (${f.status}: +${f.additions} -${f.deletions}) ---\n`;
       if (f.patch) {
-        // 单个文件 patch 上限 4000 字符
-        const patch = f.patch.length > 4000
-          ? f.patch.slice(0, 4000) + `\n... (截断，共 ${f.patch.length} 字符)`
+        // 单个文件 patch 上限 3000 字符
+        const patch = f.patch.length > 3000
+          ? f.patch.slice(0, 3000) + `\n... (截断，共 ${f.patch.length} 字符)`
           : f.patch;
         diff += "```diff\n" + patch + "\n```\n";
       } else {
         diff += "(二进制或过大，无 patch)\n";
       }
     }
-    // 总上限 ~20000 字符
-    return diff.length > 20000 ? diff.slice(0, 20000) + "\n... (diff 过长已截断)" : diff;
+    // 总上限 ~10000 字符
+    return diff.length > 10000 ? diff.slice(0, 10000) + "\n... (diff 过长已截断)" : diff;
   } catch (e) {
     return `(获取 diff 失败: ${e.message})`;
   }
@@ -370,18 +376,18 @@ async function fetchPRFileContents(prNumber) {
   try {
     const files = await ghAPI(`/pulls/${prNumber}/files?per_page=20`);
     let contents = "";
-    for (const f of files.slice(0, 8)) {
+    for (const f of files.slice(0, 5)) {
       if (!f.contents_url) continue;
       try {
         const fileData = await ghAPI(f.contents_url);
         const decoded = Buffer.from(fileData.content || "", "base64").toString("utf-8");
-        const snippet = decoded.length > 2500
-          ? decoded.slice(0, 2500) + "\n... (截断)"
+        const snippet = decoded.length > 1500
+          ? decoded.slice(0, 1500) + "\n... (截断)"
           : decoded;
         contents += `\n### 文件: ${f.filename}\n\`\`\`${guessLang(f.filename)}\n${snippet}\n\`\`\`\n`;
       } catch { /* 跳过无法读取的文件 */ }
     }
-    return contents.length > 15000 ? contents.slice(0, 15000) + "\n... (截断)" : contents;
+    return contents.length > 6000 ? contents.slice(0, 6000) + "\n... (截断)" : contents;
   } catch {
     return "";
   }
@@ -429,15 +435,15 @@ async function fetchIssueCodeContext(title, body) {
         try {
           const content = await ghAPI(item.url);
           const decoded = Buffer.from(content.content || "", "base64").toString("utf-8");
-          const snippet = decoded.length > 2000
-            ? decoded.slice(0, 2000) + "\n... (截断)"
+          const snippet = decoded.length > 1500
+            ? decoded.slice(0, 1500) + "\n... (截断)"
             : decoded;
           context += `\n### ${item.path}\n\`\`\`${guessLang(item.path)}\n${snippet}\n\`\`\`\n`;
         } catch { /* 跳过 */ }
       }
     } catch { /* 搜索失败，继续下一个关键词 */ }
   }
-  return context.length > 12000 ? context.slice(0, 12000) + "\n... (截断)" : context;
+  return context.length > 6000 ? context.slice(0, 6000) + "\n... (截断)" : context;
 }
 
 async function analyzeItem(item) {
