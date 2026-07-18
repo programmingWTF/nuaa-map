@@ -204,9 +204,7 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
       const minScale = getMinScale();
       const newScale = Math.min(MAX_SCALE, Math.max(minScale, pinchRef.current.startScale * ratio));
 
-      // 缩放原点用初始中点，焦点跟当前双指中点，自然跟踪 pinch+pan
-      const originX = pinchRef.current.midX - rect.left;
-      const originY = pinchRef.current.midY - rect.top;
+      // 缩放以当前双指中点为中心跟随手指，不是初始位置
       const focusX = (t1.clientX + t2.clientX) / 2 - rect.left;
       const focusY = (t1.clientY + t2.clientY) / 2 - rect.top;
       const scaleRatio = newScale / pinchRef.current.startScale;
@@ -215,8 +213,8 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
         clampTransform(
           {
             scale: newScale,
-            x: focusX - scaleRatio * (originX - pinchRef.current.startX),
-            y: focusY - scaleRatio * (originY - pinchRef.current.startY),
+            x: focusX - scaleRatio * (focusX - pinchRef.current.startX),
+            y: focusY - scaleRatio * (focusY - pinchRef.current.startY),
           },
           cw, ch, iw, ih,
         ),
