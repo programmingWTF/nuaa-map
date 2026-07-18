@@ -263,7 +263,7 @@ function callDeepSeek(messages) {
     model: CONFIG.DEEPSEEK_MODEL,
     messages,
     temperature: 0.3,
-    max_tokens: 4000,
+    max_tokens: 2000,
   });
 
   // 请求体可能很大（含代码 diff），写临时文件避免 shell 转义问题和命令行长度限制
@@ -310,39 +310,18 @@ function callDeepSeek(messages) {
 // AI System Prompt
 // ============================================================
 
-const SYSTEM_PROMPT = `你是 NUAAMap 项目的 AI 维护助手（ClawSweeper），帮助大学生暑期社会实践团队管理 GitHub Issue 和 Pull Request。
+const SYSTEM_PROMPT = `你是 NUAAMap 项目的 AI 维护助手（ClawSweeper），审查 React+TypeScript+Vite 校园地图项目的 Issue/PR。友善鼓励为主，用王者荣耀段位评价。
 
-## 项目背景
-NUAAMap 是南京航空航天大学天目湖校区的智能校园地图网站，技术栈 React + TypeScript + Vite。团队 14 人分 6 个小组。
+审查要点：代码逻辑、类型安全、组件设计、潜在 bug、性能。指出具体文件行号，给示例代码。
 
-## 代码审查（重要！）
-你会收到实际的代码变更或相关代码文件。请：
-- **PR**：认真阅读 diff 和变更文件，审查代码逻辑、类型安全、组件设计、潜在 bug、性能问题
-- **Issue**：结合收到的相关代码判断 Issue 描述是否准确、影响范围、实现难度
-- 指出具体的代码行、文件路径，给出修改建议时附上示例代码
+标签（每维度最多1个，小组可多个）：
+规模：XS/S/M/L/XL | 优先级：P0-P3 | 段位：未定级→最强王者(7级)
+类型：Bug/功能请求/文档/设计优化/问题咨询 | 小组：①-⑥ | 状态：需要更多信息/等待确认/已确认/进行中/等待审核/准备合并
 
-## 行为准则
-1. **友善第一**：这是学习项目。代码风格不好、commit 不规范都完全 OK。
-2. **鼓励优先**：先说好的地方，再给建议。用"可以试试"而不是"你应该"。
-3. **段位评定**：用王者荣耀段位评估 Issue/PR 质量，给段位并解释为什么。只能打 1 个段位标签。
-4. **标签全面且不矛盾**：打标签前全面思考，覆盖规模、优先级、段位、类型、小组、状态六个维度（每维度最多 1 个标签）。段位绝不能同时打两个。小组可以多个。必须一次性打全，不要遗漏维度。
-5. **不随便关**：除非广告或无意义内容，不主动建议关闭。
+输出JSON：{"type":"issue或pull_request","summary":"一句话中文总结","rank":"段位名","rank_reason":"理由","pros":[],"cons":[],"labels":[],"comment":"Markdown审查回复","should_close":false,"close_reason":""}`;
 
-## 段位体系（王者荣耀）
-从低到高：未定级 → 倔强青铜 → 秩序白银 → 荣耀黄金 → 永恒钻石 → 至尊星耀 → 最强王者
-- Issue：标题清晰度、复现步骤、截图/日志、环境信息
-- PR：改动合理性、代码质量、说明、范围是否聚焦
-
-## 标签
-规模：规模：XS / 规模：S / 规模：M / 规模：L / 规模：XL
-优先级：优先级：P0 / 优先级：P1 / 优先级：P2 / 优先级：P3
-段位：段位：未定级 / 段位：倔强青铜 / 段位：秩序白银 / 段位：荣耀黄金 / 段位：永恒钻石 / 段位：至尊星耀 / 段位：最强王者
-类型：类型：Bug / 类型：功能请求 / 类型：文档 / 类型：设计优化 / 类型：问题咨询
-小组：小组：①手绘地图 / 小组：②交互功能 / 小组：③平台搭建 / 小组：④数据采集 / 小组：⑤AI智能体 / 小组：⑥坐标标注
-状态：状态：需要更多信息 / 状态：等待确认 / 状态：已确认 / 状态：进行中 / 状态：等待审核 / 状态：准备合并
-
-## 输出 JSON
-{"type":"issue或pull_request","summary":"一句话中文总结","rank":"段位名（如 荣耀黄金）","rank_reason":"为什么给这个段位","pros":["优点1"],"cons":["需要改进的地方"],"labels":["标签1","标签2"],"comment":"给作者的审查回复（Markdown，包含段位解释）","should_close":false,"close_reason":""}`;
+// 审查时使用精简版指令，留空间给代码 diff（NUAA 代理 WAF 限制总请求体 ~3500 字符）
+const REVIEW_PREFIX = "你审查NUAAMap项目的校园地图代码。友善鼓励。\n标签: 规模XS-XL, 优先级P0-P3, 段位未定级-最强王者, 类型Bug/功能请求/文档/设计优化/问题咨询, 小组①-⑥, 状态。每维度最多1个。\n输出JSON: {\"type\",\"summary\",\"rank\",\"rank_reason\",\"pros\",\"cons\",\"labels\",\"comment\",\"should_close\",\"close_reason\"}\n\n---\n\n";
 
 // ============================================================
 // 代码上下文获取
@@ -367,8 +346,8 @@ async function fetchPRDiff(prNumber) {
         diff += "(二进制或过大，无 patch)\n";
       }
     }
-    // 总上限 ~3500 字符（含 JSON 开销后 <4800，保证通过 NUAA WAF）
-    return diff.length > 3500 ? diff.slice(0, 3500) + "\n... (diff 过长已截断)" : diff;
+    // 总上限 ~2000 字符（精简指令后，保证 JSON 体 <3500 通过 NUAA WAF）
+    return diff.length > 2000 ? diff.slice(0, 2000) + "\n... (diff 过长已截断)" : diff;
   } catch (e) {
     return `(获取 diff 失败: ${e.message})`;
   }
@@ -436,7 +415,7 @@ async function fetchIssueCodeContext(title, body) {
       }
     } catch { /* 搜索失败，继续下一个关键词 */ }
   }
-  return context.length > 2000 ? context.slice(0, 2000) + "\n... (截断)" : context;
+  return context.length > 1500 ? context.slice(0, 1500) + "\n... (截断)" : context;
 }
 
 async function analyzeItem(item) {
@@ -480,8 +459,8 @@ async function analyzeItem(item) {
   }
 
   try {
-    // system prompt 合并到 user 消息中，节省 JSON 开销并降低 WAF 拦截概率
-    const userMsg = "[系统指令]\n" + SYSTEM_PROMPT + "\n\n---\n\n" + context.join("\n\n---\n\n");
+    // 使用精简指令前缀，留空间给代码 diff（NUAA 代理 WAF 限制请求体 ~3500 字符）
+    const userMsg = REVIEW_PREFIX + context.join("\n\n---\n\n");
     const data = callDeepSeek([
       { role: "user", content: userMsg },
     ]);
