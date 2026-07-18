@@ -483,6 +483,11 @@ async function analyzeItem(item) {
     }
 
     const result = JSON.parse(jsonMatch[0]);
+    // 规范化 labels：确保是数组，过滤空值（GLM 等模型可能返回空字符串）
+    if (result.labels) {
+      result.labels = (Array.isArray(result.labels) ? result.labels : [result.labels])
+        .filter(l => typeof l === "string" && l.trim());
+    }
     log(`  📝 ${result.summary || "?"} | 🏆 ${result.rank || "?"}`);
     return result;
   } catch (e) {
@@ -555,11 +560,14 @@ function buildReviewComment(item, result) {
   );
   if (result.rank_reason) lines.push(result.rank_reason, "");
 
-  if (result.labels?.length > 0) {
+  const displayLabels = Array.isArray(result.labels)
+    ? result.labels.filter(l => typeof l === "string" && l.trim())
+    : [];
+  if (displayLabels.length > 0) {
     lines.push(
       "### 🔖 标签",
       "",
-      result.labels.map((l) => `\`${l}\``).join(" "),
+      displayLabels.map((l) => `\`${l}\``).join(" "),
       "",
     );
   }
