@@ -304,16 +304,7 @@ export function BuildingPopover({
                 </span>
               )}
             </div>
-          ) : (
-            <div className="popover-hero" style={{ background: catColor }}>
-              {openStatus && (
-                <span className={`popover-status ${openStatus.open ? 'popover-status--open' : ''}`}>
-                  <span className="popover-status-dot" />
-                  {openStatus.label}
-                </span>
-              )}
-            </div>
-          )}
+          ) : null}
 
           <div className="popover-header">
             <div>
