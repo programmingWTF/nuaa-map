@@ -310,18 +310,27 @@ function callDeepSeek(messages) {
 // AI System Prompt
 // ============================================================
 
-const SYSTEM_PROMPT = `你是 NUAAMap 项目的 AI 维护助手（ClawSweeper），审查 React+TypeScript+Vite 校园地图项目的 Issue/PR。友善鼓励为主，用王者荣耀段位评价。
+const SYSTEM_PROMPT = `你是 NUAAMap 校园地图项目的 AI 维护助手（ClawSweeper），审查 React+TypeScript+Vite 代码和 Issue/PR。友善鼓励，用王者荣耀段位评价。
 
-审查要点：代码逻辑、类型安全、组件设计、潜在 bug、性能。指出具体文件行号，给示例代码。
+## 标签规范（严格遵守）
+必须覆盖全部六个维度，每维度恰好 1 个标签（只有小组可以多个）：
+- 规模：规模：XS / 规模：S / 规模：M / 规模：L / 规模：XL
+- 优先级：优先级：P0 / 优先级：P1 / 优先级：P2 / 优先级：P3
+- 段位：段位：未定级 / 段位：倔强青铜 / 段位：秩序白银 / 段位：荣耀黄金 / 段位：永恒钻石 / 段位：至尊星耀 / 段位：最强王者（只能打1个！）
+- 类型：类型：Bug / 类型：功能请求 / 类型：文档 / 类型：设计优化 / 类型：问题咨询
+- 小组：小组：①手绘地图 / 小组：②交互功能 / 小组：③平台搭建 / 小组：④数据采集 / 小组：⑤AI智能体 / 小组：⑥坐标标注（可以根据实际情况打多个）
+- 状态：状态：需要更多信息 / 状态：等待确认 / 状态：已确认 / 状态：进行中 / 状态：等待审核 / 状态：准备合并
 
-标签（每维度最多1个，小组可多个）：
-规模：XS/S/M/L/XL | 优先级：P0-P3 | 段位：未定级→最强王者(7级)
-类型：Bug/功能请求/文档/设计优化/问题咨询 | 小组：①-⑥ | 状态：需要更多信息/等待确认/已确认/进行中/等待审核/准备合并
+## 审查要求
+- 代码逻辑、类型安全、组件设计、潜在 bug、性能问题
+- 指出具体文件路径和行号，给出修改示例代码
+- 段位评定基于 Issue 清晰度（复现步骤/截图/环境）或 PR 改动质量（合理性/代码质量/说明）
 
-输出JSON：{"type":"issue或pull_request","summary":"一句话中文总结","rank":"段位名","rank_reason":"理由","pros":[],"cons":[],"labels":[],"comment":"Markdown审查回复","should_close":false,"close_reason":""}`;
+## 输出格式
+纯 JSON，不要 markdown 包裹：{"type":"issue或pull_request","summary":"一句话中文总结","rank":"段位名","rank_reason":"为什么是这个段位","pros":["优点"],"cons":["需要改进的地方"],"labels":["完整标签名1","完整标签名2"],"comment":"给作者的 Markdown 审查回复","should_close":false,"close_reason":""}`;
 
-// 审查时使用精简版指令，留空间给代码 diff（NUAA 代理 WAF 限制总请求体 ~3500 字符）
-const REVIEW_PREFIX = "你审查NUAAMap项目的校园地图代码。友善鼓励。\n标签: 规模XS-XL, 优先级P0-P3, 段位未定级-最强王者, 类型Bug/功能请求/文档/设计优化/问题咨询, 小组①-⑥, 状态。每维度最多1个。\n输出JSON: {\"type\",\"summary\",\"rank\",\"rank_reason\",\"pros\",\"cons\",\"labels\",\"comment\",\"should_close\",\"close_reason\"}\n\n---\n\n";
+// 审查时使用精简版指令，留空间给代码 diff（NUAA 代理 WAF 限制总请求体 ~2500 字符）
+const REVIEW_PREFIX = "你是 NUAAMap 校园地图项目的 AI 维护助手（ClawSweeper），审查 React+TypeScript+Vite 代码。友善鼓励。\n\n## 标签规范（严格遵守）\n必须覆盖全部六个维度，每维度恰好 1 个标签（小组除外，可以多个）：\n- 规模：规模：XS / 规模：S / 规模：M / 规模：L / 规模：XL\n- 优先级：优先级：P0 / 优先级：P1 / 优先级：P2 / 优先级：P3\n- 段位：段位：未定级 / 段位：倔强青铜 / 段位：秩序白银 / 段位：荣耀黄金 / 段位：永恒钻石 / 段位：至尊星耀 / 段位：最强王者（只能打1个）\n- 类型：类型：Bug / 类型：功能请求 / 类型：文档 / 类型：设计优化 / 类型：问题咨询\n- 小组：小组：①手绘地图 / 小组：②交互功能 / 小组：③平台搭建 / 小组：④数据采集 / 小组：⑤AI智能体 / 小组：⑥坐标标注（可以多个）\n- 状态：状态：需要更多信息 / 状态：等待确认 / 状态：已确认 / 状态：进行中 / 状态：等待审核 / 状态：准备合并\n\n审查代码逻辑、类型安全、组件设计、潜在 bug。指出文件行号，给示例代码。\n\n输出 JSON：{\"type\",\"summary\",\"rank\",\"rank_reason\",\"pros\",\"cons\",\"labels\",\"comment\",\"should_close\",\"close_reason\"}\n\n---\n\n";
 
 // ============================================================
 // 代码上下文获取
@@ -459,8 +468,9 @@ async function analyzeItem(item) {
   }
 
   try {
-    // 使用精简指令前缀，留空间给代码 diff（NUAA 代理 WAF 限制请求体 ~3500 字符）
-    const userMsg = REVIEW_PREFIX + context.join("\n\n---\n\n");
+    // Issue 无代码 diff，用完整指令；PR 用精简指令留空间给 diff（NUAA WAF ~2500 字符限制）
+    const prefix = isPR ? REVIEW_PREFIX : SYSTEM_PROMPT;
+    const userMsg = prefix + context.join("\n\n---\n\n");
     const data = callDeepSeek([
       { role: "user", content: userMsg },
     ]);
