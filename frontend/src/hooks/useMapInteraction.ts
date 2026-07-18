@@ -225,7 +225,6 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
     if (e.touches.length > 0) return;
     dragRef.current.active = false;
     pinchRef.current.lastDist = 0;
-    // 松手时同步一次 React 状态
     setTransform(transformRef.current);
     setIsDragging(false);
   }, []);
