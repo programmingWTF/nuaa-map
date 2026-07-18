@@ -87,6 +87,7 @@ export function BuildingPopover({
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
   const [carouselIdx, setCarouselIdx] = useState(0);
+  const [brokenImgs, setBrokenImgs] = useState<Set<number>>(new Set());
   const popoverRef = useRef<HTMLDivElement>(null);
   const nearbyRef = useRef<HTMLDivElement>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -103,8 +104,8 @@ export function BuildingPopover({
     ? building.images.map(resolveImageUrl)
     : building.imageUrl ? [resolveImageUrl(building.imageUrl)] : [];
 
-  /* 切换建筑时重置轮播索引 */
-  useEffect(() => { setCarouselIdx(0); }, [building.id]);
+  /* 切换建筑时重置轮播索引 + 损坏图片状态 */
+  useEffect(() => { setCarouselIdx(0); setBrokenImgs(new Set()); }, [building.id]);
 
   /* 自动轮播（3秒切换，手动翻页后重置计时） */
   const startCarouselTimer = useCallback(() => {
@@ -253,13 +254,21 @@ export function BuildingPopover({
             <div className="popover-hero popover-hero--carousel">
               {/* 全部图片预加载，opacity 切换，切换无白闪 */}
               {imageList.map((src, i) => (
+                brokenImgs.has(i) ? null : (
                 <img
                   key={i}
                   className={`popover-hero-img ${i === carouselIdx ? 'popover-hero-img--active' : ''}`}
                   src={src}
                   alt={`${building.name} 照片 ${i + 1}`}
+                  onError={() => {
+                    setBrokenImgs(prev => new Set(prev).add(i));
+                    // 如果当前展示的就是损坏的图，跳到下一张
+                    if (i === carouselIdx) {
+                      setCarouselIdx(prev => (prev + 1) % imageList.length);
+                    }
+                  }}
                 />
-              ))}
+              )))}
               {imageList.length > 1 && (
                 <>
                   <button className="popover-carousel-btn popover-carousel-btn--prev"
