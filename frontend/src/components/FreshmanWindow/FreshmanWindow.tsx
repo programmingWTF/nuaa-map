@@ -20,7 +20,7 @@ const STORAGE_KEY = 'nuaa-map-freshman-qa';
 const API_URL = '/api/freshman-questions';
 
 // 从 QA 知识库加载预设问答
-import qaData from '../../../data/qa/qa-新生问答.json';
+import qaData from '../../data/qa-新生问答.json';
 
 const DEFAULT_FAQS: FreshmanEntry[] = qaData.questions.map((q, i) => ({
   id: `qa-freshman-${i + 1}`,
