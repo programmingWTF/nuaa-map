@@ -473,8 +473,21 @@ function buildReviewComment(item, result) {
 }
 
 // ============================================================
-// 处理单个 Item（两阶段评论）
+// 处理单个 Item（两阶段评论，原地更新已有评论）
 // ============================================================
+
+/** 查找 Bot 在指定 Issue/PR 上的最新评论 ID */
+async function findBotCommentId(issueNumber) {
+  try {
+    const comments = await ghAPI(
+      `/issues/${issueNumber}/comments?per_page=100&sort=created&direction=desc`
+    );
+    const botComment = comments.find((c) => c.user?.login === CONFIG.BOT_LOGIN);
+    return botComment ? botComment.id : null;
+  } catch {
+    return null;
+  }
+}
 
 async function processItem(item, reason) {
   const num = item.number;
@@ -482,10 +495,20 @@ async function processItem(item, reason) {
 
   log(`\n🔍 [${reason}] ${typeStr} #${num}: ${(item.title || "").slice(0, 60)}`);
 
+  // 查找已有机器人评论 → 原地更新，不新建
+  const existingId = await findBotCommentId(num);
+
   // 阶段一：确认评论
   const ackBody = buildAckComment(item);
-  const commentId = await postComment(num, ackBody);
-  if (commentId) log(`  👀 确认评论已发`);
+  let commentId;
+  if (existingId) {
+    await updateComment(existingId, ackBody);
+    commentId = existingId;
+    log(`  🔄 原地更新已有评论`);
+  } else {
+    commentId = await postComment(num, ackBody);
+    if (commentId) log(`  👀 确认评论已发`);
+  }
 
   // 阶段二：AI 分析
   const result = await analyzeItem(item);
@@ -504,7 +527,7 @@ async function processItem(item, reason) {
     log(`  🏷️ ${validNew.join(", ")}`);
   }
 
-  // 发布完整审查（更新确认评论）
+  // 发布完整审查（更新已有评论）
   const reviewBody = buildReviewComment(item, result);
   if (commentId) {
     await updateComment(commentId, reviewBody);
