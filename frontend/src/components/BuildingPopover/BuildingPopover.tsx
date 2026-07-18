@@ -87,12 +87,19 @@ export function BuildingPopover({
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
   const [carouselIdx, setCarouselIdx] = useState(0);
+  const [closing, setClosing] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
   const nearbyRef = useRef<HTMLDivElement>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const carouselTimerRef = useRef<ReturnType<typeof setInterval>>(undefined);
   const inputBlurGuard = useRef(false); // 防止移动端键盘收起时误关弹窗
+
+  const handleClose = useCallback(() => {
+    if (closing) return;
+    setClosing(true);
+    setTimeout(() => onClose(), 200);
+  }, [closing, onClose]);
 
   const openStatus = getOpenStatus(building.openTime);
   const nearby = getNearby(building, buildings);
@@ -161,7 +168,7 @@ export function BuildingPopover({
     return () => el.removeEventListener('wheel', onWheel);
   }, []);
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') handleClose(); };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
@@ -231,7 +238,7 @@ export function BuildingPopover({
           e.stopPropagation();
           e.preventDefault();
           if (inputBlurGuard.current) return;
-          onClose();
+          handleClose();
         }}
         onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
       />
@@ -241,7 +248,7 @@ export function BuildingPopover({
       >
         <div
           ref={popoverRef}
-          className="popover"
+          className={`popover ${closing ? 'popover--closing' : ''}`}
           style={{ maxHeight: POPOVER_MAX_H }}
           role="dialog" aria-label={`${building.name} 详情`}
         >
@@ -311,7 +318,7 @@ export function BuildingPopover({
               <span className="popover-category" style={{ color: catColor }}>{CATEGORY_LABELS[building.category]}</span>
               <h3 className="popover-name">{building.name}</h3>
             </div>
-            <button className="popover-close" onClick={onClose} aria-label="关闭">
+            <button className="popover-close" onClick={handleClose} aria-label="关闭">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>

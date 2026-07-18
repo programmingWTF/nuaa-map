@@ -22,6 +22,13 @@
   from { opacity:0; transform:translateY(12px) scale(0.92); }
   to   { opacity:1; transform:translateY(0) scale(1); }
 }
+.popover--closing {
+  animation: popover-out 0.2s var(--ease-out) forwards;
+}
+@keyframes popover-out {
+  from { opacity:1; transform:translateY(0) scale(1); }
+  to   { opacity:0; transform:translateY(8px) scale(0.96); }
+}
 
 /* 照片区 —— 有图用图，无图用分类色块 */
 .popover-hero {
