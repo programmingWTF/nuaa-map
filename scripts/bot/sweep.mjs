@@ -337,17 +337,17 @@ async function fetchPRDiff(prNumber) {
     for (const f of files) {
       diff += `\n--- ${f.filename} (${f.status}: +${f.additions} -${f.deletions}) ---\n`;
       if (f.patch) {
-        // 单文件 patch 上限 1000 字符（NUAA 代理 WAF 限制）
-        const patch = f.patch.length > 1000
-          ? f.patch.slice(0, 1000) + `\n... (截断，共 ${f.patch.length} 字符)`
+        // 单文件 patch 上限 500 字符（NUAA 代理 WAF ~2500 字符限制）
+        const patch = f.patch.length > 500
+          ? f.patch.slice(0, 500) + `\n... (截断，共 ${f.patch.length} 字符)`
           : f.patch;
         diff += "```diff\n" + patch + "\n```\n";
       } else {
         diff += "(二进制或过大，无 patch)\n";
       }
     }
-    // 总上限 ~2000 字符（精简指令后，保证 JSON 体 <3500 通过 NUAA WAF）
-    return diff.length > 2000 ? diff.slice(0, 2000) + "\n... (diff 过长已截断)" : diff;
+    // 总上限 ~1500 字符（保证 JSON 体 <2500 通过 NUAA WAF）
+    return diff.length > 1500 ? diff.slice(0, 1500) + "\n... (diff 过长已截断)" : diff;
   } catch (e) {
     return `(获取 diff 失败: ${e.message})`;
   }
@@ -415,7 +415,7 @@ async function fetchIssueCodeContext(title, body) {
       }
     } catch { /* 搜索失败，继续下一个关键词 */ }
   }
-  return context.length > 1500 ? context.slice(0, 1500) + "\n... (截断)" : context;
+  return context.length > 1200 ? context.slice(0, 1200) + "\n... (截断)" : context;
 }
 
 async function analyzeItem(item) {
