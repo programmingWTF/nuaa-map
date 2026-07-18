@@ -4,6 +4,6 @@
   "category": "宿舍",
   "description": "教师公寓及培训中心，教职工周转住宿。",
   "floors": 6,
-  "openTime": "24小时",
+  "openTime": "全天开放",
   "tags": ["住宿", "教师"]
 }
