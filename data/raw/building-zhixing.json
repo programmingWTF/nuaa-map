@@ -1,0 +1,9 @@
+{
+  "id": "building-009",
+  "name": "知行楼",
+  "category": "教学",
+  "description": "实验楼，常见作为考场使用。",
+  "floors": 5,
+  "openTime": "周一至周五 7:00-21:30",
+  "tags": ["实验", "考试"]
+}
