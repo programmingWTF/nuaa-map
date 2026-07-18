@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { flushSync } from 'react-dom';
 import type { MapTransform } from '../types';
 
 const MAX_SCALE = 4;
@@ -210,11 +211,13 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
   }, [containerRef, imageSize, getMinScale]);
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    // 双指变单指时不重置，避免 transition 闪切
     if (e.touches.length > 0) return;
     dragRef.current.active = false;
-    setIsDragging(false);
     pinchRef.current.lastDist = 0;
+    // flushSync 确保最后一帧 transform 渲染完再改 isDragging
+    flushSync(() => {
+      setIsDragging(false);
+    });
   }, []);
 
   /* ── 适应屏幕：宽度适配，左右边界对齐窗口 ── */
