@@ -640,7 +640,7 @@ async function processItem(item, reason) {
   const result = await analyzeItem(item);
   if (!result) {
     if (commentId) {
-      await updateComment(commentId, ackBody.replace("正在分析……", "分析遇到问题，请稍后重试或 @nuaamap-bot"));
+      await updateComment(commentId, ackBody.replace("正在分析……", "分析遇到问题，请稍后重试或 @LiGuiyu-AI"));
     }
     return false;
   }
