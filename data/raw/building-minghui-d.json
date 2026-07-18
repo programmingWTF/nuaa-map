@@ -1,10 +1,36 @@
 {
-  "id": "building-020",
+  "id": "building-minghui-d",
   "name": "明慧楼D",
-  "category": "教学",
+  "category": "教学楼",
   "description": "理工科实验教学楼D座，兼设教材发行处。用于上课及学支活动。",
   "floors": 5,
   "openTime": "周一至周五 7:00-21:30",
-  "facilities": ["实验室", "教材发行处"],
-  "tags": ["上课", "实验", "教材", "学支活动"]
+  "facilities": [
+    "实验室",
+    "教材发行处"
+  ],
+  "tags": [
+    "上课",
+    "实验",
+    "教材",
+    "学支活动"
+  ],
+  "position": {
+    "pixelX": 0,
+    "pixelY": 0,
+    "_comment": "⑥组标注"
+  },
+  "clickArea": {
+    "_comment": "⑥组标注",
+    "type": "rect",
+    "rect": {
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0
+    },
+    "polygon": []
+  },
+  "images": [],
+  "departments": []
 }

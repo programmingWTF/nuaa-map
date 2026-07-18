@@ -1,10 +1,37 @@
 {
-  "id": "building-014",
+  "id": "building-library",
   "name": "问天图书馆",
   "category": "图书馆",
   "description": "南航三校区最大主馆，2026.5.19开馆。何镜堂院士团队设计，地下1层地上9层，总面积5.1万㎡，藏书容量200万册。泗水湖畔地标，楼顶直升机停机坪。",
   "floors": 9,
   "openTime": "周一至周日 8:00-22:00",
-  "facilities": ["电子阅览室", "研讨间", "自习区", "停机坪", "会堂"],
-  "tags": ["学习", "地标"]
+  "facilities": [
+    "电子阅览室",
+    "研讨间",
+    "自习区",
+    "停机坪",
+    "会堂"
+  ],
+  "tags": [
+    "学习",
+    "地标"
+  ],
+  "position": {
+    "pixelX": 0,
+    "pixelY": 0,
+    "_comment": "⑥组标注"
+  },
+  "clickArea": {
+    "_comment": "⑥组标注",
+    "type": "rect",
+    "rect": {
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0
+    },
+    "polygon": []
+  },
+  "images": [],
+  "departments": []
 }

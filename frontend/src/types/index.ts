@@ -49,6 +49,26 @@ export interface BuildingClickData {
   screenHeight: number;
 }
 
+/** data/raw/ 中的建筑原始数据（④组采集，坐标由⑥组补充） */
+export interface RawBuildingInfo {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  floors?: number;
+  openTime?: string;
+  facilities?: string[];
+  departments?: string[];
+  tags?: string[];
+  position: { pixelX: number; pixelY: number };
+  clickArea: {
+    type: 'rect' | 'polygon';
+    rect: { x: number; y: number; width: number; height: number };
+    polygon: { x: number; y: number }[];
+  };
+  images: string[];
+}
+
 /** 地图图片元信息（运行时从图片读取） */
 export interface MapImageMeta {
   width: number;

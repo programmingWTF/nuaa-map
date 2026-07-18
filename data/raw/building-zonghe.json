@@ -1,11 +1,38 @@
 {
-  "id": "building-031",
+  "id": "building-zonghe",
   "name": "综合服务楼",
-  "category": "服务",
+  "category": "行政楼",
   "description": "5层综合服务楼。1层保卫处/师生服务大厅，2层牧星学院办公区，4层校区管委会/学工/团委，5层后勤集团。",
   "floors": 5,
   "openTime": "周一至周日 8:00-20:00",
-  "facilities": ["师生服务大厅", "保卫处"],
-  "departments": ["牧星学院", "校区管委会", "后勤集团"],
-  "tags": ["服务", "行政"]
+  "facilities": [
+    "师生服务大厅",
+    "保卫处"
+  ],
+  "departments": [
+    "牧星学院",
+    "校区管委会",
+    "后勤集团"
+  ],
+  "tags": [
+    "服务",
+    "行政"
+  ],
+  "position": {
+    "pixelX": 0,
+    "pixelY": 0,
+    "_comment": "⑥组标注"
+  },
+  "clickArea": {
+    "_comment": "⑥组标注",
+    "type": "rect",
+    "rect": {
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0
+    },
+    "polygon": []
+  },
+  "images": []
 }

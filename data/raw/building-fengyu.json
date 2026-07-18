@@ -1,10 +1,36 @@
 {
-  "id": "building-028",
+  "id": "building-fengyu",
   "name": "风雨操场",
-  "category": "体育",
+  "category": "体育设施",
   "description": "含西操场、看台教室、羽毛球馆（APP预约）、两个舞蹈房、健身房（预约制）。",
   "floors": 2,
   "openTime": "健身房 周一至周四12:30-13:30/18:00-21:00，周五12:30-21:00，周末9:00-21:00",
-  "facilities": ["羽毛球馆", "健身房", "舞蹈房", "西操场"],
-  "tags": ["体育", "健身"]
+  "facilities": [
+    "羽毛球馆",
+    "健身房",
+    "舞蹈房",
+    "西操场"
+  ],
+  "tags": [
+    "体育",
+    "健身"
+  ],
+  "position": {
+    "pixelX": 0,
+    "pixelY": 0,
+    "_comment": "⑥组标注"
+  },
+  "clickArea": {
+    "_comment": "⑥组标注",
+    "type": "rect",
+    "rect": {
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0
+    },
+    "polygon": []
+  },
+  "images": [],
+  "departments": []
 }

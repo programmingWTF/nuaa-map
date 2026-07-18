@@ -1,10 +1,35 @@
 {
-  "id": "building-008",
+  "id": "building-duxing",
   "name": "笃行楼",
-  "category": "教学",
+  "category": "教学楼",
   "description": "实验楼，含物理实验室、机房、飞行实验室。",
   "floors": 5,
   "openTime": "周一至周五 7:00-21:30",
-  "facilities": ["物理实验室", "机房", "飞行实验室"],
-  "tags": ["实验", "上课"]
+  "facilities": [
+    "物理实验室",
+    "机房",
+    "飞行实验室"
+  ],
+  "tags": [
+    "实验",
+    "上课"
+  ],
+  "position": {
+    "pixelX": 0,
+    "pixelY": 0,
+    "_comment": "⑥组标注"
+  },
+  "clickArea": {
+    "_comment": "⑥组标注",
+    "type": "rect",
+    "rect": {
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0
+    },
+    "polygon": []
+  },
+  "images": [],
+  "departments": []
 }
