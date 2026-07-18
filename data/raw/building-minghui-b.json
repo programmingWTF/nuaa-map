@@ -1,0 +1,10 @@
+{
+  "id": "building-018",
+  "name": "明慧楼B",
+  "category": "教学",
+  "description": "理工科实验教学楼B座，用于上课及学支活动。",
+  "floors": 5,
+  "openTime": "周一至周五 7:00-21:30",
+  "facilities": ["实验室", "多媒体教室"],
+  "tags": ["上课", "实验", "学支活动"]
+}
