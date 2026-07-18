@@ -19,26 +19,15 @@ type PanelPhase = 'hidden' | 'entering' | 'visible' | 'exiting';
 const STORAGE_KEY = 'nuaa-map-freshman-qa';
 const API_URL = '/api/freshman-questions';
 
-const DEFAULT_FAQS: FreshmanEntry[] = [
-  {
-    id: 'faq-1',
-    question: '天目湖校区宿舍如何分配？',
-    answer: '开学前会在迎新系统中公布宿舍楼栋及房间号，可在地图中搜索对应楼栋查看位置。',
-    createdAt: '系统预置',
-  },
-  {
-    id: 'faq-2',
-    question: '校区内食堂在哪里？',
-    answer: '地图上标记为“食堂”的建筑即为餐饮场所，进入地图后可直接点击查看。',
-    createdAt: '系统预置',
-  },
-  {
-    id: 'faq-3',
-    question: '图书馆几点关门？',
-    answer: '图书馆通常在晚上较晚时间关闭，具体以当日公告为准。',
-    createdAt: '系统预置',
-  },
-];
+// 从 QA 知识库加载预设问答
+import qaData from '../../../data/qa/qa-新生问答.json';
+
+const DEFAULT_FAQS: FreshmanEntry[] = qaData.questions.map((q, i) => ({
+  id: `qa-freshman-${i + 1}`,
+  question: q.question,
+  answer: q.answer,
+  createdAt: '④组 QA 知识库',
+}));
 
 function readLocalEntries(): FreshmanEntry[] {
   try {

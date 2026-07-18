@@ -1,0 +1,9 @@
+{
+  "id": "building-nanshan-4",
+  "name": "南山苑4号楼",
+  "category": "宿舍",
+  "description": "学生公寓，两室一厅套间（8人），上床下桌，独立卫浴干湿分离，24小时热水，空调风扇，覆盖WiFi。",
+  "floors": 7,
+  "openTime": "全天开放",
+  "facilities": ["空调", "独立卫浴", "WiFi", "洗衣机", "直饮水"]
+}

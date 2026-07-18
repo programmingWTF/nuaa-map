@@ -97,7 +97,7 @@
       "width": 80,
       "height": 60
     },
-    "description": "综合性教学楼，设有多功能阶梯教室和实验室。",
+    "description": "常用教学楼，与B5二楼有连廊。108和110为报告厅，常用于会议和讲座。",
     "openTime": "周一至周五 7:00-21:30",
     "floors": 5,
     "images": [
@@ -115,9 +115,9 @@
       "width": 80,
       "height": 60
     },
-    "description": "实践教学中心，配备各类专业实验室。",
+    "description": "实验楼，含物理实验室、机房、飞行实验室。",
     "openTime": "周一至周五 7:00-21:30",
-    "floors": 4,
+    "floors": 5,
     "images": [
       "/buildings/duxing/01.jpg",
       "/buildings/duxing/02.jpg"
@@ -133,7 +133,7 @@
       "width": 85,
       "height": 65
     },
-    "description": "公共教学楼，以大型阶梯教室为主。",
+    "description": "实验楼，常见作为考场使用。",
     "openTime": "周一至周五 7:00-21:30",
     "floors": 5,
     "images": [
@@ -151,7 +151,7 @@
       "width": 80,
       "height": 60
     },
-    "description": "人文社科类教学与行政综合楼。",
+    "description": "通用航空与飞行学院主楼。1层档案室/教工之家，2层科研办公室/研讨室，3层会议室/航空机房/实验室，4层学院行政核心区。",
     "openTime": "周一至周五 7:00-21:00",
     "floors": 4,
     "images": [
@@ -169,7 +169,7 @@
       "width": 70,
       "height": 55
     },
-    "description": "理工科实验教学楼A座。",
+    "description": "理工科实验教学楼A座，用于上课及学支活动。",
     "openTime": "周一至周五 7:00-21:30",
     "floors": 5,
     "images": [
@@ -187,7 +187,7 @@
       "width": 70,
       "height": 55
     },
-    "description": "理工科实验教学楼B座。",
+    "description": "理工科实验教学楼B座，用于上课及学支活动。",
     "openTime": "周一至周五 7:00-21:30",
     "floors": 5,
     "images": [
@@ -206,7 +206,7 @@
       "width": 70,
       "height": 55
     },
-    "description": "理工科实验教学楼C座。",
+    "description": "理工科实验教学楼C座，用于上课及学支活动。",
     "openTime": "周一至周五 7:00-21:30",
     "floors": 5,
     "images": [
@@ -223,7 +223,7 @@
       "width": 70,
       "height": 55
     },
-    "description": "理工科实验教学楼D座。",
+    "description": "理工科实验教学楼D座，兼设教材发行处，用于上课及学支活动。",
     "openTime": "周一至周五 7:00-21:30",
     "floors": 5,
     "images": [
@@ -241,9 +241,9 @@
       "width": 90,
       "height": 70
     },
-    "description": "天目湖校区标志性建筑，藏书丰富，配备电子阅览室、研讨间和自习区。",
+    "description": "南航三校区最大主馆，2026.5.19开馆。何镜堂院士团队设计，地下1层地上9层，总面积5.1万㎡，藏书容量200万册。泗水湖畔地标，楼顶直升机停机坪。",
     "openTime": "周一至周日 8:00-22:00",
-    "floors": 5,
+    "floors": 9,
     "images": [
       "/buildings/tushuguan/01.jpg"
     ]
@@ -258,9 +258,9 @@
       "width": 75,
       "height": 60
     },
-    "description": "南山苑宿舍区配套食堂，两层风味窗口。",
-    "openTime": "早餐 6:30-9:00 | 午餐 11:00-13:00 | 晚餐 17:00-19:30",
-    "floors": 2,
+    "description": "航空文化主题食堂，三层。1层特色快餐+民族餐厅，2层200余种轮换菜品，3层教工餐厅。",
+    "openTime": "早餐 7:00-9:00 | 午餐 11:00-13:00 | 晚餐 17:00-18:45 | 夜宵 19:00-22:00(仅1层)",
+    "floors": 3,
     "images": [
       "/buildings/nanshan/01.jpg",
       "/buildings/nanshan/02.jpg"
@@ -276,9 +276,9 @@
       "width": 75,
       "height": 60
     },
-    "description": "东篱苑宿舍区配套食堂，提供各地风味美食。",
-    "openTime": "早餐 6:30-9:00 | 午餐 11:00-13:00 | 晚餐 17:00-19:30",
-    "floors": 2,
+    "description": "三层食堂，主打平价餐食。1层大众自选餐区（免费酸梅汤），2层特色美食区（西式快餐/羊肉粉/炒浇面等），不定期美食节活动。",
+    "openTime": "早餐 7:00-9:00 | 午餐 11:00-13:00 | 晚餐 17:00-18:45",
+    "floors": 3,
     "images": [
       "/buildings/dongli/02.jpg",
       "/buildings/dongli/03.jpg"
@@ -390,7 +390,7 @@
       "width": 65,
       "height": 70
     },
-    "description": "学生宿舍楼，配备空调和独立卫浴。",
+    "description": "学生宿舍楼，配备空调和独立卫浴。架空层设东篱苑自习室（6:30-24:00开放）。",
     "floors": 7
   },
   {
@@ -416,7 +416,7 @@
       "width": 60,
       "height": 55
     },
-    "description": "教职工周转公寓。",
+    "description": "教师公寓及培训中心，教职工周转住宿。",
     "floors": 6,
     "images": ["/buildings/zhigong/01.jpg", "/buildings/zhigong/02.jpg", "/buildings/zhigong/03.jpg"]
   },
@@ -430,7 +430,7 @@
       "width": 100,
       "height": 80
     },
-    "description": "含室内篮球场、羽毛球场、游泳馆及健身房。",
+    "description": "健翔体育馆，含游泳馆、拳击馆、篮球馆等多功能体育场所。除体育课外常用于大型会议和晚会。",
     "openTime": "周一至周日 9:00-21:00",
     "floors": 2,
     "images": ["/buildings/jianxiang/01.jpg"]
@@ -460,7 +460,7 @@
       "width": 90,
       "height": 65
     },
-    "description": "户外运动场，含篮球场和网球场。",
+    "description": "户外运动场，含田径跑道、足球场及网球场。",
     "openTime": "全天开放",
     "floors": 0,
     "images": ["/buildings/dongcao/01.jpg", "/buildings/dongcao/02.jpg"]
@@ -475,8 +475,8 @@
       "width": 90,
       "height": 70
     },
-    "description": "室内综合运动场馆，可进行篮球、羽毛球等活动。",
-    "openTime": "周一至周日 9:00-21:00",
+    "description": "含西操场、看台教室、羽毛球馆（APP预约）、两个舞蹈房、健身房（预约制）。",
+    "openTime": "健身房 周一至周四 12:30-13:30/18:00-21:00，周五 12:30-21:00，周末 9:00-21:00",
     "floors": 1,
     "images": ["/buildings/fengyu/01.jpg"]
   },
@@ -490,9 +490,9 @@
       "width": 70,
       "height": 55
     },
-    "description": "校园生活服务中心，超市、快递、文印等。",
+    "description": "5层综合服务楼。1层保卫处/师生服务大厅，2层牧星学院办公区，4层校区管委会/学工/团委，5层后勤集团。",
     "openTime": "周一至周日 8:00-20:00",
-    "floors": 2,
+    "floors": 5,
     "images": [
       "/buildings/zonghe/01.jpg",
       "/buildings/zonghe/02.jpg"
@@ -508,7 +508,7 @@
       "width": 70,
       "height": 50
     },
-    "description": "一站式师生事务办理中心。",
+    "description": "位于综合服务楼1层。办理学生证、缴纳学费、办理银行卡等一站式事务。",
     "openTime": "周一至周五 8:00-12:00, 14:00-17:00",
     "floors": 1,
     "images": [
@@ -526,9 +526,9 @@
       "width": 65,
       "height": 50
     },
-    "description": "提供基本医疗服务，24小时急诊，支持校园医保。",
-    "openTime": "门诊 8:00-17:00 | 急诊 24小时",
-    "floors": 2,
+    "description": "4层。门诊8:30-12:15/14:00-17:45，急诊24小时。1层挂号/药房/输液/放射，2层B超/检验/妇科/耳鼻喉科，3层体检中心，4层行政办公。",
+    "openTime": "门诊 8:30-12:15, 14:00-17:45 | 急诊 24小时",
+    "floors": 4,
     "images": [
       "/buildings/xiaoyiyuan/01.jpg",
       "/buildings/xiaoyiyuan/02.jpg"
