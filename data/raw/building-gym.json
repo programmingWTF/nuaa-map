@@ -1,10 +1,35 @@
 {
-  "id": "building-016",
+  "id": "building-gym",
   "name": "体育馆游泳馆",
-  "category": "体育",
+  "category": "体育设施",
   "description": "健翔体育馆，含游泳馆、拳击馆、篮球馆等多功能体育场所。除体育课外常用于大型会议和晚会。",
   "floors": 2,
   "openTime": "周一至周日 9:00-21:00",
-  "facilities": ["游泳馆", "篮球馆", "拳击馆"],
-  "tags": ["体育", "会议"]
+  "facilities": [
+    "游泳馆",
+    "篮球馆",
+    "拳击馆"
+  ],
+  "tags": [
+    "体育",
+    "会议"
+  ],
+  "position": {
+    "pixelX": 0,
+    "pixelY": 0,
+    "_comment": "⑥组标注"
+  },
+  "clickArea": {
+    "_comment": "⑥组标注",
+    "type": "rect",
+    "rect": {
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0
+    },
+    "polygon": []
+  },
+  "images": [],
+  "departments": []
 }

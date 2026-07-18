@@ -1,9 +1,31 @@
 {
-  "id": "building-010",
+  "id": "building-nanshan-canteen",
   "name": "南山苑餐厅",
   "category": "食堂",
   "description": "航空文化主题食堂，三层。1层特色快餐+民族餐厅（一毛钱米饭），2层200余种轮换菜品，3层教工餐厅。夜宵19:00-22:00仅1层民族餐厅开放。",
   "floors": 3,
   "openTime": "早餐7:00-9:00 | 午餐11:00-13:00 | 晚餐17:00-18:45 | 夜宵19:00-22:00",
-  "tags": ["食堂", "民族餐厅", "夜宵"]
+  "tags": [
+    "食堂",
+    "民族餐厅",
+    "夜宵"
+  ],
+  "position": {
+    "pixelX": 0,
+    "pixelY": 0,
+    "_comment": "⑥组标注"
+  },
+  "clickArea": {
+    "_comment": "⑥组标注",
+    "type": "rect",
+    "rect": {
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0
+    },
+    "polygon": []
+  },
+  "images": [],
+  "departments": []
 }
