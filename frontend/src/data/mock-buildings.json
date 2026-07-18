@@ -241,9 +241,9 @@
       "width": 90,
       "height": 70
     },
-    "description": "天目湖校区标志性建筑，藏书丰富，配备电子阅览室、研讨间和自习区。",
+    "description": "南航三校区最大主馆，2026.5.19开馆。何镜堂院士团队设计，地下1层地上9层，总面积5.1万㎡，藏书容量200万册。泗水湖畔地标，楼顶直升机停机坪。",
     "openTime": "周一至周日 8:00-22:00",
-    "floors": 5,
+    "floors": 9,
     "images": [
       "/buildings/tushuguan/01.jpg"
     ]
@@ -430,7 +430,7 @@
       "width": 100,
       "height": 80
     },
-    "description": "含室内篮球场、羽毛球场、游泳馆及健身房。",
+    "description": "健翔体育馆，含游泳馆、拳击馆、篮球馆等多功能体育场所。除体育课外常用于大型会议和晚会。",
     "openTime": "周一至周日 9:00-21:00",
     "floors": 2,
     "images": ["/buildings/jianxiang/01.jpg"]
@@ -460,7 +460,7 @@
       "width": 90,
       "height": 65
     },
-    "description": "户外运动场，含篮球场和网球场。",
+    "description": "户外运动场，含田径跑道、足球场及网球场。",
     "openTime": "全天开放",
     "floors": 0,
     "images": ["/buildings/dongcao/01.jpg", "/buildings/dongcao/02.jpg"]
@@ -475,8 +475,8 @@
       "width": 90,
       "height": 70
     },
-    "description": "室内综合运动场馆，可进行篮球、羽毛球等活动。",
-    "openTime": "周一至周日 9:00-21:00",
+    "description": "含西操场、看台教室、羽毛球馆（APP预约）、两个舞蹈房、健身房（预约制）。",
+    "openTime": "健身房 周一至周四 12:30-13:30/18:00-21:00，周五 12:30-21:00，周末 9:00-21:00",
     "floors": 1,
     "images": ["/buildings/fengyu/01.jpg"]
   },
