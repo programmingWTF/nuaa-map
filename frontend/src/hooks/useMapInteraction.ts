@@ -176,7 +176,6 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
   }, []);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    e.preventDefault(); // 阻止浏览器默认手势（页面缩放/滚动），与 CSS touch-action: none 双保险
     const container = containerRef.current;
     if (!container || !imageSize) return;
     const rect = container.getBoundingClientRect();
@@ -191,9 +190,6 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
         { scale: transformRef.current.scale, x: dragRef.current.startTx + (t.clientX - dragRef.current.startX), y: dragRef.current.startTy + (t.clientY - dragRef.current.startY) },
         cw, ch, iw, ih,
       );
-      transformRef.current = next;
-      const layer = container?.querySelector('.map-layer') as HTMLElement | null;
-      if (layer) layer.style.transform = `translate(${next.x}px, ${next.y}px) scale(${next.scale})`;
       setTransform(next);
     } else if (e.touches.length === 2 && pinchRef.current.lastDist > 0) {
       const [t1, t2] = [e.touches[0], e.touches[1]];
@@ -211,9 +207,6 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
         cw, ch, iw, ih,
       );
 
-      transformRef.current = next;
-      const layer = container?.querySelector('.map-layer') as HTMLElement | null;
-      if (layer) layer.style.transform = `translate(${next.x}px, ${next.y}px) scale(${next.scale})`;
       setTransform(next);
     }
   }, [containerRef, imageSize, getMinScale]);
@@ -228,9 +221,8 @@ export function useMapInteraction({ containerRef, imageSize }: UseMapInteraction
     }
     if (e.touches.length > 0) return;
     dragRef.current.active = false;
+    setIsDragging(false);
     pinchRef.current.lastDist = 0;
-    // 延迟一帧重置 isDragging，等 React 把最后的 transform 渲染完
-    requestAnimationFrame(() => setIsDragging(false));
   }, []);
 
   /* ── 适应屏幕：宽度适配，左右边界对齐窗口 ── */
