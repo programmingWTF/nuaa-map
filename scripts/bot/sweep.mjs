@@ -271,7 +271,7 @@ function callDeepSeek(messages) {
   writeFileSync(tmpFile, body, "utf-8");
 
   const cmd = [
-    "curl -s --connect-timeout 15 --max-time 60",
+    "curl -s -4 --connect-timeout 15 --max-time 60",
     "--proxy socks5h://127.0.0.1:1080",
     `-H "Authorization: Bearer ${CONFIG.DEEPSEEK_KEY}"`,
     `-H "Content-Type: application/json"`,
