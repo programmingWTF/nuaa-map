@@ -97,22 +97,25 @@ npm run build      # 生产构建
 nuaa-map/
 ├── frontend/          # ✅ ②③组：前端代码（React + TypeScript + Vite）
 │   └── src/
-│       ├── components/    # UI 组件（MapView / BuildingPopover / ChatWidget / Minimap）
+│       ├── components/    # UI 组件（TopBar / SearchBar / MapView / BuildingPopover / ChatWidget / FreshmanWindow / Minimap）
 │       ├── hooks/         # 自定义 Hook（useMapInteraction）
 │       ├── types/         # TypeScript 类型定义
-│       └── data/          # Mock 建筑数据
-├── assets/            # 📋 规划：静态资源
-│   └── map/           # ①组：手绘地图扫描图、图标
+│       └── data/          # 建筑数据（36栋）+ QA 知识库
+├── assets/            # ✅ 静态资源
+│   └── map/           # ①组：手绘地图修图素材、瓦片底图
 ├── data/
-│   ├── qa/            # ④组：问答知识库 → ⑤组直接使用
-│   ├── raw/           # ④组：建筑信息（无坐标）
-│   └── positions/     # ⑥组产出：建筑信息 + 像素坐标
+│   ├── extracted-map/ # ✅ 官方地图 XML API 提取的原始数据
+│   ├── qa/            # ✅ ④组：问答知识库 → ⑤组直接使用
+│   ├── raw/           # ✅ ④组：建筑信息（无坐标）
+│   └── positions/     # 📋 ⑥组产出：建筑信息 + 像素坐标（待创建）
 ├── docs/
 │   └── templates/     # 数据模板
-├── backend/           # ③组：后端 API（待开发）
-├── ai-agent/          # ⑤组：RAG + Prompt 工程（待开发）
-├── scripts/           # 工具脚本（待开发）
-└── .github/           # CI/CD（待配置）
+├── backend/           # 📋 ③组：后端 API（待开发）
+├── ai-agent/          # 📋 ⑤组：RAG + Prompt 工程（待开发）
+├── scripts/           # ✅ 工具脚本（瓦片拼接、R2 上传、Bot 自动化）
+│   └── bot/           # GitHub Bot 自动化脚本（sweep.mjs）
+└── .github/           # ✅ CI/CD（自动部署 + Bot 工作流）
+    └── workflows/     # deploy.yml / bot-labels.yml / bot-stale.yml
 ```
 
 > ✅ = 已搭建完成 | 📋 = 规划中，待对应组交付
