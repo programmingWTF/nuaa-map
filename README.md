@@ -55,7 +55,7 @@ npm run dev
 > [!WARNING]
 > **常见问题**：如果直接执行 `npm run dev` 提示 `'vite' 不是内部或外部命令`，说明还没有安装依赖——请先运行 `npm install`（即上述第 3 步），再执行第 4 步。`node_modules/` 目录不会纳入 Git 版本控制，因此每次在新环境中 clone 仓库后都需要重新安装。
 
-> 目前前端已搭建完成，包含天目湖校区真实卫星地图底图（Zoom 3 瓦片拼接）+ 28 个真实建筑坐标 + 地图交互（缩放/拖拽边界约束、宽度适配）+ AI 聊天界面 + 缩略图导航。后端和 AI 智能体模块尚未开发。
+> 目前前端已搭建完成，包含天目湖校区真实卫星地图底图（Zoom 3 瓦片拼接）+ 36 栋真实建筑坐标 + 地图交互（缩放/拖拽边界约束、宽度适配）+ AI 聊天界面 + 新生问答窗口 + 建筑搜索 + 缩略图导航。后端和 AI 智能体模块尚未开发。
 
 ## 技术栈
 
@@ -74,16 +74,18 @@ npm run dev
 ```
 frontend/src/
 ├── components/
-│   ├── TopBar/           # 顶部导航栏（Logo + 搜索）
+│   ├── TopBar/           # 顶部导航栏（Logo + 搜索入口）
+│   ├── SearchBar/        # 建筑搜索栏（支持空间搜索）
 │   ├── MapView/          # 地图容器（缩放/拖拽）+ 热区层
 │   │   └── HotspotLayer  # 建筑标记（航路点风格，脉冲发光动画）
 │   ├── BuildingPopover/  # 建筑气泡弹窗（内嵌建筑专属AI问答）
 │   ├── ChatWidget/       # AI 浮动聊天组件（呼吸光晕按钮）
+│   ├── FreshmanWindow/   # 新生问答窗口（航迹云主题动画）
 │   └── Minimap/          # 缩略图导航（左下角，支持拖拽实时平移）
 ├── hooks/
 │   └── useMapInteraction # 地图交互 Hook（滚轮/捏合缩放、拖拽平移）
 ├── types/                # TypeScript 类型定义
-└── data/                 # 建筑数据（28个真实天目湖建筑 + 真实像素坐标）
+└── data/                 # 建筑数据（36栋真实天目湖建筑 + 真实像素坐标）+ QA 知识库
 ```
 
 ## 文档导航
@@ -93,7 +95,10 @@ frontend/src/
 | [团队协作规范](CONTRIBUTING.md) | 分支策略、提交规范、跨组接口 |
 | [团队职责](docs/team.md) | 各组详细职责与对接关系 |
 | [GitHub 协作入门指南](docs/github-guide.md) | 零基础学 Git/GitHub，从安装到 PR |
+| [标签体系说明](docs/labels.md) | Issue/PR 标签分类与王者荣耀段位评级 |
+| [Bot 自动化系统](docs/bot-automation.md) | GitHub Bot 自动化管理（自动标签、过时清理、AI 分类） |
 | [AI 工具使用指南](AGENTS.md) | 各组如何用 AI Agent 提效 |
+| [AI 自动化协作系统规格](ai-automation-spec.md) | Bot 系统技术规格与部署方案 |
 | [项目规则书](CLAUDE.md) | AI 自动遵守的项目规范与架构 |
 | [部署配置](#部署) | Docker 部署、自动 CI/CD、部署文件说明 |
 | [QA 知识库模板](docs/templates/qa-knowledge.json) | ④组：问答数据模板 |

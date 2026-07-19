@@ -253,20 +253,28 @@ nuaa-map/
 │   │   ├── tianmuhu-buildings-xml.json   # 36 栋建筑 XML 原始坐标
 │   │   ├── tianmuhu-buildings.json       # 坐标转换后的建筑数据
 │   │   └── tianmuhu-buildings-local.json # 本地坐标系建筑数据
-│   ├── qa/                      # 📋 ④组：问答知识库 → ⑤组直接使用
-│   ├── raw/                     # 📋 ④组：建筑信息 JSON（无坐标）
-│   └── positions/               # 📋 ⑥组：建筑信息 + 像素坐标 → ②前端
+│   ├── qa/                      # ✅ ④组：问答知识库 → ⑤组直接使用
+│   ├── raw/                     # ✅ ④组：建筑信息 JSON（无坐标）
+│   └── positions/               # 📋 ⑥组：建筑信息 + 像素坐标 → ②前端（待创建）
 ├── backend/                     # 📋 ③组：后端 API
 ├── ai-agent/                    # 📋 ⑤组：RAG 管道
 ├── scripts/
-│   └── stitch-tianmuhu-tiles.py # ✅ 瓦片拼接脚本
+│   ├── stitch-tianmuhu-tiles.py # ✅ 瓦片拼接脚本
+│   ├── upload-to-r2.cjs         # ✅ R2 图片上传脚本
+│   └── bot/                     # ✅ GitHub Bot 自动化脚本
+│       └── sweep.mjs            # Issue/PR 自动分类与标签管理
 ├── docs/
 │   ├── templates/               # 数据模板
 │   │   ├── qa-knowledge.json    # QA 知识库模板
 │   │   └── building-info.json   # 建筑信息模板
 │   ├── team.md                  # 各组详细职责
-│   └── github-guide.md          # GitHub 协作入门指南
-├── .github/                     # 📋 CI/CD 配置
+│   ├── github-guide.md          # GitHub 协作入门指南
+│   └── labels.md                # 标签体系说明
+├── .github/
+│   └── workflows/               # ✅ CI/CD 工作流
+│       ├── deploy.yml           # 自动部署到 NAS 服务器
+│       ├── bot-labels.yml       # Bot 自动标签
+│       └── bot-stale.yml        # 过期 Issue 自动关闭
 ├── CLAUDE.md                    # 项目规则书（本文件，AI 自动读取）
 ├── AGENTS.md                    # AI 辅助开发指南（面向团队成员）
 ├── CONTRIBUTING.md              # 团队协作规范
