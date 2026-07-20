@@ -272,7 +272,10 @@ function callDeepSeek(messages) {
 
   const cmd = [
     "curl -s -4 --connect-timeout 15 --max-time 60",
-    "--proxy socks5h://127.0.0.1:1080",
+    // socks5（非 socks5h）+ 上面的 -4：让本机把域名解析成 IPv4 后再交给 dante。
+    // 若用 socks5h 则由 dante 解析 token.nuaa.edu.cn，偶发命中 IPv6(AAAA) 黑洞而超时
+    // （-4 只约束 curl→代理一跳，管不到 dante→目标，故光加 -4 不够）。
+    "--proxy socks5://127.0.0.1:1080",
     `-H "Authorization: Bearer ${CONFIG.DEEPSEEK_KEY}"`,
     `-H "Content-Type: application/json"`,
     `--data-binary @${tmpFile}`,
