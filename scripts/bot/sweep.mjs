@@ -521,6 +521,17 @@ async function analyzeItem(item) {
       result.labels = (Array.isArray(result.labels) ? result.labels : [result.labels])
         .filter(l => typeof l === "string" && l.trim());
     }
+    // 规范化 pros/cons：模型偶发返回字符串而非数组。buildReviewComment 用 for...of
+    // 遍历，字符串会被逐字符迭代，导致评论「一个字一行」。统一转成字符串数组
+    // （字符串 → 单元素数组），与上面 labels 的归一化同一模式。
+    const toStrArray = (v) =>
+      Array.isArray(v)
+        ? v.filter((x) => typeof x === "string" && x.trim())
+        : typeof v === "string" && v.trim()
+          ? [v.trim()]
+          : [];
+    result.pros = toStrArray(result.pros);
+    result.cons = toStrArray(result.cons);
     log(`  📝 ${result.summary || "?"} | 🏆 ${result.rank || "?"}`);
     return result;
   } catch (e) {
