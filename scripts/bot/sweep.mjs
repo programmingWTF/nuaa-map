@@ -150,20 +150,31 @@ function saveState(state) {
 
 async function ghAPI(path, opts = {}) {
   const url = path.startsWith("http") ? path : `${CONFIG.REPO_API}${path}`;
-  const res = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${CONFIG.GH_TOKEN}`,
-      Accept: "application/vnd.github+json",
-      "X-GitHub-Api-Version": "2022-11-28",
-      ...opts.headers,
-    },
-    ...opts,
-  });
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`GitHub API ${res.status}: ${body.slice(0, 200)}`);
+  const headers = {
+    Authorization: `Bearer ${CONFIG.GH_TOKEN}`,
+    Accept: "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28",
+    ...opts.headers,
+  };
+  if (opts.body && !headers["Content-Type"]) {
+    headers["Content-Type"] = "application/json";
   }
-  return res.json();
+  // fetch 在 NAS 网络上偶发失败，最多重试 3 次
+  let lastErr;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const res = await fetch(url, { headers, ...opts });
+      if (!res.ok) {
+        const body = await res.text();
+        throw new Error(`GitHub API ${res.status}: ${body.slice(0, 200)}`);
+      }
+      return res.json();
+    } catch (e) {
+      lastErr = e;
+      if (attempt < 3) await new Promise(r => setTimeout(r, 2000));
+    }
+  }
+  throw lastErr;
 }
 
 function extractIssueNumber(issueUrl) {
@@ -219,10 +230,10 @@ async function setLabels(issueNumber, labels) {
   const valid = labels.filter((l) => VALID_LABELS.includes(l));
   if (valid.length === 0) return;
   try {
-    await ghAPI(`/issues/${issueNumber}/labels`, {
-      method: "PUT",
-      body: JSON.stringify({ labels: valid }),
-    });
+    // Node.js undici 对 PUT 请求偶发 fetch failed，改用 curl 保底
+    const url = `https://api.github.com/repos/${CONFIG.REPO}/issues/${issueNumber}/labels`;
+    const cmd = `curl -s --connect-timeout 10 --max-time 15 -X PUT -H "Authorization: Bearer ${CONFIG.GH_TOKEN}" -H "Accept: application/vnd.github+json" -H "Content-Type: application/json" -d ${JSON.stringify(JSON.stringify({ labels: valid }))} ${url}`;
+    execSync(cmd, { encoding: "utf-8", timeout: 20000, stdio: ["pipe", "pipe", "pipe"] });
   } catch (e) {
     log(`  ⚠️ 设置标签失败: ${e.message}`);
   }
