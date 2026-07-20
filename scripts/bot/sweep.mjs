@@ -19,8 +19,8 @@ const CONFIG = {
   REPO_API: "https://api.github.com/repos/programmingWTF/nuaa-map",
   BOT_LOGIN: "LiGuiyu-AI",
 
-  DEEPSEEK_API: "https://token.nuaa.edu.cn/v1/chat/completions",
-  DEEPSEEK_MODEL: "glm-5.2",
+  DEEPSEEK_API: "https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
+  DEEPSEEK_MODEL: "qwen3.8-max-preview",
   DEEPSEEK_KEY: process.env.DEEPSEEK_KEY || "",
 
   STATE_FILE: join(__dirname, "state.json"),
@@ -288,7 +288,25 @@ async function updateComment(commentId, body) {
 }
 
 // ============================================================
-// DeepSeek API
+// 工具函数
+// ============================================================
+
+/** 从 markdown 中提取图片 URL */
+function extractImageUrls(markdown) {
+  const urls = [];
+  // Markdown: ![alt](url)
+  for (const m of markdown.matchAll(/!\[.*?\]\((https?:\/\/[^\s)]+)\)/g)) {
+    urls.push(m[1]);
+  }
+  // HTML: <img src="url">
+  for (const m of markdown.matchAll(/<img[^>]+src=["'](https?:\/\/[^\s"']+)["'][^>]*>/gi)) {
+    urls.push(m[1]);
+  }
+  return [...new Set(urls)]; // 去重
+}
+
+// ============================================================
+// Qwen API（阿里云百炼，兼容 OpenAI 协议）
 // ============================================================
 
 function callDeepSeek(messages) {
@@ -296,7 +314,7 @@ function callDeepSeek(messages) {
     model: CONFIG.DEEPSEEK_MODEL,
     messages,
     temperature: 0.3,
-    max_tokens: 2000,
+    max_tokens: 4096,
   });
 
   // 请求体可能很大（含代码 diff），写临时文件避免 shell 转义问题和命令行长度限制
@@ -304,8 +322,7 @@ function callDeepSeek(messages) {
   writeFileSync(tmpFile, body, "utf-8");
 
   const cmd = [
-    "curl -s -4 --connect-timeout 15 --max-time 60",
-    "--proxy socks5h://127.0.0.1:1080",
+    "curl -s --connect-timeout 15 --max-time 60",
     `-H "Authorization: Bearer ${CONFIG.DEEPSEEK_KEY}"`,
     `-H "Content-Type: application/json"`,
     `--data-binary @${tmpFile}`,
@@ -362,7 +379,7 @@ const SYSTEM_PROMPT = `你是 NUAAMap 校园地图项目的 AI 维护助手（Cl
 ## 输出格式
 纯 JSON，不要 markdown 包裹：{"type":"issue或pull_request","summary":"一句话中文总结","size":"规模名","priority":"优先级名","rank":"段位名","category":"类型名","teams":["小组名"],"status":"状态名","rank_reason":"为什么是这个段位","pros":["优点"],"cons":["需要改进的地方"],"comment":"给作者的 Markdown 审查回复","should_close":false,"close_reason":""}`;
 
-// 审查时使用精简版指令，留空间给代码 diff（NUAA 代理 WAF 限制总请求体 ~2500 字符）
+// 审查时使用精简版指令，留空间给代码 diff
 const REVIEW_PREFIX = "你是 NUAAMap 校园地图项目的 AI 维护助手（ClawSweeper），审查 React+TypeScript+Vite 代码。友善鼓励。\n\n## 标签规范（严格遵守）\n必须覆盖全部六个维度，每维度恰好 1 个标签（小组除外，可以多个）。输出 JSON 时六个维度分别填入字段：size=规模、priority=优先级、rank=段位、category=类型、teams=小组(数组)、status=状态：\n- 规模：规模：XS / 规模：S / 规模：M / 规模：L / 规模：XL\n- 优先级：优先级：P0 / 优先级：P1 / 优先级：P2 / 优先级：P3\n- 段位：段位：未定级 / 段位：倔强青铜 / 段位：秩序白银 / 段位：荣耀黄金 / 段位：永恒钻石 / 段位：至尊星耀 / 段位：最强王者（只能打1个）\n- 类型：类型：Bug / 类型：功能请求 / 类型：文档 / 类型：设计优化 / 类型：问题咨询\n- 小组：小组：①手绘地图 / 小组：②交互功能 / 小组：③平台搭建 / 小组：④数据采集 / 小组：⑤AI智能体 / 小组：⑥坐标标注（可以多个）\n- 状态：状态：需要更多信息 / 状态：等待确认 / 状态：已确认 / 状态：进行中 / 状态：等待审核 / 状态：准备合并\n\n审查代码逻辑、类型安全、组件设计、潜在 bug。指出文件行号，给示例代码。\n\n输出 JSON：{\"type\",\"summary\",\"size\",\"priority\",\"rank\",\"category\",\"teams\",\"status\",\"rank_reason\",\"pros\",\"cons\",\"comment\",\"should_close\",\"close_reason\"}\n\n---\n\n";
 
 // ============================================================
@@ -379,17 +396,16 @@ async function fetchPRDiff(prNumber) {
     for (const f of files) {
       diff += `\n--- ${f.filename} (${f.status}: +${f.additions} -${f.deletions}) ---\n`;
       if (f.patch) {
-        // 单文件 patch 上限 500 字符（NUAA 代理 WAF ~2500 字符限制）
-        const patch = f.patch.length > 500
-          ? f.patch.slice(0, 500) + `\n... (截断，共 ${f.patch.length} 字符)`
+        const patch = f.patch.length > 2000
+          ? f.patch.slice(0, 2000) + `\n... (截断，共 ${f.patch.length} 字符)`
           : f.patch;
         diff += "```diff\n" + patch + "\n```\n";
       } else {
         diff += "(二进制或过大，无 patch)\n";
       }
     }
-    // 总上限 ~1500 字符（保证 JSON 体 <2500 通过 NUAA WAF）
-    return diff.length > 1500 ? diff.slice(0, 1500) + "\n... (diff 过长已截断)" : diff;
+    // 总上限 ~8000 字符
+    return diff.length > 8000 ? diff.slice(0, 8000) + "\n... (diff 过长已截断)" : diff;
   } catch (e) {
     return `(获取 diff 失败: ${e.message})`;
   }
@@ -501,11 +517,24 @@ async function analyzeItem(item) {
   }
 
   try {
-    // Issue 无代码 diff，用完整指令；PR 用精简指令留空间给 diff（NUAA WAF ~2500 字符限制）
+    // 提取描述中的图片，多模态发送给模型
+    const images = extractImageUrls(body);
+    if (images.length) log(`  🖼️ 检测到 ${images.length} 张图片`);
+
+    // Issue 无代码 diff，用完整指令；PR 用精简指令留空间给 diff
     const prefix = isPR ? REVIEW_PREFIX : SYSTEM_PROMPT;
     const userMsg = prefix + context.join("\n\n---\n\n");
+
+    // 有图片时用多模态格式（文本 + 图片），否则保持纯文本
+    const userContent = images.length > 0
+      ? [
+          { type: "text", text: userMsg },
+          ...images.map(url => ({ type: "image_url", image_url: { url } })),
+        ]
+      : userMsg;
+
     const data = callDeepSeek([
-      { role: "user", content: userMsg },
+      { role: "user", content: userContent },
     ]);
 
     const content = data.choices?.[0]?.message?.content || "";
