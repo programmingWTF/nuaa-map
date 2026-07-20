@@ -228,6 +228,39 @@ async function setLabels(issueNumber, labels) {
   }
 }
 
+/** 把单个标签值归一化并匹配到合法标签名（兼容全/半角冒号、漏前缀、多余空格） */
+function canonLabel(dimPrefix, value) {
+  if (value == null) return null;
+  let v = String(value).trim().replace(/:/g, "：").replace(/\s+/g, "");
+  if (!v) return null;
+  if (VALID_LABELS.includes(v)) return v;
+  if (dimPrefix && !v.startsWith(dimPrefix)) {
+    const withPrefix = dimPrefix + v;
+    if (VALID_LABELS.includes(withPrefix)) return withPrefix;
+  }
+  return null;
+}
+
+/** 从 AI 结构化字段组装合法标签数组（独立字段永不为空，规避模型偶发返回空 labels） */
+function buildLabelsFromResult(result) {
+  if (!result) return [];
+  const out = new Set();
+  const add = (v) => { if (v) out.add(v); };
+  add(canonLabel("规模：", result.size));
+  add(canonLabel("优先级：", result.priority));
+  add(canonLabel("段位：", result.rank));
+  add(canonLabel("类型：", result.category));
+  add(canonLabel("状态：", result.status));
+  if (Array.isArray(result.teams)) for (const t of result.teams) add(canonLabel("小组：", t));
+  if (Array.isArray(result.labels)) {
+    for (const l of result.labels) {
+      const n = String(l).trim().replace(/:/g, "：").replace(/\s+/g, "");
+      if (VALID_LABELS.includes(n)) out.add(n);
+    }
+  }
+  return [...out];
+}
+
 async function postComment(issueNumber, body) {
   if (!body) return null;
   try {
@@ -313,7 +346,7 @@ function callDeepSeek(messages) {
 const SYSTEM_PROMPT = `你是 NUAAMap 校园地图项目的 AI 维护助手（ClawSweeper），审查 React+TypeScript+Vite 代码和 Issue/PR。友善鼓励，用王者荣耀段位评价。
 
 ## 标签规范（严格遵守）
-必须覆盖全部六个维度，每维度恰好 1 个标签（只有小组可以多个）：
+必须覆盖全部六个维度，每维度恰好 1 个标签（只有小组可以多个）。输出 JSON 时六个维度分别填入字段：size=规模、priority=优先级、rank=段位、category=类型、teams=小组(数组)、status=状态：
 - 规模：规模：XS / 规模：S / 规模：M / 规模：L / 规模：XL
 - 优先级：优先级：P0 / 优先级：P1 / 优先级：P2 / 优先级：P3
 - 段位：段位：未定级 / 段位：倔强青铜 / 段位：秩序白银 / 段位：荣耀黄金 / 段位：永恒钻石 / 段位：至尊星耀 / 段位：最强王者（只能打1个！）
@@ -327,10 +360,10 @@ const SYSTEM_PROMPT = `你是 NUAAMap 校园地图项目的 AI 维护助手（Cl
 - 段位评定基于 Issue 清晰度（复现步骤/截图/环境）或 PR 改动质量（合理性/代码质量/说明）
 
 ## 输出格式
-纯 JSON，不要 markdown 包裹：{"type":"issue或pull_request","summary":"一句话中文总结","rank":"段位名","rank_reason":"为什么是这个段位","pros":["优点"],"cons":["需要改进的地方"],"labels":["完整标签名1","完整标签名2"],"comment":"给作者的 Markdown 审查回复","should_close":false,"close_reason":""}`;
+纯 JSON，不要 markdown 包裹：{"type":"issue或pull_request","summary":"一句话中文总结","size":"规模名","priority":"优先级名","rank":"段位名","category":"类型名","teams":["小组名"],"status":"状态名","rank_reason":"为什么是这个段位","pros":["优点"],"cons":["需要改进的地方"],"comment":"给作者的 Markdown 审查回复","should_close":false,"close_reason":""}`;
 
 // 审查时使用精简版指令，留空间给代码 diff（NUAA 代理 WAF 限制总请求体 ~2500 字符）
-const REVIEW_PREFIX = "你是 NUAAMap 校园地图项目的 AI 维护助手（ClawSweeper），审查 React+TypeScript+Vite 代码。友善鼓励。\n\n## 标签规范（严格遵守）\n必须覆盖全部六个维度，每维度恰好 1 个标签（小组除外，可以多个）：\n- 规模：规模：XS / 规模：S / 规模：M / 规模：L / 规模：XL\n- 优先级：优先级：P0 / 优先级：P1 / 优先级：P2 / 优先级：P3\n- 段位：段位：未定级 / 段位：倔强青铜 / 段位：秩序白银 / 段位：荣耀黄金 / 段位：永恒钻石 / 段位：至尊星耀 / 段位：最强王者（只能打1个）\n- 类型：类型：Bug / 类型：功能请求 / 类型：文档 / 类型：设计优化 / 类型：问题咨询\n- 小组：小组：①手绘地图 / 小组：②交互功能 / 小组：③平台搭建 / 小组：④数据采集 / 小组：⑤AI智能体 / 小组：⑥坐标标注（可以多个）\n- 状态：状态：需要更多信息 / 状态：等待确认 / 状态：已确认 / 状态：进行中 / 状态：等待审核 / 状态：准备合并\n\n审查代码逻辑、类型安全、组件设计、潜在 bug。指出文件行号，给示例代码。\n\n输出 JSON：{\"type\",\"summary\",\"rank\",\"rank_reason\",\"pros\",\"cons\",\"labels\",\"comment\",\"should_close\",\"close_reason\"}\n\n---\n\n";
+const REVIEW_PREFIX = "你是 NUAAMap 校园地图项目的 AI 维护助手（ClawSweeper），审查 React+TypeScript+Vite 代码。友善鼓励。\n\n## 标签规范（严格遵守）\n必须覆盖全部六个维度，每维度恰好 1 个标签（小组除外，可以多个）。输出 JSON 时六个维度分别填入字段：size=规模、priority=优先级、rank=段位、category=类型、teams=小组(数组)、status=状态：\n- 规模：规模：XS / 规模：S / 规模：M / 规模：L / 规模：XL\n- 优先级：优先级：P0 / 优先级：P1 / 优先级：P2 / 优先级：P3\n- 段位：段位：未定级 / 段位：倔强青铜 / 段位：秩序白银 / 段位：荣耀黄金 / 段位：永恒钻石 / 段位：至尊星耀 / 段位：最强王者（只能打1个）\n- 类型：类型：Bug / 类型：功能请求 / 类型：文档 / 类型：设计优化 / 类型：问题咨询\n- 小组：小组：①手绘地图 / 小组：②交互功能 / 小组：③平台搭建 / 小组：④数据采集 / 小组：⑤AI智能体 / 小组：⑥坐标标注（可以多个）\n- 状态：状态：需要更多信息 / 状态：等待确认 / 状态：已确认 / 状态：进行中 / 状态：等待审核 / 状态：准备合并\n\n审查代码逻辑、类型安全、组件设计、潜在 bug。指出文件行号，给示例代码。\n\n输出 JSON：{\"type\",\"summary\",\"size\",\"priority\",\"rank\",\"category\",\"teams\",\"status\",\"rank_reason\",\"pros\",\"cons\",\"comment\",\"should_close\",\"close_reason\"}\n\n---\n\n";
 
 // ============================================================
 // 代码上下文获取
@@ -528,7 +561,7 @@ function buildAckComment(item) {
 }
 
 function buildReviewComment(item, result) {
-  const rank = result.rank || "未定级";
+  const rank = String(result.rank || "未定级").replace(/^段位[：:]/, "").trim() || "未定级";
   const icon = RANK_ICONS[rank] || "❓";
   const explain = RANK_EXPLAIN[rank] || "";
 
@@ -643,9 +676,9 @@ async function processItem(item, reason) {
   }
 
   // 打标签
-  if (result.labels?.length > 0) {
+  const validNew = buildLabelsFromResult(result);
+  if (validNew.length > 0) {
     const existingLabels = (item.labels || []).map((l) => l.name);
-    const validNew = result.labels.filter((l) => VALID_LABELS.includes(l));
     await setLabels(num, [...new Set([...existingLabels, ...validNew])]);
     log(`  🏷️ ${validNew.join(", ")}`);
   }
@@ -800,8 +833,9 @@ async function sweepDaily() {
       if (!state.reviewed[key]) {
         log(`  🏷️ #${item.number} 缺标签`);
         const result = await analyzeItem(item);
-        if (result?.labels?.length > 0) {
-          await setLabels(item.number, [...new Set([...existingLabels, ...result.labels.filter((l) => VALID_LABELS.includes(l))])]);
+        const newLabels = buildLabelsFromResult(result);
+        if (newLabels.length > 0) {
+          await setLabels(item.number, [...new Set([...existingLabels, ...newLabels])]);
           labelN++;
         }
         state.reviewed[key] = { at: now };
@@ -877,13 +911,11 @@ async function backfill() {
     log(`🔍 [回填] ${typeStr} #${item.number}: ${(item.title || "").slice(0, 60)}`);
 
     const result = await analyzeItem(item);
-    if (result?.labels?.length > 0) {
-      const validLabels = result.labels.filter((l) => VALID_LABELS.includes(l));
-      if (validLabels.length > 0) {
-        await setLabels(item.number, validLabels);
-        log(`  🏷️ ${validLabels.join(", ")} | 🏆 ${result.rank || "?"}`);
-        processed++;
-      }
+    const validLabels = buildLabelsFromResult(result);
+    if (validLabels.length > 0) {
+      await setLabels(item.number, validLabels);
+      log(`  🏷️ ${validLabels.join(", ")} | 🏆 ${result.rank || "?"}`);
+      processed++;
     }
 
     state.reviewed[key] = { at: now };
