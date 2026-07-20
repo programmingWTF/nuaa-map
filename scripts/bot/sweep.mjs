@@ -1,4 +1,4 @@
-// NUAAMap AI 维护 Bot — ClawSweeper 风格
+// NUAAMap AI 维护 Bot — 李桂聿养的龙虾 风格
 // 部署在 NAS，调用阿里云百炼千问 API（公网，无需 VPN）
 // 运行方式: GH_TOKEN=ghp_xxx DEEPSEEK_KEY=sk-xxx node sweep.mjs [daily|backfill]
 
@@ -28,11 +28,11 @@ const CONFIG = {
 };
 
 // ============================================================
-// 标签体系 — 模仿 ClawSweeper，段位用王者荣耀
+// 标签体系 — 模仿 李桂聿养的龙虾，段位用王者荣耀
 // ============================================================
 
 const LABELS = {
-  // 规模 — 继承 ClawSweeper Size: XS/S/M/L/XL（字母保留英文）
+  // 规模 — 继承 李桂聿养的龙虾 Size: XS/S/M/L/XL（字母保留英文）
   size: [
     { name: "规模：XS", color: "8C959F", desc: "极简改动，预计几分钟" },
     { name: "规模：S", color: "8C959F", desc: "小改动，预计半天内" },
@@ -47,7 +47,7 @@ const LABELS = {
     { name: "优先级：P2", color: "FBCA04", desc: "中：常规任务" },
     { name: "优先级：P3", color: "8C959F", desc: "低：优化、文档、锦上添花" },
   ],
-  // 段位 — 王者荣耀 7 级（替代 ClawSweeper 海洋生物评级）
+  // 段位 — 王者荣耀 7 级（替代 李桂聿养的龙虾 海洋生物评级）
   rank: [
     { name: "段位：未定级", color: "8C2F39", desc: "信息不足，尚无法评估质量" },
     { name: "段位：倔强青铜", color: "8B5A2B", desc: "初具雏形，仍需补充大量信息" },
@@ -325,7 +325,7 @@ function callDeepSeek(messages) {
     model: CONFIG.DEEPSEEK_MODEL,
     messages,
     temperature: 0.3,
-    max_tokens: 4096,
+    max_tokens: 8192,
   });
 
   // 请求体可能很大（含代码 diff），写临时文件避免 shell 转义问题和命令行长度限制
@@ -374,7 +374,7 @@ function callDeepSeek(messages) {
 // AI System Prompt
 // ============================================================
 
-const SYSTEM_PROMPT = `你是 NUAAMap 校园地图项目的 AI 维护助手（ClawSweeper），审查 React+TypeScript+Vite 代码和 Issue/PR。友善鼓励，用王者荣耀段位评价。
+const SYSTEM_PROMPT = `你是 NUAAMap 校园地图项目的 AI 维护助手（李桂聿养的龙虾），审查 React+TypeScript+Vite 代码和 Issue/PR。友善鼓励，用王者荣耀段位评价。
 
 ## 标签规范（严格遵守）
 必须覆盖全部六个维度，每维度恰好 1 个标签（只有小组可以多个）。输出 JSON 时六个维度分别填入字段：size=规模、priority=优先级、rank=段位、category=类型、teams=小组(数组)、status=状态：
@@ -394,7 +394,7 @@ const SYSTEM_PROMPT = `你是 NUAAMap 校园地图项目的 AI 维护助手（Cl
 纯 JSON，不要 markdown 包裹：{"type":"issue或pull_request","summary":"一句话中文总结","size":"规模名","priority":"优先级名","rank":"段位名","category":"类型名","teams":["小组名"],"status":"状态名","rank_reason":"为什么是这个段位","pros":["优点"],"cons":["需要改进的地方"],"comment":"给作者的 Markdown 审查回复","should_close":false,"close_reason":""}`;
 
 // 审查时使用精简版指令，留空间给代码 diff
-const REVIEW_PREFIX = "你是 NUAAMap 校园地图项目的 AI 维护助手（ClawSweeper），审查 React+TypeScript+Vite 代码。友善鼓励。\n\n## 标签规范（严格遵守）\n必须覆盖全部六个维度，每维度恰好 1 个标签（小组除外，可以多个）。输出 JSON 时六个维度分别填入字段：size=规模、priority=优先级、rank=段位、category=类型、teams=小组(数组)、status=状态：\n- 规模：规模：XS / 规模：S / 规模：M / 规模：L / 规模：XL\n- 优先级：优先级：P0 / 优先级：P1 / 优先级：P2 / 优先级：P3\n- 段位：段位：未定级 / 段位：倔强青铜 / 段位：秩序白银 / 段位：荣耀黄金 / 段位：永恒钻石 / 段位：至尊星耀 / 段位：最强王者（只能打1个）\n- 类型：类型：Bug / 类型：功能请求 / 类型：文档 / 类型：设计优化 / 类型：问题咨询\n- 小组：小组：①手绘地图 / 小组：②交互功能 / 小组：③平台搭建 / 小组：④数据采集 / 小组：⑤AI智能体 / 小组：⑥坐标标注（可以多个）\n- 状态：状态：需要更多信息 / 状态：等待确认 / 状态：已确认 / 状态：进行中 / 状态：等待审核 / 状态：准备合并\n\n审查代码逻辑、类型安全、组件设计、潜在 bug。指出文件行号，给示例代码。\n\n输出 JSON：{\"type\",\"summary\",\"size\",\"priority\",\"rank\",\"category\",\"teams\",\"status\",\"rank_reason\",\"pros\",\"cons\",\"comment\",\"should_close\",\"close_reason\"}\n\n---\n\n";
+const REVIEW_PREFIX = "你是 NUAAMap 校园地图项目的 AI 维护助手（李桂聿养的龙虾），审查 React+TypeScript+Vite 代码。友善鼓励。\n\n## 标签规范（严格遵守）\n必须覆盖全部六个维度，每维度恰好 1 个标签（小组除外，可以多个）。输出 JSON 时六个维度分别填入字段：size=规模、priority=优先级、rank=段位、category=类型、teams=小组(数组)、status=状态：\n- 规模：规模：XS / 规模：S / 规模：M / 规模：L / 规模：XL\n- 优先级：优先级：P0 / 优先级：P1 / 优先级：P2 / 优先级：P3\n- 段位：段位：未定级 / 段位：倔强青铜 / 段位：秩序白银 / 段位：荣耀黄金 / 段位：永恒钻石 / 段位：至尊星耀 / 段位：最强王者（只能打1个）\n- 类型：类型：Bug / 类型：功能请求 / 类型：文档 / 类型：设计优化 / 类型：问题咨询\n- 小组：小组：①手绘地图 / 小组：②交互功能 / 小组：③平台搭建 / 小组：④数据采集 / 小组：⑤AI智能体 / 小组：⑥坐标标注（可以多个）\n- 状态：状态：需要更多信息 / 状态：等待确认 / 状态：已确认 / 状态：进行中 / 状态：等待审核 / 状态：准备合并\n\n审查代码逻辑、类型安全、组件设计、潜在 bug。指出文件行号，给示例代码。\n\n输出 JSON：{\"type\",\"summary\",\"size\",\"priority\",\"rank\",\"category\",\"teams\",\"status\",\"rank_reason\",\"pros\",\"cons\",\"comment\",\"should_close\",\"close_reason\"}\n\n---\n\n";
 
 // ============================================================
 // 代码上下文获取
@@ -403,23 +403,23 @@ const REVIEW_PREFIX = "你是 NUAAMap 校园地图项目的 AI 维护助手（Cl
 /** 获取 PR 的实际代码变更 diff */
 async function fetchPRDiff(prNumber) {
   try {
-    const files = await ghAPI(`/pulls/${prNumber}/files?per_page=60`);
+    const files = await ghAPI(`/pulls/${prNumber}/files?per_page=100`);
     if (!files.length) return "(无文件变更)";
 
     let diff = `共 ${files.length} 个文件变更：\n`;
     for (const f of files) {
       diff += `\n--- ${f.filename} (${f.status}: +${f.additions} -${f.deletions}) ---\n`;
       if (f.patch) {
-        const patch = f.patch.length > 6000
-          ? f.patch.slice(0, 6000) + `\n... (截断，共 ${f.patch.length} 字符)`
+        const patch = f.patch.length > 16000
+          ? f.patch.slice(0, 16000) + `\n... (截断，共 ${f.patch.length} 字符)`
           : f.patch;
         diff += "```diff\n" + patch + "\n```\n";
       } else {
         diff += "(二进制或过大，无 patch)\n";
       }
     }
-    // 总上限 ~8000 字符
-    return diff.length > 24000 ? diff.slice(0, 24000) + "\n... (diff 过长已截断)" : diff;
+    // 总上限 ~64000 字符
+    return diff.length > 64000 ? diff.slice(0, 64000) + "\n... (diff 过长已截断)" : diff;
   } catch (e) {
     return `(获取 diff 失败: ${e.message})`;
   }
@@ -428,8 +428,8 @@ async function fetchPRDiff(prNumber) {
 /** 获取 PR 变更文件概览（仅文件名+统计，WAF 限制不拉全文） */
 async function fetchPRFileContents(prNumber) {
   try {
-    const files = await ghAPI(`/pulls/${prNumber}/files?per_page=20`);
-    return files.slice(0, 8).map(f =>
+    const files = await ghAPI(`/pulls/${prNumber}/files?per_page=30`);
+    return files.slice(0, 15).map(f =>
       `- ${f.filename} (${f.status}: +${f.additions} -${f.deletions})`
     ).join("\n");
   } catch {
@@ -479,21 +479,21 @@ async function fetchIssueCodeContext(title, body) {
         try {
           const content = await ghAPI(item.url);
           const decoded = Buffer.from(content.content || "", "base64").toString("utf-8");
-          const snippet = decoded.length > 600
-            ? decoded.slice(0, 2000) + "\n... (截断)"
+          const snippet = decoded.length > 6000
+            ? decoded.slice(0, 6000) + "\n... (截断)"
             : decoded;
           context += `\n### ${item.path}\n\`\`\`${guessLang(item.path)}\n${snippet}\n\`\`\`\n`;
         } catch { /* 跳过 */ }
       }
     } catch { /* 搜索失败，继续下一个关键词 */ }
   }
-  return context.length > 3000 ? context.slice(0, 3000) + "\n... (截断)" : context;
+  return context.length > 12000 ? context.slice(0, 12000) + "\n... (截断)" : context;
 }
 
 async function analyzeItem(item) {
   const isPR = !!item.pull_request;
   const title = item.title || "";
-  const body = (item.body || "").slice(0, 8000);
+  const body = (item.body || "").slice(0, 15000);
   const author = item.user?.login || "未知";
   const labels = (item.labels || []).map((l) => l.name).join(", ") || "无";
 
@@ -584,7 +584,7 @@ async function analyzeItem(item) {
 }
 
 // ============================================================
-// ClawSweeper 风格评论
+// 李桂聿养的龙虾 风格评论
 // ============================================================
 
 const RANK_ICONS = {
@@ -605,7 +605,7 @@ const RANK_EXPLAIN = {
 function buildAckComment(item) {
   const typeStr = item.pull_request ? "PR" : "Issue";
   return [
-    "> 🤖 **ClawSweeper** · 正在查看",
+    "> 🤖 **李桂聿养的龙虾** · 正在查看",
     "",
     `👀 收到 ${typeStr} #${item.number}，正在分析……`,
     "",
@@ -620,7 +620,7 @@ function buildReviewComment(item, result) {
   const explain = RANK_EXPLAIN[rank] || "";
 
   const lines = [
-    "> 🤖 **ClawSweeper** · 审查完成",
+    "> 🤖 **李桂聿养的龙虾** · 审查完成",
     "",
     "### 📋 概要",
     result.summary || "(无法总结)",
