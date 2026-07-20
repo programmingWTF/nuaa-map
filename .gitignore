@@ -43,3 +43,6 @@ coverage/
 .cache/
 .playwright-mcp/
 tianmuhu-campus-map.png
+
+# Claude Code
+.claude/
