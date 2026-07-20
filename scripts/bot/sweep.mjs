@@ -410,8 +410,8 @@ async function fetchPRDiff(prNumber) {
     for (const f of files) {
       diff += `\n--- ${f.filename} (${f.status}: +${f.additions} -${f.deletions}) ---\n`;
       if (f.patch) {
-        const patch = f.patch.length > 2000
-          ? f.patch.slice(0, 2000) + `\n... (截断，共 ${f.patch.length} 字符)`
+        const patch = f.patch.length > 6000
+          ? f.patch.slice(0, 6000) + `\n... (截断，共 ${f.patch.length} 字符)`
           : f.patch;
         diff += "```diff\n" + patch + "\n```\n";
       } else {
@@ -419,7 +419,7 @@ async function fetchPRDiff(prNumber) {
       }
     }
     // 总上限 ~8000 字符
-    return diff.length > 8000 ? diff.slice(0, 8000) + "\n... (diff 过长已截断)" : diff;
+    return diff.length > 24000 ? diff.slice(0, 24000) + "\n... (diff 过长已截断)" : diff;
   } catch (e) {
     return `(获取 diff 失败: ${e.message})`;
   }
@@ -480,20 +480,20 @@ async function fetchIssueCodeContext(title, body) {
           const content = await ghAPI(item.url);
           const decoded = Buffer.from(content.content || "", "base64").toString("utf-8");
           const snippet = decoded.length > 600
-            ? decoded.slice(0, 600) + "\n... (截断)"
+            ? decoded.slice(0, 2000) + "\n... (截断)"
             : decoded;
           context += `\n### ${item.path}\n\`\`\`${guessLang(item.path)}\n${snippet}\n\`\`\`\n`;
         } catch { /* 跳过 */ }
       }
     } catch { /* 搜索失败，继续下一个关键词 */ }
   }
-  return context.length > 1200 ? context.slice(0, 1200) + "\n... (截断)" : context;
+  return context.length > 3000 ? context.slice(0, 3000) + "\n... (截断)" : context;
 }
 
 async function analyzeItem(item) {
   const isPR = !!item.pull_request;
   const title = item.title || "";
-  const body = (item.body || "").slice(0, 3000);
+  const body = (item.body || "").slice(0, 8000);
   const author = item.user?.login || "未知";
   const labels = (item.labels || []).map((l) => l.name).join(", ") || "无";
 
