@@ -1,8 +1,8 @@
 // NUAAMap AI 维护 Bot — ClawSweeper 风格
-// 部署在 NAS，DeepSeek 调用显式走 EasyConnect SOCKS5 代理
+// 部署在 NAS，调用阿里云百炼千问 API（公网，无需 VPN）
 // 运行方式: GH_TOKEN=ghp_xxx DEEPSEEK_KEY=sk-xxx node sweep.mjs [daily|backfill]
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync, unlinkSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -19,7 +19,7 @@ const CONFIG = {
   REPO_API: "https://api.github.com/repos/programmingWTF/nuaa-map",
   BOT_LOGIN: "LiGuiyu-AI",
 
-  DEEPSEEK_API: "https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
+  DEEPSEEK_API: "https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1/chat/completions",
   DEEPSEEK_MODEL: "qwen3.8-max-preview",
   DEEPSEEK_KEY: process.env.DEEPSEEK_KEY || "",
 
@@ -322,7 +322,7 @@ function callDeepSeek(messages) {
   writeFileSync(tmpFile, body, "utf-8");
 
   const cmd = [
-    "curl -s --connect-timeout 15 --max-time 60",
+    "curl -s --connect-timeout 15 --max-time 180",
     `-H "Authorization: Bearer ${CONFIG.DEEPSEEK_KEY}"`,
     `-H "Content-Type: application/json"`,
     `--data-binary @${tmpFile}`,
@@ -333,18 +333,21 @@ function callDeepSeek(messages) {
     try {
       const stdout = execSync(cmd, {
         encoding: "utf-8",
-        timeout: 65000,
+        timeout: 185000,
         stdio: ["pipe", "pipe", "pipe"],
       });
       const data = JSON.parse(stdout);
       if (data.error) {
         throw new Error(`API error: ${JSON.stringify(data.error)}`);
       }
-      try { require("fs").unlinkSync(tmpFile); } catch {}
+      // 千问 thinking 模式：content 可能为空，实际输出在 reasoning_content
+      const msg = data.choices?.[0]?.message;
+      if (msg && !msg.content) msg.content = msg.reasoning_content || "";
+      try { unlinkSync(tmpFile); } catch {}
       return data;
     } catch (e) {
       if (attempt === 3) {
-        try { require("fs").unlinkSync(tmpFile); } catch {}
+        try { unlinkSync(tmpFile); } catch {}
         const msg = e.stdout ? e.stdout.toString().slice(0, 200) : e.message;
         throw new Error(`DeepSeek 不可达 (尝试${attempt}次): ${msg}`);
       }
@@ -745,7 +748,7 @@ async function sweepIncremental() {
 
   const state = loadState();
   const now = new Date();
-  const windowStart = new Date(now.getTime() - 6 * 60 * 1000);
+  const windowStart = new Date(now.getTime() - 30 * 60 * 1000);
 
   const allIssues = await ghAPI(
     `/issues?state=open&since=${windowStart.toISOString()}&sort=updated&direction=desc&per_page=30`
@@ -772,8 +775,11 @@ async function sweepIncremental() {
 
       const createdTs = new Date(item.created_at).getTime();
       const reason = !last ? "新创建" : "内容有更新";
-      await processItem(item, reason);
-      state.reviewed[num] = { at: Date.now(), hash: fingerprint, reason };
+      const success = await processItem(item, reason);
+      // AI 分析失败时不保存指纹，下次 cron 自动重试
+      if (success) {
+        state.reviewed[num] = { at: Date.now(), hash: fingerprint, reason };
+      }
       n++;
     }
     log(`  ✅ 处理 ${n} 个`);
@@ -795,7 +801,7 @@ async function sweepMentions(state, now = new Date()) {
       `https://api.github.com/repos/${CONFIG.REPO}/issues/comments?sort=updated&direction=desc&per_page=20`
     );
 
-    const windowStart = now.getTime() - 6 * 60 * 1000;
+    const windowStart = now.getTime() - 30 * 60 * 1000;
     let count = 0;
 
     for (const c of comments) {
