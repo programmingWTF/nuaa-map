@@ -775,6 +775,14 @@ async function sweepIncremental() {
     let n = 0;
     for (const item of candidates) {
       if (n >= CONFIG.MAX_ITEMS_PER_RUN) break;
+      // PR 需要额外拉取 head.sha（Issues API 不包含）
+      if (item.pull_request) {
+        try {
+          const pr = await ghAPI(item.pull_request.url);
+          item.head = pr.head;
+          item.base = pr.base;
+        } catch { /* 拉取失败用原有数据 */ }
+      }
       const num = item.number;
       const last = state.reviewed[num];
       const fingerprint = getContentFingerprint(item);
@@ -849,11 +857,23 @@ async function sweepMentions(state, now = new Date()) {
       log(`  📣 #${num} 被 @ 提及`);
       try {
         const item = await ghAPI(`/issues/${num}`);
+        // PR 需要额外拉取 head.sha（Issues API 不包含）
+        if (item.pull_request) {
+          const pr = await ghAPI(item.pull_request.url);
+          item.head = pr.head;
+          item.base = pr.base;
+        }
         await processItem(item, "被 @ 提及");
         state.reviewed[key] = { at: now.getTime() };
+        // 提及处理后更新内容指纹，下次增量扫描不会产生误判
+        state.reviewed[num] = { at: now.getTime(), hash: getContentFingerprint(item), reason: "被 @ 提及" };
         count++;
       } catch (e) {
         log(`  ⚠️ #${num}: ${e.message}`);
+        // 仅在无现有真实记录时才写入失败标记，避免覆盖正常指纹
+        if (!state.reviewed[num]?.hash) {
+          state.reviewed[num] = { at: now.getTime(), hash: getContentFingerprint({ title: "", body: "" }), reason: "被 @ 提及", aiFailed: true };
+        }
       }
     }
 
