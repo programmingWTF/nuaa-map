@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import type { Building, ChatMessage } from '../../types';
+import { matchBestAnswer, getRelatedQuestions } from '../../data/qa-matcher';
+import type { QaEntry } from '../../data/qa-matcher';
 import './ChatWidget.css';
 
 interface ChatWidgetProps {
@@ -16,6 +18,8 @@ export function ChatWidget({ selectedBuilding, onViewBuilding }: ChatWidgetProps
   }]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [suggestions, setSuggestions] = useState<QaEntry[]>([]);
+  const timerRef = useRef<number>(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const chatRef = useRef<HTMLDivElement>(null);
@@ -23,11 +27,14 @@ export function ChatWidget({ selectedBuilding, onViewBuilding }: ChatWidgetProps
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
   useEffect(() => { if (isOpen) inputRef.current?.focus(); }, [isOpen]);
 
-  /* 移动端聊天打开时锁定背景滚动 */
+  /* 移动端聊天打开时锁定背景滚动 + 卸载时清理定时器 */
   useEffect(() => {
     if (isOpen) document.body.classList.add('body--chat-open');
     else document.body.classList.remove('body--chat-open');
-    return () => document.body.classList.remove('body--chat-open');
+    return () => {
+      document.body.classList.remove('body--chat-open');
+      clearTimeout(timerRef.current);
+    };
   }, [isOpen]);
 
   useEffect(() => {
@@ -44,25 +51,43 @@ export function ChatWidget({ selectedBuilding, onViewBuilding }: ChatWidgetProps
     return () => document.removeEventListener('mousedown', onClick);
   }, [isOpen]);
 
-  const sendMessage = useCallback(() => {
-    const text = input.trim();
+  /* 打开时加载默认快捷建议 */
+  useEffect(() => {
+    if (isOpen && suggestions.length === 0) {
+      setSuggestions(getRelatedQuestions('', 3));
+    }
+  }, [isOpen, suggestions.length]);
+
+  const handleSend = useCallback((text: string) => {
     if (!text || isLoading) return;
     const userMsg: ChatMessage = {
       id: `u-${Date.now()}`, role: 'user', content: text, timestamp: Date.now(),
     };
     setMessages(prev => [...prev, userMsg]);
-    setInput(''); setIsLoading(true);
+    setIsLoading(true);
 
-    // TODO: 对接后端 /api/chat（⑤组 RAG 管道）
-    setTimeout(() => {
+    // 优先尝试本地问答匹配
+    const match = matchBestAnswer(text);
+    const delay = match ? 400 : 1000;
+    timerRef.current = setTimeout(() => {
       setMessages(prev => [...prev, {
         id: `a-${Date.now()}`, role: 'assistant',
-        content: '感谢你的提问！\n\n智能问答系统正在建设中（⑤组 RAG 管道接入后即可使用）。',
+        content: match
+          ? match.entry.answer
+          : '感谢你的提问！\n\n智能问答系统正在建设中（⑤组 RAG 管道接入后即可使用）。',
         timestamp: Date.now(),
       }]);
+      if (match) setSuggestions(getRelatedQuestions(text, 3));
       setIsLoading(false);
-    }, 1000);
-  }, [input, isLoading]);
+    }, delay);
+  }, [isLoading]);
+
+  const sendMessage = useCallback(() => {
+    const text = input.trim();
+    if (!text || isLoading) return;
+    setInput('');
+    handleSend(text);
+  }, [input, isLoading, handleSend]);
 
   return (
     <div className={`chat-widget ${isOpen ? 'chat-widget--open' : ''}`} ref={chatRef}>
@@ -102,6 +127,22 @@ export function ChatWidget({ selectedBuilding, onViewBuilding }: ChatWidgetProps
                   查看详情
                 </button>
               )}
+            </div>
+          )}
+
+          {suggestions.length > 0 && (
+            <div className="chat-suggestions">
+              <div className="chat-suggestions-title">猜你想问</div>
+              <div className="chat-suggestions-list">
+                {suggestions.map(s => (
+                  <button key={s.id} className="chat-suggestion-btn"
+                    disabled={isLoading}
+                    onClick={() => { setInput(''); handleSend(s.question); }}
+                  >
+                    {s.question}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
