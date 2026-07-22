@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import type { Building, ChatMessage } from '../../types';
+import { matchBestAnswer, getRelatedQuestions } from '../../data/qa-matcher';
+import type { QaEntry } from '../../data/qa-matcher';
 import './ChatWidget.css';
 
 interface ChatWidgetProps {
@@ -16,6 +18,7 @@ export function ChatWidget({ selectedBuilding, onViewBuilding }: ChatWidgetProps
   }]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [suggestions, setSuggestions] = useState<QaEntry[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const chatRef = useRef<HTMLDivElement>(null);
@@ -44,6 +47,13 @@ export function ChatWidget({ selectedBuilding, onViewBuilding }: ChatWidgetProps
     return () => document.removeEventListener('mousedown', onClick);
   }, [isOpen]);
 
+  /* 打开时加载默认快捷建议 */
+  useEffect(() => {
+    if (isOpen && suggestions.length === 0) {
+      setSuggestions(getRelatedQuestions('', 3));
+    }
+  }, [isOpen, suggestions.length]);
+
   const sendMessage = useCallback(() => {
     const text = input.trim();
     if (!text || isLoading) return;
@@ -53,15 +63,29 @@ export function ChatWidget({ selectedBuilding, onViewBuilding }: ChatWidgetProps
     setMessages(prev => [...prev, userMsg]);
     setInput(''); setIsLoading(true);
 
-    // TODO: 对接后端 /api/chat（⑤组 RAG 管道）
-    setTimeout(() => {
-      setMessages(prev => [...prev, {
-        id: `a-${Date.now()}`, role: 'assistant',
-        content: '感谢你的提问！\n\n智能问答系统正在建设中（⑤组 RAG 管道接入后即可使用）。',
-        timestamp: Date.now(),
-      }]);
-      setIsLoading(false);
-    }, 1000);
+    // 优先尝试本地问答匹配
+    const match = matchBestAnswer(text);
+    if (match) {
+      setTimeout(() => {
+        setMessages(prev => [...prev, {
+          id: `a-${Date.now()}`, role: 'assistant',
+          content: match.entry.answer,
+          timestamp: Date.now(),
+        }]);
+        setSuggestions(getRelatedQuestions(text, 3));
+        setIsLoading(false);
+      }, 400);
+    } else {
+      // TODO: 对接后端 /api/chat（⑤组 RAG 管道）
+      setTimeout(() => {
+        setMessages(prev => [...prev, {
+          id: `a-${Date.now()}`, role: 'assistant',
+          content: '感谢你的提问！\n\n智能问答系统正在建设中（⑤组 RAG 管道接入后即可使用）。',
+          timestamp: Date.now(),
+        }]);
+        setIsLoading(false);
+      }, 1000);
+    }
   }, [input, isLoading]);
 
   return (
@@ -102,6 +126,21 @@ export function ChatWidget({ selectedBuilding, onViewBuilding }: ChatWidgetProps
                   查看详情
                 </button>
               )}
+            </div>
+          )}
+
+          {suggestions.length > 0 && (
+            <div className="chat-suggestions">
+              <div className="chat-suggestions-title">猜你想问</div>
+              <div className="chat-suggestions-list">
+                {suggestions.map(s => (
+                  <button key={s.id} className="chat-suggestion-btn"
+                    onClick={() => setInput(s.question)}
+                  >
+                    {s.question}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
