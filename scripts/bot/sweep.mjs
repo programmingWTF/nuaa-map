@@ -24,6 +24,7 @@ const CONFIG = {
   DEEPSEEK_KEY: process.env.DEEPSEEK_KEY || "",
 
   STATE_FILE: join(__dirname, "state.json"),
+  LOCK_FILE: join(__dirname, "sweep.lock"),
   MAX_ITEMS_PER_RUN: 10,
 };
 
@@ -984,6 +985,38 @@ async function backfill() {
 }
 
 // ============================================================
+// 文件锁（防止 cron 并发导致状态覆盖）
+// ============================================================
+
+function acquireLock() {
+  if (existsSync(CONFIG.LOCK_FILE)) {
+    try {
+      const raw = readFileSync(CONFIG.LOCK_FILE, "utf-8");
+      const lock = JSON.parse(raw);
+      const age = Date.now() - lock.at;
+      // 锁文件超过 15 分钟自动视为过期（进程可能被 SIGKILL）
+      if (age < 15 * 60 * 1000) {
+        log(`⏭️ 已有实例运行中（${Math.round(age / 1000)}秒前启动），跳过本次执行`);
+        process.exit(0);
+      }
+      log(`⚠️ 发现过期锁（${Math.round(age / 1000)}秒未更新），强制接管`);
+    } catch {}
+  }
+  const lock = { pid: process.pid, at: Date.now() };
+  writeFileSync(CONFIG.LOCK_FILE, JSON.stringify(lock));
+  return true;
+}
+
+function releaseLock() {
+  try { unlinkSync(CONFIG.LOCK_FILE); } catch {}
+}
+
+// 异常退出时也清理锁（15 分钟过期是最后保险）
+process.on("exit", () => releaseLock());
+process.on("SIGINT", () => { releaseLock(); process.exit(130); });
+process.on("SIGTERM", () => { releaseLock(); process.exit(143); });
+
+// ============================================================
 // 入口
 // ============================================================
 
@@ -992,6 +1025,8 @@ async function main() {
     log("❌ 缺少 GH_TOKEN");
     process.exit(1);
   }
+
+  acquireLock();
 
   await ensureLabelsExist();
 
@@ -1002,9 +1037,11 @@ async function main() {
     else { await sweepIncremental(); }
   } catch (e) {
     log(`❌ ${e.message}`);
+    releaseLock();
     process.exit(1);
   }
 
+  releaseLock();
   log("🏁 完成\n");
 }
 
