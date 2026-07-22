@@ -791,6 +791,7 @@ async function sweepIncremental() {
       // AI 分析失败时不保存指纹，下次 cron 自动重试
       if (success) {
         state.reviewed[num] = { at: Date.now(), hash: fingerprint, reason };
+        saveState(state); // 逐项持久化，防止后续 item 失败导致前面的结果丢失
       }
       n++;
     }
