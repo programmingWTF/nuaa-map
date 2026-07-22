@@ -787,12 +787,24 @@ async function sweepIncremental() {
 
       const createdTs = new Date(item.created_at).getTime();
       const reason = !last ? "新创建" : "内容有更新";
-      const success = await processItem(item, reason);
-      // AI 分析失败时不保存指纹，下次 cron 自动重试
-      if (success) {
-        state.reviewed[num] = { at: Date.now(), hash: fingerprint, reason };
-        saveState(state); // 逐项持久化，防止后续 item 失败导致前面的结果丢失
+
+      // AI 失败冷却：同一指纹失败后 1 小时内不再重试，避免大 diff 反复超时
+      if (last?.aiFailed && last.hash === fingerprint) {
+        const cooldownMs = 60 * 60 * 1000; // 1 小时
+        if (Date.now() - last.at < cooldownMs) {
+          log(`  ⏭️ #${num} AI 上次分析失败，冷却中（${Math.round((cooldownMs - Date.now() + last.at) / 60000)}分钟后重试）`);
+          continue;
+        }
       }
+
+      const success = await processItem(item, reason);
+      state.reviewed[num] = {
+        at: Date.now(),
+        hash: fingerprint,
+        reason,
+        ...(success ? {} : { aiFailed: true }),
+      };
+      saveState(state); // 逐项持久化，防止后续 item 失败导致前面的结果丢失
       n++;
     }
     log(`  ✅ 处理 ${n} 个`);
