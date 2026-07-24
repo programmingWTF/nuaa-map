@@ -36,6 +36,7 @@ const POPOVER_W = 300;
 const POPOVER_MAX_H = 500;
 const ARROW_H = 8;
 const GAP = 10;
+const TOPBAR_H = 60; // 顶部导航栏高度，弹窗不越过此线
 
 /* 判断建筑当前开放状态 */
 function getOpenStatus(openTime?: string): { open: boolean; label: string } | null {
@@ -196,7 +197,7 @@ export function BuildingPopover({
     }, 1000);
   }, [chatInput, chatLoading, building]);
 
-  /* 定位（钳制在容器边界内，避免被 overflow:hidden 裁切） */
+  /* 定位（钳制在容器边界内，避免被 TopBar 遮盖或 overflow:hidden 裁切） */
   const hotspotCX = screenX + screenWidth / 2;
   const hotspotTop = screenY;
   const hotspotBot = screenY + screenHeight;
@@ -205,7 +206,8 @@ export function BuildingPopover({
   let arrowDir: 'bottom' | 'top';
   let anchorAbove = false;
 
-  const spaceAbove = hotspotTop - GAP - ARROW_H;
+  // 上方可用空间需扣除 TopBar 高度
+  const spaceAbove = hotspotTop - GAP - ARROW_H - TOPBAR_H;
   const spaceBelow = containerHeight > 0
     ? containerHeight - hotspotBot - GAP - ARROW_H
     : POPOVER_MAX_H;
@@ -229,6 +231,11 @@ export function BuildingPopover({
       anchorTop = hotspotBot + GAP + ARROW_H;
       arrowDir = 'top';
     }
+  }
+
+  // 钳制：弹窗不可越过 TopBar
+  if (anchorAbove) {
+    anchorTop = Math.max(anchorTop, TOPBAR_H);
   }
 
   let popLeft = hotspotCX - POPOVER_W / 2;
