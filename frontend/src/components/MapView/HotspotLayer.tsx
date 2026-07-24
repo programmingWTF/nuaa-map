@@ -20,7 +20,7 @@ export function HotspotLayer({
       {buildings.map((b) => {
         const { x, y, width, height } = b.hotspot;
         const isSelected = b.id === selectedBuildingId;
-        // 移动端保证点击区域至少 44×44 屏幕像素（反算为地图坐标）
+        // 手绘标记点需较大触控区域，反算为地图坐标（80px > WCAG 44px 基线，确保点选体验）
         const MIN_TOUCH = 80;
         const minMapSize = MIN_TOUCH / transform.scale;
         const w = Math.max(width, minMapSize);
