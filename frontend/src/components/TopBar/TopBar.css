@@ -105,8 +105,20 @@
 .topbar-search-item-cat { font-size:11px; color:var(--color-slate-400); }
 
 .topbar-search-empty {
-  padding:24px; text-align:center;
+  padding:20px 24px 8px; text-align:center;
   font-size:var(--text-sm); color:var(--color-slate-400);
+}
+
+/* 智能推荐区域 */
+.topbar-search-suggestions {
+  padding: 4px 0 8px;
+  border-top: 1px solid rgba(37,99,235,0.06);
+  margin: 8px 12px 0;
+}
+.topbar-search-suggestions-label {
+  display: block;
+  padding: 8px 4px 4px;
+  font-size: 11px; color: var(--color-slate-400);
 }
 
 @media (max-width:640px) {
@@ -114,11 +126,11 @@
     padding: 0 var(--mobile-gutter);
     height: var(--topbar-height-mobile);
   }
-  .topbar-brand { gap: 8px; }
-  .topbar-logo { font-size: 15px; padding: 4px 10px; }
-  .topbar-title { font-size: var(--text-sm); }
-  .topbar-search { max-width: none; flex: 1; margin-left: 10px; }
-  .topbar-search-input { height: 36px; font-size: var(--text-xs); padding: 0 52px 0 34px; }
+  .topbar-brand { gap: 0; }
+  .topbar-logo { font-size: 14px; padding: 4px 8px; border-radius: 4px; }
+  .topbar-title { display: none; }  /* 窄屏隐藏标题，只留 Logo + 搜索框 */
+  .topbar-search { max-width: none; flex: 1; margin-left: 8px; }
+  .topbar-search-input { height: 36px; font-size: var(--text-xs); padding: 0 40px 0 34px; }
   .topbar-search-kbd { display: none; }
   .topbar-search-panel {
     position: fixed;
@@ -130,10 +142,11 @@
   .topbar-search-clear {
     width: var(--touch-target-min);
     height: var(--touch-target-min);
-    right: 8px;
+    right: 4px;
   }
   .topbar-search-item {
     min-height: var(--touch-target-min);
     padding: 12px 14px;
   }
+  .topbar-search-icon { left: 10px; }
 }
