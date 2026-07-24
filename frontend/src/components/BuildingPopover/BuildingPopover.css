@@ -25,7 +25,7 @@
 
 /* 照片区 —— 有图用图，无图用分类色块 */
 .popover-hero {
-  height:170px; flex-shrink:0; position:relative;
+  height:140px; flex-shrink:0; position:relative;
   background-size:cover; background-position:center;
 }
 /* 照片 → 内容渐变过渡 */
@@ -185,7 +185,7 @@
 @media (max-width:640px) {
   .popover-anchor { top:auto!important; bottom:0!important; left:0!important; width:100%!important; transform:none!important; }
   .popover { max-width:100vw!important; max-height:65dvh; border-radius:var(--radius-lg) var(--radius-lg) 0 0; }
-  .popover-hero { height:160px; }
+  .popover-hero { height:130px; }
   .popover-body { padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); touch-action:pan-y; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
   .popover-drag-handle { display:block; }
   .popover-carousel-btn { opacity:1; width:44px; height:44px; }

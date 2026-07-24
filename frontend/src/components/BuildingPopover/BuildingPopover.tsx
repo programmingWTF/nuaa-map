@@ -32,9 +32,9 @@ const CATEGORY_COLORS: Record<Building['category'], string> = {
   gate: '#78716C', landscape: '#14B8A6', facility: '#94A3B8', other: '#8B5CF6',
 };
 
-const POPOVER_W = 360;
-const POPOVER_MAX_H = 560;
-const POPOVER_MIN_H = 300;
+const POPOVER_W = 340;
+const POPOVER_MAX_H = 580;
+const POPOVER_MIN_H = 320;
 const ARROW_H = 8;
 const GAP = 10;
 const TOPBAR_H = 60;
