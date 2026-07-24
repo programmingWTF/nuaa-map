@@ -33,8 +33,8 @@ const CATEGORY_COLORS: Record<Building['category'], string> = {
 };
 
 const POPOVER_W = 340;
-const POPOVER_MIN_H = 420;
-const POPOVER_MAX_H = 620;
+const POPOVER_MIN_H = 380;
+const POPOVER_MAX_H = 540;
 const ARROW_H = 8;
 const GAP = 10;
 const TOPBAR_H = 60;
