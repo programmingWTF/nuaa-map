@@ -128,7 +128,7 @@
 /* 周边设施 */
 .popover-nearby { margin-top:10px; margin-bottom:4px; }
 .popover-nearby-label { font-size:var(--text-xs); color:var(--color-slate-400); margin-bottom:8px; font-weight:600; }
-.popover-nearby-list { display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; scroll-snap-type:x mandatory; }
+.popover-nearby-list { display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; scroll-snap-type:x mandatory; scroll-behavior:smooth; -webkit-overflow-scrolling:touch; }
 .popover-nearby-list::-webkit-scrollbar { height:5px; }
 .popover-nearby-list::-webkit-scrollbar-thumb { background:rgba(37,99,235,0.18); border-radius:3px; }
 .popover-nearby-list::-webkit-scrollbar-thumb:hover { background:rgba(37,99,235,0.35); }
@@ -146,17 +146,31 @@
 .popover-nearby-card-time { font-size:10px; color:var(--color-slate-400); }
 
 /* 内嵌问答 */
-.popover-chat { margin-top:14px; padding-top:14px; border-top:1px solid rgba(37,99,235,0.08); }
-.popover-chat-label { display:flex; align-items:center; gap:6px; font-size:var(--text-xs); color:var(--color-slate-400); margin-bottom:8px; }
-.popover-chat-msgs { display:flex; flex-direction:column; gap:6px; margin-bottom:8px; max-height:120px; overflow-y:auto; }
+.popover-chat {
+  margin-top:14px; padding:14px;
+  background: linear-gradient(135deg, rgba(37,99,235,0.04), rgba(99,102,241,0.06));
+  border: 1px solid rgba(37,99,235,0.12);
+  border-radius: var(--radius-md);
+  position: relative;
+}
+.popover-chat::before {
+  content: '💬 AI 助手';
+  display: block;
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: var(--color-blue-500);
+  margin-bottom: 8px;
+}
+.popover-chat-label { display:flex; align-items:center; gap:6px; font-size:var(--text-xs); color:var(--color-slate-500); margin-bottom:8px; font-weight: 500; }
+.popover-chat-msgs { display:flex; flex-direction:column; gap:6px; margin-bottom:8px; max-height:130px; overflow-y:auto; }
 .popover-chat-msg { font-size:var(--text-xs); line-height:1.6; padding:7px 12px; border-radius:var(--radius-sm); color:var(--color-slate-800); background:rgba(37,99,235,0.04); }
 .popover-chat-msg--user { background:var(--gradient-sky); color:#fff; }
 .popover-chat-typing { color:var(--color-slate-400); background:transparent; padding:4px 12px; }
 .popover-chat-input-row { display:flex; gap:6px; }
-.popover-chat-input { flex:1; height:34px; padding:0 12px; border:1px solid rgba(255,255,255,0.5); border-radius:var(--radius-full); font-family:var(--font-body); font-size:var(--text-xs); color:var(--color-navy); background:rgba(255,255,255,0.4); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); transition:all var(--transition-fast); }
-.popover-chat-input:focus { outline:none; border-color:var(--color-blue-500); box-shadow:0 0 0 3px rgba(37,99,235,0.08), var(--glass-highlight); background:rgba(255,255,255,0.7); }
+.popover-chat-input { flex:1; height:36px; padding:0 14px; border:1px solid rgba(37,99,235,0.2); border-radius:var(--radius-full); font-family:var(--font-body); font-size:var(--text-xs); color:var(--color-navy); background:rgba(255,255,255,0.6); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); transition:all var(--transition-fast); }
+.popover-chat-input:focus { outline:none; border-color:var(--color-blue-500); box-shadow:0 0 0 3px rgba(37,99,235,0.12), var(--glass-highlight); background:rgba(255,255,255,0.85); }
 .popover-chat-input::placeholder { color:var(--color-slate-400); }
-.popover-chat-send { width:34px; height:34px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:var(--gradient-sky); color:#fff; border-radius:50%; box-shadow:0 2px 8px rgba(37,99,235,0.25); transition:all var(--transition-fast); }
+.popover-chat-send { width:36px; height:36px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:var(--gradient-sky); color:#fff; border-radius:50%; box-shadow:0 2px 8px rgba(37,99,235,0.25); transition:all var(--transition-fast); }
 .popover-chat-send:hover { box-shadow:0 4px 20px rgba(37,99,235,0.4); transform:scale(1.08); }
 .popover-chat-send:disabled { opacity:0.4; cursor:default; transform:none; box-shadow:none; }
 

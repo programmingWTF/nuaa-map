@@ -33,7 +33,7 @@ const CATEGORY_COLORS: Record<Building['category'], string> = {
 };
 
 const POPOVER_W = 300;
-const POPOVER_MAX_H = 400;
+const POPOVER_MAX_H = 500;
 const ARROW_H = 8;
 const GAP = 10;
 
@@ -89,6 +89,7 @@ export function BuildingPopover({
   const [carouselIdx, setCarouselIdx] = useState(0);
   const [brokenImgs, setBrokenImgs] = useState<Set<number>>(new Set());
   const popoverRef = useRef<HTMLDivElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
   const nearbyRef = useRef<HTMLDivElement>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -104,8 +105,13 @@ export function BuildingPopover({
     ? building.images.map(resolveImageUrl)
     : building.imageUrl ? [resolveImageUrl(building.imageUrl)] : [];
 
-  /* 切换建筑时重置轮播索引 + 损坏图片状态 */
-  useEffect(() => { setCarouselIdx(0); setBrokenImgs(new Set()); }, [building.id]);
+  /* 切换建筑时重置轮播索引 + 损坏图片状态 + 滚动到顶部 */
+  useEffect(() => {
+    setCarouselIdx(0);
+    setBrokenImgs(new Set());
+    // 强制弹窗正文回到顶部，让用户首先看到建筑核心信息
+    if (bodyRef.current) bodyRef.current.scrollTop = 0;
+  }, [building.id]);
 
   /* 自动轮播（3秒切换，手动翻页后重置计时） */
   const startCarouselTimer = useCallback(() => {
@@ -130,7 +136,12 @@ export function BuildingPopover({
     startCarouselTimer();
   };
 
-  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, [chatMsgs]);
+  /* 新消息到达时滚动聊天区域到底部（仅当有消息时，避免初始空状态触发滚动） */
+  useEffect(() => {
+    if (chatMsgs.length > 0) {
+      chatEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [chatMsgs]);
   useEffect(() => { inputRef.current?.focus(); }, []);
   useEffect(() => {
     const el = popoverRef.current;
@@ -155,7 +166,7 @@ export function BuildingPopover({
     const onWheel = (e: WheelEvent) => {
       if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
         e.preventDefault();
-        el.scrollLeft += e.deltaY;
+        el.scrollBy({ left: e.deltaY, behavior: 'smooth' });
       }
     };
     el.addEventListener('wheel', onWheel, { passive: false });
@@ -319,7 +330,7 @@ export function BuildingPopover({
             </button>
           </div>
 
-          <div className="popover-body">
+          <div className="popover-body" ref={bodyRef}>
             <p className="popover-desc">{building.description}</p>
             <div className="popover-meta">
               {building.openTime && (
