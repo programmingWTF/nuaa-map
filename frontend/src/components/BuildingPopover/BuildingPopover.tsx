@@ -231,6 +231,9 @@ export function BuildingPopover({
     }
   }
 
+  // 动态限制弹窗高度：不超出可用空间
+  const maxPopH = Math.min(POPOVER_MAX_H, anchorAbove ? spaceAbove : spaceBelow);
+
   let popLeft = hotspotCX - POPOVER_W / 2;
   popLeft = Math.max(8, Math.min(popLeft, containerWidth - POPOVER_W - 8));
   const arrowOff = hotspotCX - (popLeft + POPOVER_W / 2);
@@ -254,7 +257,7 @@ export function BuildingPopover({
         <div
           ref={popoverRef}
           className="popover"
-          style={{ maxHeight: POPOVER_MAX_H }}
+          style={{ maxHeight: maxPopH }}
           role="dialog" aria-label={`${building.name} 详情`}
         >
           <div className={`popover-arrow popover-arrow--${arrowDir}`}
