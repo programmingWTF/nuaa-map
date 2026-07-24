@@ -1,5 +1,7 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import type { Building } from '../../types';
+import { toPinyin, toPinyinAbbr } from '../../utils/pinyin';
+import { findSimilar } from '../../utils/search';
 import './TopBar.css';
 
 interface TopBarProps {
@@ -31,12 +33,25 @@ export function TopBar({ buildings, onSearchSelect }: TopBarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  /* 搜索结果 */
+  /* 搜索结果：中文模糊匹配 + 拼音全拼 + 拼音首字母 */
   const results = query.trim().length > 0
     ? buildings
-        .filter(b => fuzzyMatch(query, b.name) || fuzzyMatch(query, CATEGORY_LABELS[b.category] || b.category))
+        .filter(b => {
+          const cat = CATEGORY_LABELS[b.category] || b.category;
+          return fuzzyMatch(query, b.name)
+            || fuzzyMatch(query, cat)
+            || fuzzyMatch(query, toPinyin(b.name))
+            || fuzzyMatch(query, toPinyinAbbr(b.name));
+        })
         .slice(0, 8)
     : [];
+
+  /* 无结果时的智能推荐（编辑距离） */
+  const suggestions = useMemo(() => {
+    const q = query.trim();
+    if (!q || results.length > 0) return [];
+    return findSimilar(q, buildings.map(b => ({ id: b.id, name: b.name })), 3);
+  }, [query, results.length, buildings]);
 
   const close = useCallback(() => {
     setIsOpen(false);
@@ -135,10 +150,31 @@ export function TopBar({ buildings, onSearchSelect }: TopBarProps) {
           </div>
         )}
 
-        {/* 无结果 */}
+        {/* 无结果 + 智能推荐 */}
         {isOpen && query.trim() && results.length === 0 && (
           <div className="topbar-search-panel">
             <div className="topbar-search-empty">未找到匹配的建筑</div>
+            {suggestions.length > 0 && (
+              <div className="topbar-search-suggestions">
+                <span className="topbar-search-suggestions-label">你是不是想找：</span>
+                {suggestions.map(s => {
+                  const building = buildings.find(b => b.id === s.id)!;
+                  return (
+                    <button
+                      key={s.id}
+                      className="topbar-search-item"
+                      onClick={() => select(building)}
+                    >
+                      <span className="topbar-search-item-icon" data-cat={building.category} />
+                      <span className="topbar-search-item-info">
+                        <span className="topbar-search-item-name">{building.name}</span>
+                        <span className="topbar-search-item-cat">{CATEGORY_LABELS[building.category]}</span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </div>
