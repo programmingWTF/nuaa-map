@@ -4,6 +4,7 @@ import { MapView } from './components/MapView/MapView';
 import type { MapViewState } from './components/MapView/MapView';
 import { Minimap } from './components/Minimap/Minimap';
 import { ChatWidget } from './components/ChatWidget/ChatWidget';
+import { ErrorBoundary } from './components/ErrorBoundary/ErrorBoundary';
 import type { Building, BuildingClickData, MapTransform } from './types';
 import mockBuildings from './data/mock-buildings.json';
 import './App.css';
@@ -61,12 +62,14 @@ function App() {
         onSearchSelect={handleSearchSelect}
       />
       <main className="app-main">
-        <MapView
-          buildings={buildings}
-          selectedBuilding={selectedBuilding}
-          onBuildingClick={handleBuildingClick}
-          onMapStateChange={setMapState}
-        />
+        <ErrorBoundary name="地图">
+          <MapView
+            buildings={buildings}
+            selectedBuilding={selectedBuilding}
+            onBuildingClick={handleBuildingClick}
+            onMapStateChange={setMapState}
+          />
+        </ErrorBoundary>
       </main>
       {!selectedBuilding && (
         <Minimap
@@ -80,10 +83,12 @@ function App() {
         />
       )}
       {!selectedBuilding && (
-        <ChatWidget
-          selectedBuilding={selectedBuilding}
-          onViewBuilding={(bld) => handleSearchSelect(bld)}
-        />
+        <ErrorBoundary name="AI 聊天">
+          <ChatWidget
+            selectedBuilding={selectedBuilding}
+            onViewBuilding={(bld) => handleSearchSelect(bld)}
+          />
+        </ErrorBoundary>
       )}
     </div>
   );
