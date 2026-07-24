@@ -197,7 +197,7 @@ export function BuildingPopover({
     }, 1000);
   }, [chatInput, chatLoading, building]);
 
-  /* 定位（钳制在容器边界内，避免被 TopBar 遮盖或 overflow:hidden 裁切） */
+  /* 定位（避开 TopBar，优先放上方，上方不够放下方） */
   const hotspotCX = screenX + screenWidth / 2;
   const hotspotTop = screenY;
   const hotspotBot = screenY + screenHeight;
@@ -206,36 +206,29 @@ export function BuildingPopover({
   let arrowDir: 'bottom' | 'top';
   let anchorAbove = false;
 
-  // 上方可用空间需扣除 TopBar 高度
+  // 上方可用空间：弹窗顶部不能越过 TopBar(60px)，底部留 GAP+ARROW_H 间距
+  const popoverNeededH = Math.min(POPOVER_MAX_H, containerHeight - TOPBAR_H);
   const spaceAbove = hotspotTop - GAP - ARROW_H - TOPBAR_H;
   const spaceBelow = containerHeight > 0
     ? containerHeight - hotspotBot - GAP - ARROW_H
-    : POPOVER_MAX_H;
+    : popoverNeededH;
 
-  if (spaceAbove >= POPOVER_MAX_H) {
-    // 上方空间够 → 放上方
+  if (spaceAbove >= popoverNeededH) {
     anchorTop = hotspotTop - GAP - ARROW_H;
     arrowDir = 'bottom';
     anchorAbove = true;
-  } else if (spaceBelow >= POPOVER_MAX_H) {
-    // 上方不够、下方够 → 放下方
+  } else if (spaceBelow >= popoverNeededH) {
     anchorTop = hotspotBot + GAP + ARROW_H;
     arrowDir = 'top';
   } else {
-    // 上下都不够 → 哪边空间大放哪边
     if (spaceAbove >= spaceBelow) {
-      anchorTop = hotspotTop - GAP - ARROW_H;
+      anchorTop = Math.max(hotspotTop - GAP - ARROW_H, TOPBAR_H);
       arrowDir = 'bottom';
       anchorAbove = true;
     } else {
       anchorTop = hotspotBot + GAP + ARROW_H;
       arrowDir = 'top';
     }
-  }
-
-  // 钳制：弹窗不可越过 TopBar
-  if (anchorAbove) {
-    anchorTop = Math.max(anchorTop, TOPBAR_H);
   }
 
   let popLeft = hotspotCX - POPOVER_W / 2;
