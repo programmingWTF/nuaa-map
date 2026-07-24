@@ -25,7 +25,7 @@
 
 /* 照片区 —— 有图用图，无图用分类色块 */
 .popover-hero {
-  height:180px; flex-shrink:0; position:relative;
+  height:160px; flex-shrink:0; position:relative;
   background-size:cover; background-position:center;
 }
 /* 照片 → 内容渐变过渡 */
