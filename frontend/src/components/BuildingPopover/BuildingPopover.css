@@ -1,8 +1,8 @@
-.popover-backdrop { position:absolute; inset:0; z-index:105; pointer-events:auto; background:rgba(15,23,42,0.08); }
+.popover-backdrop { position:absolute; inset:0; z-index:110; pointer-events:auto; }
 
 /* 定位锚点 */
 .popover-anchor {
-  position:absolute; z-index:106;
+  position:absolute; z-index:111;
 }
 .popover-anchor--above {
   transform: translateY(-100%);
