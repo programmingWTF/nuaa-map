@@ -32,7 +32,8 @@ const CATEGORY_COLORS: Record<Building['category'], string> = {
   gate: '#78716C', landscape: '#14B8A6', facility: '#94A3B8', other: '#8B5CF6',
 };
 
-const POPOVER_W = 320;
+const POPOVER_W = 340;
+const POPOVER_MIN_H = 420;
 const POPOVER_MAX_H = 620;
 const ARROW_H = 8;
 const GAP = 10;
@@ -259,7 +260,7 @@ export function BuildingPopover({
         <div
           ref={popoverRef}
           className="popover"
-          style={{ maxHeight: maxPopH }}
+          style={{ minHeight: POPOVER_MIN_H, maxHeight: maxPopH }}
           role="dialog" aria-label={`${building.name} 详情`}
         >
           <div className={`popover-arrow popover-arrow--${arrowDir}`}
