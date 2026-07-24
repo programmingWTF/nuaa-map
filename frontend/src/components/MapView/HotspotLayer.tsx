@@ -21,7 +21,7 @@ export function HotspotLayer({
         const { x, y, width, height } = b.hotspot;
         const isSelected = b.id === selectedBuildingId;
         // 移动端保证点击区域至少 44×44 屏幕像素（反算为地图坐标）
-        const MIN_TOUCH = 44;
+        const MIN_TOUCH = 80;
         const minMapSize = MIN_TOUCH / transform.scale;
         const w = Math.max(width, minMapSize);
         const h = Math.max(height, minMapSize);
@@ -38,6 +38,9 @@ export function HotspotLayer({
           onBuildingClick({ building: b, screenX, screenY, screenWidth, screenHeight });
         };
 
+        // 反缩放但设上限，避免缩太小时标记过大
+        const invScale = Math.min(1 / transform.scale, 2.5);
+
         return (
           <button
             key={b.id}
@@ -46,11 +49,11 @@ export function HotspotLayer({
             onClick={handleClick}
             aria-label={`查看 ${b.name} 详情`}
           >
-            <span className="hotspot-marker">
+            <span className="hotspot-marker" style={{ transform: `scale(${invScale})`, transformOrigin: 'center center' }}>
               <span className="hotspot-marker-outer" />
               <span className="hotspot-marker-inner" />
             </span>
-            <span className="hotspot-label">{b.name}</span>
+            <span className="hotspot-label" style={{ transform: `scale(${invScale})`, transformOrigin: 'center top' }}>{b.name}</span>
           </button>
         );
       })}
