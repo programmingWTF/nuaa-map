@@ -33,10 +33,10 @@ const CATEGORY_COLORS: Record<Building['category'], string> = {
 };
 
 const POPOVER_W = 300;
-const POPOVER_MAX_H = 500;
+const POPOVER_MAX_H = 550;
 const ARROW_H = 8;
 const GAP = 10;
-const TOPBAR_H = 60; // 顶部导航栏高度，弹窗不越过此线
+const TOPBAR_H = 60;
 
 /* 判断建筑当前开放状态 */
 function getOpenStatus(openTime?: string): { open: boolean; label: string } | null {
@@ -197,7 +197,7 @@ export function BuildingPopover({
     }, 1000);
   }, [chatInput, chatLoading, building]);
 
-  /* 定位（避开 TopBar，优先放上方，上方不够放下方） */
+  /* 定位：优先放上方，上方不够（含 TopBar 遮挡）则放下方 */
   const hotspotCX = screenX + screenWidth / 2;
   const hotspotTop = screenY;
   const hotspotBot = screenY + screenHeight;
@@ -205,34 +205,36 @@ export function BuildingPopover({
   let anchorTop: number;
   let arrowDir: 'bottom' | 'top';
   let anchorAbove = false;
+  let maxPopH = POPOVER_MAX_H;
 
-  // 上方可用空间：弹窗顶部不能越过 TopBar(60px)，底部留 GAP+ARROW_H 间距
-  const popoverNeededH = Math.min(POPOVER_MAX_H, containerHeight - TOPBAR_H);
+  // 扣除 TopBar 后的上方可用空间
   const spaceAbove = hotspotTop - GAP - ARROW_H - TOPBAR_H;
   const spaceBelow = containerHeight > 0
     ? containerHeight - hotspotBot - GAP - ARROW_H
-    : popoverNeededH;
+    : POPOVER_MAX_H;
 
-  if (spaceAbove >= popoverNeededH) {
+  if (spaceAbove >= POPOVER_MAX_H) {
+    // 上方够 → 放上方，完整高度
     anchorTop = hotspotTop - GAP - ARROW_H;
     arrowDir = 'bottom';
     anchorAbove = true;
-  } else if (spaceBelow >= popoverNeededH) {
+  } else if (spaceBelow >= POPOVER_MAX_H) {
+    // 上方不够、下方够 → 放下方，完整高度
     anchorTop = hotspotBot + GAP + ARROW_H;
     arrowDir = 'top';
   } else {
+    // 两边都不够 → 哪边大放哪边，缩小弹窗
     if (spaceAbove >= spaceBelow) {
       anchorTop = Math.max(hotspotTop - GAP - ARROW_H, TOPBAR_H);
       arrowDir = 'bottom';
       anchorAbove = true;
+      maxPopH = Math.max(spaceAbove, 200);
     } else {
       anchorTop = hotspotBot + GAP + ARROW_H;
       arrowDir = 'top';
+      maxPopH = Math.max(spaceBelow, 200);
     }
   }
-
-  // 动态限制弹窗高度：不超出可用空间
-  const maxPopH = Math.min(POPOVER_MAX_H, anchorAbove ? spaceAbove : spaceBelow);
 
   let popLeft = hotspotCX - POPOVER_W / 2;
   popLeft = Math.max(8, Math.min(popLeft, containerWidth - POPOVER_W - 8));
