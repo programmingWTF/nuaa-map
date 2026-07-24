@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent as ReactKeyboardEvent } from 'react';
+import { highlightMatch } from '../../utils/highlight';
 import './FreshmanWindow.css';
 
 type FreshmanEntry = {
@@ -351,8 +352,8 @@ export function FreshmanWindow() {
                 ) : (
                   filteredEntries.map((item) => (
                     <article key={item.id} className="freshman-window__item">
-                      <div className="freshman-window__item-title">Q: {item.question}</div>
-                      <p className="freshman-window__item-answer">{item.answer || '等待后续回复…'}</p>
+                      <div className="freshman-window__item-title">Q: {highlightMatch(item.question, searchTerm)}</div>
+                      <p className="freshman-window__item-answer">{highlightMatch(item.answer || '等待后续回复…', searchTerm)}</p>
                       <div className="freshman-window__item-meta">
                         <time className="freshman-window__item-time">{item.createdAt}</time>
                         {item.status === 'pending' && <span className="freshman-window__chip">待人工回复</span>}

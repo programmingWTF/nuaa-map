@@ -630,3 +630,15 @@
     animation: shimmer 0.5s ease-out forwards;
   }
 }
+
+/* ── 关键词高亮 ── */
+.freshman-window__item-title mark,
+.freshman-window__item-answer mark,
+.freshman-window__reply-text mark {
+  background: linear-gradient(180deg, rgba(251,191,36,0.35) 0%, rgba(251,191,36,0.15) 100%);
+  color: inherit;
+  padding: 1px 3px;
+  border-radius: 2px;
+  font-weight: 600;
+  box-shadow: 0 0 0 1px rgba(251,191,36,0.15);
+}
