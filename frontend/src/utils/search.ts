@@ -15,7 +15,7 @@ export function levenshtein(a: string, b: string): number {
 
   // 只用两行，节省内存
   let prev = Array.from({ length: n + 1 }, (_, j) => j);
-  const curr = new Array(n + 1);
+  let curr = new Array(n + 1);
 
   for (let i = 1; i <= m; i++) {
     curr[0] = i;
