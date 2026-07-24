@@ -33,7 +33,7 @@ const CATEGORY_COLORS: Record<Building['category'], string> = {
 };
 
 const POPOVER_W = 340;
-const POPOVER_MIN_H = 380;
+const POPOVER_MIN_H = 300;
 const POPOVER_MAX_H = 540;
 const ARROW_H = 8;
 const GAP = 10;
@@ -224,16 +224,16 @@ export function BuildingPopover({
     anchorTop = hotspotBot + GAP + ARROW_H;
     arrowDir = 'top';
   } else {
-    // 两边都不够 → 哪边大放哪边，缩小弹窗
+    // 两边都不够 → 哪边大放哪边，缩小弹窗但不低于最小高度
     if (spaceAbove >= spaceBelow) {
       anchorTop = Math.max(hotspotTop - GAP - ARROW_H, TOPBAR_H);
       arrowDir = 'bottom';
       anchorAbove = true;
-      maxPopH = Math.max(spaceAbove, 200);
+      maxPopH = Math.max(spaceAbove, POPOVER_MIN_H);
     } else {
       anchorTop = hotspotBot + GAP + ARROW_H;
       arrowDir = 'top';
-      maxPopH = Math.max(spaceBelow, 200);
+      maxPopH = Math.max(spaceBelow, POPOVER_MIN_H);
     }
   }
 
