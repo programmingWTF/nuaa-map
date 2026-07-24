@@ -6,7 +6,7 @@ import { FreshmanWindow } from '../FreshmanWindow/FreshmanWindow';
 import type { Building, BuildingClickData, MapImageMeta, MapTransform } from '../../types';
 import './MapView.css';
 
-const MAP_SRC = '/tianmuhu-map.jpg';
+const MAP_SRC = '/hand-drawn-map-v1.jpg';
 
 export interface MapViewState {
   transform: MapTransform;
@@ -136,8 +136,21 @@ export function MapView({ buildings, selectedBuilding, onBuildingClick, onMapSta
     >
       {!imageMeta.loaded && (
         <div className="map-loading">
-          <div className="map-loading-spinner" />
-          <span>地图加载中…</span>
+          <div className="map-loading-card">
+            <div className="map-loading-icon">
+              <svg width="48" height="48" viewBox="0 0 64 64" fill="none">
+                <rect x="12" y="16" width="40" height="32" rx="3" stroke="currentColor" strokeWidth="2" opacity="0.3"/>
+                <path d="M12 28h40" stroke="currentColor" strokeWidth="2" opacity="0.2"/>
+                <path d="M18 36h14" stroke="currentColor" strokeWidth="2" opacity="0.15"/>
+                <circle cx="44" cy="38" r="9" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeDasharray="56.5" className="map-loading-pin"/>
+              </svg>
+            </div>
+            <div className="map-loading-bar-track">
+              <div className="map-loading-bar-fill" />
+            </div>
+            <p className="map-loading-text">地图加载中…</p>
+            <p className="map-loading-sub">正在加载天目湖校区手绘地图</p>
+          </div>
         </div>
       )}
 
